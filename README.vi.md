@@ -1,86 +1,70 @@
 <p align="center">
-  <img src="docs/images/app-icon.png" width="132" alt="Biểu tượng ứng dụng 3105">
+  <img src="docs/images/app-icon.png" width="132" alt="Biểu tượng ứng dụng dekpop">
 </p>
 
-<h1 align="center">3105</h1>
+<h1 align="center">dekpop</h1>
 
 <p align="center">
-  Trình quản lý dữ liệu ứng dụng, patch theo bundle, dọn dẹp giới hạn và hình nền PosterBoard dành cho iOS.
+  Ứng dụng iOS chỉ có một chức năng: duyệt và quản lý tệp trong app container.
 </p>
 
 <p align="center">
-  <img alt="Phiên bản" src="https://img.shields.io/badge/phiên%20bản-1.0.1-E6753A?style=flat-square">
+  <img alt="Phiên bản" src="https://img.shields.io/badge/phiên%20bản-1.2.0-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-Mọi%20phiên%20bản%2016.0%2B-222222?style=flat-square">
-  <img alt="Ngôn ngữ" src="https://img.shields.io/badge/ngôn%20ngữ-English%20%7C%20Tiếng%20Việt%20%7C%20简体中文-E6753A?style=flat-square">
+  <img alt="Ngôn ngữ" src="https://img.shields.io/badge/ngôn%20ngữ-English%20%7C%20Tiếng%20Việt%20%7C%20简体中文-6C4CF1?style=flat-square">
 </p>
 
-<p align="center"><a href="README.md">English</a> · <a href="docs/PATCH_GUIDE.vi.md">Hướng dẫn Patch</a> · <a href="#giấy-phép">Giấy phép</a></p>
+<p align="center"><a href="README.md">English</a> · <a href="docs/QUICKSTART.th.md">คู่มือภาษาไทย</a> · <a href="#giấy-phép">Giấy phép</a></p>
 
 > [!WARNING]
-> 3105 là phần mềm nghiên cứu để quản lý thiết bị cá nhân. Chỉ sử dụng trên thiết bị và dữ liệu thuộc quyền sở hữu của bạn, đồng thời luôn sao lưu trước khi thay đổi dữ liệu ứng dụng.
+> dekpop là phần mềm nghiên cứu để quản lý thiết bị cá nhân. Chỉ sử dụng trên thiết bị và dữ liệu của bạn, và luôn sao lưu trước khi thay đổi dữ liệu ứng dụng.
 
-## Giao diện
+## Có gì mới trong 1.2.0 — bản dekpop
 
-<p align="center">
-  <img src="docs/images/home.png" width="245" alt="Trang chủ 3105">
-  &nbsp;
-  <img src="docs/images/patches.png" width="245" alt="Patch 3105">
-  &nbsp;
-  <img src="docs/images/cleaner.png" width="245" alt="Dọn dẹp 3105">
-</p>
+- **Thiết kế lại hoàn toàn** — hệ màu tím → hồng, wordmark riêng, thẻ hero gradient hiển thị thiết bị / iOS / trạng thái truy cập, điều khiển bo tròn và icon 1024×1024 mới.
+- **Chỉ còn tính năng Files** — đã bỏ tab bar, dashboard, patch, cleaner, Wallpaper Lab, onboarding, attribution, thông báo cập nhật và xử lý URL import patch. Ứng dụng mở thẳng vào trình duyệt tệp.
+- **Định danh riêng** — tên hiển thị, `PRODUCT_NAME`, executable và bundle `.app` đều là `dekpop`; phiên bản `1.2.0` (build 8); chuỗi EN / VI / ZH đã cập nhật.
+- **CI đổi tên** — artifact `dekpop-unsigned-ipa` chứa `dekpop-unsigned.ipa` (`Payload/dekpop.app/`).
 
-## Có gì mới trong bản hiện tại
+> [!IMPORTANT]
+> Bundle ID vẫn giữ `com.apple.mobile.MobileHouseArrest`. `mcm_bridge.m` kiểm tra identifier này trước khi kích hoạt MHA-C2; đổi đi sẽ làm hỏng tính năng Files. Chỉ phần định danh nhìn thấy được thay đổi.
 
-- **Mọi phiên bản iOS** — đã bỏ danh sách phiên bản và build beta được xác minh. Mọi iOS có thể cài app (từ 16.0) đều được bật, kể cả iOS 27 chính thức, các beta sau này và phiên bản lớn hơn trong tương lai.
-- **Không còn dừng đột ngột** — `offsets_init` dùng bộ offsets mới nhất làm dự phòng và ghi log `offsets: ... unverified` thay vì kết thúc exploit.
-- **Nhận diện kernel cho iOS 27+** — chấp nhận cả khi magic word thứ hai khác iOS 26.
-- **Wallpaper Lab trên mọi iOS** — tab Hình nền không còn giới hạn ở iOS 17/18/26/27.
-
-## Có gì mới trong 1.0.1
-
-- **Patch workspace v2** — tạo patch bằng cây thư mục theo bundle trong `Trên iPhone của tôi/3105/Patches`; khi Áp dụng hoặc Xuất, app tự đồng bộ toàn bộ workspace.
-- **Khôi phục an toàn hơn** — file gốc được ghi nhật ký và sao lưu trước khi thay; Khôi phục sẽ trả lại file cũ, xóa file do patch thêm và dọn các thư mục mới nếu đã rỗng.
-- **Tab Tệp đầy đủ hơn** — nhiều tab độc lập, giữ nguyên vị trí thư mục, chọn nhiều file, nén/giải nén ZIP và giao diện nhóm cân đối hơn.
-- **Giao diện thích ứng** — hỗ trợ iPad dạng split view/landscape, cho phép ẩn Dọn dẹp hoặc Hình nền, giữ ổn định ô tìm kiếm và cân lại kích thước icon/hàng.
-- **Hướng dẫn Hình nền chính xác** — bổ sung đúng bước đóng PosterBoard và lưu ý nhận hình nền Bộ Sưu Tập trước trên iOS 27.
-
-Xem [hướng dẫn Patch workspace đầy đủ](docs/PATCH_GUIDE.vi.md).
+Các tài liệu cũ trong `docs/PATCH_GUIDE*.md` mô tả tính năng của bản 1.0/1.1 và không còn dùng được trong dekpop.
 
 ## Tính năng chính
 
-- Duyệt dữ liệu ứng dụng theo **bundle identifier**, không phụ thuộc UUID container của từng máy.
-- Trình quản lý tệp có tìm kiếm, xem trước, chia sẻ, nhập nhiều tệp, sao chép, di chuyển, dán, đổi tên, xóa, tạo tệp/thư mục, nén ZIP và xử lý trùng tên.
-- Tạo và nhập dự án patch `.3105` theo bundle, hỗ trợ nhiều quy tắc, tệp/thư mục, mật khẩu tùy chọn và nhập từ Files hoặc liên kết website bảo mật.
-- Dọn dẹp giới hạn trong `Library/Caches` và `tmp`, hỗ trợ sắp xếp dung lượng và chọn nhiều ứng dụng, luôn hiển thị cảnh báo trước khi xóa.
-- Nhập gói hình nền `.tendies`, xác thực payload và chỉ reset nội dung do 3105 cài đặt.
-- 3105 không cài jailbreak, bootstrap hay daemon thường trú và không inject mã vào ứng dụng bên thứ ba. Do ứng dụng vẫn dùng khai thác thiết bị và có thể sửa dữ liệu app, không thể bảo đảm vượt qua mọi cơ chế kiểm tra tính toàn vẹn hoặc phát hiện jailbreak.
+- Duyệt dữ liệu ứng dụng theo **bundle identifier**, không phụ thuộc UUID container.
+- Quản lý tệp: tìm kiếm, xem trước, chia sẻ, nhập nhiều tệp, sao chép, di chuyển, dán, đổi tên, xóa, tạo tệp/thư mục, nén/giải nén ZIP, xử lý trùng tên.
+- Nhiều tab độc lập, giữ nguyên vị trí thư mục (iPad có thanh tab).
+- Workspace `dekpop` trong `Trên iPhone của tôi`.
+- Không cài jailbreak, bootstrap hay daemon thường trú; không inject mã vào ứng dụng bên thứ ba.
 - Hỗ trợ tiếng Anh, tiếng Việt và tiếng Trung giản thể.
 
 ## Phiên bản iOS được hỗ trợ
 
-3105 không còn chặn tính năng theo phiên bản iOS hay build. Mọi phiên bản có thể cài đặt ứng dụng đều được bật:
+Mọi phiên bản iOS có thể cài đặt ứng dụng đều được bật — không còn danh sách phiên bản hay build:
 
 | Mục | Trạng thái |
 | --- | --- |
-| Phiên bản hỗ trợ | Mọi iOS từ 16.0 trở lên (chính thức, beta và các bản lớn hơn trong tương lai) |
-| Danh sách build | Đã xóa — không còn danh sách build beta |
+| Phiên bản hỗ trợ | Mọi iOS từ 16.0 trở lên |
+| Danh sách build | Đã xóa |
 | Deployment target | iOS 16.0 |
-| Offset dự phòng | Dùng bộ iOS 26.0 cho bản 26.1+ chưa xác minh; bộ iOS 17.0 cho bản dưới 17.0 |
+| Offset dự phòng | Bộ iOS 26.0 cho bản 26.1+ chưa xác minh; bộ iOS 17.0 cho bản dưới 17.0 |
 
 > [!NOTE]
-> Kernel exploit vẫn cần offsets khớp với kernel đang chạy. Với phiên bản iOS chưa có trong bảng offsets, exploit có thể thất bại; app sẽ ghi log `offsets: ... unverified` và dùng bộ offsets mới nhất thay vì thoát ngay. Một lần exploit thất bại có thể khiến app khởi động lại.
+> Kernel exploit vẫn cần offsets khớp kernel đang chạy. Với iOS chưa có trong bảng offsets, app ghi log `offsets: ... unverified` và dùng bộ offsets mới nhất thay vì thoát ngay. Một lần exploit thất bại có thể khiến app khởi động lại.
 
 ## Lưu ý cài đặt
 
-- Các chức năng trên thiết bị yêu cầu ứng dụng được ký bằng **chứng chỉ doanh nghiệp**.
+- Cần ký bằng **chứng chỉ doanh nghiệp**.
 - Không hỗ trợ SideStore, AltStore, 3uTools hoặc LiveContainer.
 - Bundle ID `com.apple.mobile.MobileHouseArrest` được giữ có chủ đích cho luồng MHA-C2.
-- Cây mã nguồn không chứa chứng chỉ, provisioning profile, ứng dụng đã ký hoặc IPA; phần Release có thể cung cấp IPA unsigned.
+- CI tạo IPA **unsigned**; bạn tự ký bằng certificate/profile của mình (ESign trên máy, hoặc `scripts/resign-windows-zsign.ps1`). Xem [README.md](README.md#build-sign--install) và [hướng dẫn tiếng Thái](docs/QUICKSTART.th.md).
 
 ## Tác giả và ghi công
 
-3105 được phát triển và thiết kế bởi [YangJiii](https://x.com/duongduong0908). Xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) để biết các dự án và nhà phát triển nền tảng đã được sử dụng/tham khảo.
+dekpop là bản chỉnh sửa Files-only từ dự án 3105 của [YangJiii](https://x.com/duongduong0908). Xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) để biết các dự án nền tảng.
 
 ## Giấy phép
 
-Phần mã gốc của 3105 được phát hành theo [GNU General Public License v3.0](LICENSE). Thành phần của bên thứ ba vẫn tuân theo bản quyền và điều khoản của dự án nguồn tương ứng; xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Phần mã gốc của dự án 3105 được phát hành theo [GNU General Public License v3.0](LICENSE). Thành phần bên thứ ba tuân theo điều khoản riêng; xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Phần branding và giao diện mới của dekpop đi cùng điều khoản đó.

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-Re-sign a 3105 IPA on Windows with zsign (no macOS or Xcode required).
+Re-sign a dekpop IPA on Windows with zsign (no macOS or Xcode required).
 
 .EXAMPLE
-.\scripts\resign-windows-zsign.ps1 -Ipa .\3105-unsigned.ipa -P12 .\enterprise.p12 -P12Password 'YOUR_PASSWORD' -MobileProvision .\profile.mobileprovision
+.\scripts\resign-windows-zsign.ps1 -Ipa .\dekpop-unsigned.ipa -P12 .\enterprise.p12 -P12Password 'YOUR_PASSWORD' -MobileProvision .\profile.mobileprovision
 
 .NOTES
 Get zsign from https://github.com/zhlynn/zsign (Windows build) and either put
@@ -15,7 +15,7 @@ param(
     [Parameter(Mandatory = $true)][string]$P12,
     [Parameter(Mandatory = $true)][string]$P12Password,
     [Parameter(Mandatory = $true)][string]$MobileProvision,
-    [string]$Output = "3105-signed.ipa",
+    [string]$Output = "dekpop-signed.ipa",
     [string]$ZSign = "zsign"
 )
 

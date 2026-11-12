@@ -41,9 +41,12 @@ struct AppDataBrowserView: View {
     var body: some View {
         NavigationStack(path: activeNavigationPath) {
             appList
-            .navigationTitle(language.text("browser.title"))
+            .navigationTitle(DekpopBrand.displayName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    DekpopWordmark(compact: true)
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     FilesTabToolbarButton(session: $tabSession)
                 }
@@ -114,26 +117,37 @@ struct AppDataBrowserView: View {
 
     private var appRows: some View {
         List {
+            Section {
+                DekpopHeroCard()
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 6, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+
             if let workspaceURL {
                 Section(language.text("browser.workspace")) {
                     let workspaceDestination = FileBrowserDestination(
                         containerPath: workspaceURL.path,
                         startPath: workspaceURL.path,
-                        title: "3105",
+                        title: DekpopBrand.displayName,
                         bundleID: nil
                     )
                     NavigationLink(value: workspaceDestination) {
                         HStack(spacing: 10) {
-                            AppRowIcon(systemName: "folder.fill")
+                            AppRowIcon(
+                                systemName: "folder.fill",
+                                tint: AppTheme.accentSecondary,
+                                frameSize: 34
+                            )
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("3105")
-                                    .font(.subheadline.weight(.semibold))
-                                Text(language.text("browser.workspace_subtitle"))
+                                Text(DekpopBrand.displayName)
+                                    .font(.subheadline.weight(.bold))
+                                Text(language.text("dekpop.workspace_subtitle"))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                         }
-                        .padding(.vertical, 2)
+                        .padding(.vertical, 4)
                     }
                     .contextMenu {
                         openInNewTabButton(workspaceDestination)
@@ -172,6 +186,9 @@ struct AppDataBrowserView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .textCase(nil)
+            }
+            Section {
+                DekpopFooterView()
             }
         }
         .listStyle(.insetGrouped)
@@ -232,17 +249,23 @@ struct AppDataBrowserView: View {
     }
 
     private var emptyView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "folder.badge.questionmark")
-                .font(.system(size: AppTheme.emptyIconSize, weight: .light))
-                .foregroundStyle(.secondary)
+        VStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(AppTheme.brandGradient)
+                Image(systemName: "folder.badge.questionmark")
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .frame(width: 60, height: 60)
             Text(errorMessage ?? language.text("browser.empty"))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-                .padding()
+                .padding(.horizontal)
             Button(language.text("browser.retry")) { reload() }
                 .buttonStyle(.borderedProminent)
+                .tint(AppTheme.accent)
         }
         .padding()
     }

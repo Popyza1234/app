@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download 3105-unsigned.ipa from a successful GitHub Actions build.
+"""Download dekpop-unsigned.ipa from a successful GitHub Actions build.
 
 Uses the GitHub credential already cached by Git Credential Manager on this
 machine (`git credential fill`). The token is kept in memory and is never
@@ -26,9 +26,11 @@ import zipfile
 
 API = "https://api.github.com"
 WORKFLOW_NAME = "Build unsigned IPA"
-ARTIFACT_NAME = "3105-unsigned-ipa"
+ARTIFACT_NAME = "dekpop-unsigned-ipa"
 DEFAULT_REPO = "Popyza1234/app"
-UA = "3105-artifact-downloader"
+DEFAULT_OUTPUT = "dekpop-unsigned.ipa"
+APP_BUNDLE = "dekpop.app"
+UA = "dekpop-artifact-downloader"
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -143,7 +145,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=DEFAULT_REPO, help="owner/repo")
     parser.add_argument("--run-id", type=int, help="specific workflow run id")
-    parser.add_argument("--output", default="3105-unsigned.ipa")
+    parser.add_argument("--output", default=DEFAULT_OUTPUT)
     args = parser.parse_args()
 
     try:
@@ -169,19 +171,21 @@ def main() -> int:
             handle.write(ipa)
 
         app = zipfile.ZipFile(io.BytesIO(ipa))
-        plist_path = "Payload/3105.app/Info.plist"
+        plist_path = "Payload/%s/Info.plist" % APP_BUNDLE
         if plist_path not in app.namelist():
             raise RuntimeError("Unexpected IPA layout (missing %s)." % plist_path)
         info = plistlib.loads(app.read(plist_path))
         signed = any(
-            n.startswith("Payload/3105.app/_CodeSignature") for n in app.namelist()
+            n.startswith("Payload/%s/_CodeSignature" % APP_BUNDLE)
+            for n in app.namelist()
         )
         print("==> Saved: %s (%d bytes)" % (out, len(ipa)))
-        print("    Bundle ID      : %s" % info.get("CFBundleIdentifier"))
-        print("    Version        : %s (%s)" % (
+        print("    Display name     : %s" % info.get("CFBundleDisplayName"))
+        print("    Bundle ID        : %s" % info.get("CFBundleIdentifier"))
+        print("    Version          : %s (%s)" % (
             info.get("CFBundleShortVersionString"), info.get("CFBundleVersion")))
-        print("    MinimumOSVersion: %s" % info.get("MinimumOSVersion"))
-        print("    Code signed    : %s" % ("yes" if signed else "NO - unsigned"))
+        print("    MinimumOSVersion : %s" % info.get("MinimumOSVersion"))
+        print("    Code signed      : %s" % ("yes" if signed else "NO - unsigned"))
         print("==> Next: sign it with ESign or scripts/resign-windows-zsign.ps1")
         return 0
     except (RuntimeError, urllib.error.URLError, OSError, zipfile.BadZipFile) as exc:

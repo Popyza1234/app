@@ -1,95 +1,9 @@
 import Foundation
 
-enum AppSection: Int, CaseIterable, Identifiable {
-    case home
-    case files
-    case patches
-    case cleaner
-    case wallpapers
-
-    var id: Int { rawValue }
-}
-
-enum WallpaperFeatureSupportPolicy {
-    /// Wallpaper Lab is available on every iOS version the app runs on.
-    /// The `major` parameter is kept for call-site compatibility.
-    static func isSupported(major: Int) -> Bool {
-        true
-    }
-}
-
-struct FeatureVisibility: Equatable {
-    static let cleanerStorageKey = "feature.cleaner.enabled"
-    static let wallpapersStorageKey = "feature.wallpapers.enabled"
-
-    let cleanerEnabled: Bool
-    let wallpapersEnabled: Bool
-    let wallpapersSupported: Bool
-
-    init(
-        cleanerEnabled: Bool,
-        wallpapersEnabled: Bool,
-        wallpapersSupported: Bool = true
-    ) {
-        self.cleanerEnabled = cleanerEnabled
-        self.wallpapersEnabled = wallpapersEnabled
-        self.wallpapersSupported = wallpapersSupported
-    }
-
-    var visibleSections: [AppSection] {
-        AppSection.allCases.filter(isVisible)
-    }
-
-    func isVisible(_ section: AppSection) -> Bool {
-        switch section {
-        case .cleaner:
-            return cleanerEnabled
-        case .wallpapers:
-            return wallpapersEnabled && wallpapersSupported
-        case .home, .files, .patches:
-            return true
-        }
-    }
-}
-
-struct AppTabNavigationState: Equatable {
-    private(set) var selectedTab: Int
-    private(set) var filesTabs: FilesTabSession
-
-    init(
-        selectedTab: Int = 0,
-        filesNavigationPath: [FileBrowserDestination] = []
-    ) {
-        self.selectedTab = selectedTab
-        var session = FilesTabSession()
-        session.setActiveNavigationPath(filesNavigationPath)
-        filesTabs = session
-    }
-
-    mutating func select(_ tab: Int) {
-        selectedTab = tab
-    }
-
-    mutating func setFilesNavigationPath(_ path: [FileBrowserDestination]) {
-        filesTabs.setActiveNavigationPath(path)
-    }
-
-    var filesNavigationPath: [FileBrowserDestination] {
-        filesTabs.activeTab?.navigationPath ?? []
-    }
-
-    mutating func setFilesTabs(_ session: FilesTabSession) {
-        filesTabs = session
-    }
-
-    mutating func reconcileSelection(with visibility: FeatureVisibility) {
-        guard let selectedSection = AppSection(rawValue: selectedTab),
-              visibility.isVisible(selectedSection) else {
-            selectedTab = AppSection.home.rawValue
-            return
-        }
-    }
-}
+/// dekpop keeps only the Files feature, so the navigation model contains
+/// nothing but file-browser destinations and the Files tab session.
+/// The old AppSection / FeatureVisibility / WallpaperFeatureSupportPolicy /
+/// AppTabNavigationState types were removed with the other tabs.
 
 struct FileBrowserDestination: Hashable {
     let containerPath: String

@@ -1,10 +1,10 @@
 @echo off
 setlocal
-title 3105 - download unsigned IPA
+title dekpop - download unsigned IPA
 cd /d "%~dp0.."
 
 echo ==========================================================
-echo  3105 - download 3105-unsigned.ipa from GitHub Actions
+echo  dekpop - download dekpop-unsigned.ipa from GitHub Actions
 echo ==========================================================
 echo.
 
@@ -24,7 +24,7 @@ if errorlevel 1 (
 if errorlevel 1 goto :fail
 
 echo.
-echo [OK] 3105-unsigned.ipa is in this folder. It is UNSIGNED - sign it first.
+echo [OK] dekpop-unsigned.ipa is in this folder. It is UNSIGNED - sign it first.
 echo      ESign on the device, or scripts\resign-windows-zsign.ps1 on Windows.
 pause
 exit /b 0
@@ -32,6 +32,6 @@ exit /b 0
 :fail
 echo.
 echo [FAILED] You can always download the artifact manually:
-echo   https://github.com/Popyza1234/app/actions  ^> Artifacts ^> 3105-unsigned-ipa
+echo   https://github.com/Popyza1234/app/actions  ^> Artifacts ^> dekpop-unsigned-ipa
 pause
 exit /b 1

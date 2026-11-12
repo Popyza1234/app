@@ -36,6 +36,8 @@ DerivedData/
 /Tests/
 /.workbuddy-ai/
 /3105-all-ios-versions.zip
+/dekpop-source.zip
+__pycache__/
 # CI workflows are tracked so the unsigned-IPA build can run on a macOS runner
 /.github/*
 !/.github/workflows/

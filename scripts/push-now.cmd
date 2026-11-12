@@ -1,9 +1,9 @@
 @echo off
 setlocal
-title 3105 - push to GitHub
+title dekpop - push to GitHub
 
 echo ==========================================================
-echo  3105 - push to GitHub, then Actions builds the unsigned IPA
+echo  dekpop - push to GitHub, then Actions builds the unsigned IPA
 echo ==========================================================
 echo.
 
@@ -20,7 +20,7 @@ if not exist "ThreeOneOSFive.xcodeproj\project.pbxproj" (
     echo [INFO] Switched to the project folder on your Desktop.
   ) else (
     echo [ERROR] Project files not found next to this script.
-    echo Put this file inside the scripts folder of the extracted 3105 project.
+    echo Put this file inside the scripts folder of the extracted dekpop project.
     goto :fail
   )
 )
@@ -82,7 +82,7 @@ if errorlevel 1 (
 echo [4/6] Committing (if needed)...
 git diff --cached --quiet
 if errorlevel 1 (
-  git -c user.name="3105 local" -c user.email="local@3105.invalid" commit -q -m "Enable all iOS versions and add no-Mac IPA build tooling"
+  git -c user.name="dekpop local" -c user.email="local@dekpop.invalid" commit -q -m "Enable all iOS versions and add no-Mac IPA build tooling"
   echo       committed
 ) else (
   echo       nothing to commit
@@ -103,7 +103,7 @@ echo [OK] Pushed to main.
 echo Next:
 echo   1. Open the Actions tab of %REPO%
 echo   2. Build unsigned IPA ^> Run workflow (the push already triggers it)
-echo   3. Download artifact '3105-unsigned-ipa' -^> 3105-unsigned.ipa
+echo   3. Download artifact 'dekpop-unsigned-ipa' -^> dekpop-unsigned.ipa
 echo   4. Sign it before installing (the IPA is UNSIGNED)
 echo.
 pause

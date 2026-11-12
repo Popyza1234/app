@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Re-sign an unsigned 3105 IPA with YOUR OWN enterprise certificate.
+# Re-sign an unsigned dekpop IPA with YOUR OWN enterprise certificate.
 # Usage: ./scripts/resign-ipa.sh <unsigned.ipa> <signing-identity> <profile.mobileprovision> [output.ipa]
 set -euo pipefail
 

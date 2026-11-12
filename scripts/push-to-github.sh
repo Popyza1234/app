@@ -59,7 +59,7 @@ git ls-files --error-unmatch scripts/build-unsigned-ipa.sh >/dev/null 2>&1 || {
 if ! git diff --cached --quiet; then
   echo "==> Committing project"
   # Local-only identity: does not touch your global git config.
-  git -c user.name="3105 local" -c user.email="local@3105.invalid" \
+  git -c user.name="dekpop local" -c user.email="local@dekpop.invalid" \
     commit -q -m "Enable all iOS versions and add no-Mac IPA build tooling"
 else
   echo "==> Nothing to commit (working tree is clean)"
@@ -93,7 +93,7 @@ echo
 echo "==> Done. Next:"
 echo "    1. Open your repository's Actions tab"
 echo "    2. Actions > Build unsigned IPA > Run workflow (the push to main also triggers it)"
-echo "    3. Download artifact '3105-unsigned-ipa' -> 3105-unsigned.ipa"
+echo "    3. Download artifact 'dekpop-unsigned-ipa' -> dekpop-unsigned.ipa"
 echo "    4. Sign it (ESign on-device, or scripts/resign-windows-zsign.ps1) before installing"
 echo "    The artifact is UNSIGNED; it cannot be installed until it is signed with"
 echo "    your own authorized enterprise certificate and matching provisioning profile."

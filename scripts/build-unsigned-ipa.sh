@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build 3105 as an unsigned IPA. Run on macOS with Xcode installed.
+# Build dekpop as an unsigned IPA. Run on macOS with Xcode installed.
 # Usage: ./scripts/build-unsigned-ipa.sh [output.ipa]
 set -euo pipefail
 
@@ -15,14 +15,14 @@ fi
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-OUTPUT="${1:-3105-unsigned.ipa}"
+OUTPUT="${1:-dekpop-unsigned.ipa}"
 case "$OUTPUT" in
   /*) OUTPUT_ABS="$OUTPUT" ;;
   *)  OUTPUT_ABS="$ROOT/$OUTPUT" ;;
 esac
 
 SYMROOT="$ROOT/build"
-echo "==> Building target 3105 (Release, unsigned)..."
+echo "==> Building dekpop (target 3105, Release, unsigned)..."
 xcodebuild -project "ThreeOneOSFive.xcodeproj" \
   -target 3105 \
   -sdk iphoneos \
@@ -32,9 +32,9 @@ xcodebuild -project "ThreeOneOSFive.xcodeproj" \
   CODE_SIGNING_REQUIRED=NO \
   clean build
 
-APP="$SYMROOT/Release-iphoneos/3105.app"
+APP="$SYMROOT/Release-iphoneos/dekpop.app"
 if [ ! -d "$APP" ]; then
-  echo "error: expected $APP (PRODUCT_NAME is 3105, not ThreeOneOSFive)." >&2
+  echo "error: expected $APP (PRODUCT_NAME is dekpop, not 3105/ThreeOneOSFive)." >&2
   exit 1
 fi
 

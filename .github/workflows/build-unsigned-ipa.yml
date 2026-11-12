@@ -24,20 +24,20 @@ jobs:
           xcodebuild -showsdks | grep iphoneos || true
 
       # No certificate or provisioning profile is needed: the script builds
-      # with CODE_SIGNING_ALLOWED=NO and packs Payload/3105.app into an IPA.
+      # with CODE_SIGNING_ALLOWED=NO and packs Payload/dekpop.app into an IPA.
       - name: Build unsigned IPA
         run: |
           chmod +x scripts/build-unsigned-ipa.sh
           ./scripts/build-unsigned-ipa.sh
 
       - name: Verify IPA layout
-        run: unzip -l 3105-unsigned.ipa | grep 'Payload/3105.app/Info.plist'
+        run: unzip -l dekpop-unsigned.ipa | grep 'Payload/dekpop.app/Info.plist'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 3105-unsigned-ipa
-          path: 3105-unsigned.ipa
+          name: dekpop-unsigned-ipa
+          path: dekpop-unsigned.ipa
           if-no-files-found: error
           retention-days: 14
 

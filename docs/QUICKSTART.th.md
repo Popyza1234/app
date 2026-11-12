@@ -1,8 +1,9 @@
 # วิธีสร้างไฟล์ `.ipa` (ภาษาไทย) — ไม่ต้องมี Mac
 
-> **สถานะตอนนี้:** โปรเจกต์แก้ให้รองรับทุก iOS แล้ว, มี Git commit ในเครื่องแล้ว, มี CI workflow แล้ว
-> **แต่ยังไม่มีไฟล์ `.ipa` อยู่จริง** — ไฟล์จะเกิดขึ้นก็ต่อเมื่อ GitHub Actions รัน build บน macOS runner สำเร็จ
-> ZIP `3105-all-ios-versions.zip` คือ "ชุดโปรเจกต์ + สคริปต์" ไม่ใช่ IPA สำเร็จรูป
+> **สถานะตอนนี้:** โปรเจกต์ถูกออกแบบใหม่เป็น **dekpop** (มีแค่ฟีเจอร์ Files) และ push ขึ้น GitHub แล้ว → GitHub Actions จะ build ไฟล์ `.ipa` ให้
+> **ไฟล์ที่ได้คือ `dekpop-unsigned.ipa` (ยังไม่ได้เซ็น)** — ต้องเซ็นด้วยใบรับรอง enterprise ของคุณก่อนติดตั้ง
+> ZIP `dekpop-source.zip` คือ "ชุดโปรเจกต์ + สคริปต์" ไม่ใช่ IPA สำเร็จรูป
+> ชื่อ target ใน Xcode ยังเป็น `3105` แต่ `PRODUCT_NAME` เป็น `dekpop` → ได้ `Payload/dekpop.app/`
 
 ## ภาพรวม
 
@@ -11,9 +12,9 @@
         ↓
 [2] push โปรเจกต์ขึ้น main (สคริปต์ทำให้)
         ↓
-[3] Actions รันบน macos-latest → ออก 3105-unsigned.ipa (artifact)
+[3] Actions รันบน macos-latest → ออก dekpop-unsigned.ipa (artifact)
         ↓
-[4] เซ็นด้วย enterprise cert → 3105-signed.ipa → ติดตั้ง
+[4] เซ็นด้วย enterprise cert → dekpop-signed.ipa → ติดตั้ง
 ```
 
 ---
@@ -21,7 +22,7 @@
 ## 1. สร้าง GitHub repo แบบว่างเปล่า (คลิกบนเว็บ)
 
 1. เปิด <https://github.com/new> แล้วล็อกอินบัญชี **ของคุณ**
-2. **Owner** = บัญชีคุณ | **Repository name** = เช่น `3105-all-ios`
+2. **Owner** = บัญชีคุณ | **Repository name** = เช่น `dekpop-app`
 3. เลือก **Public** (Actions ฟรี) หรือ **Private** (ใช้ Actions minutes ตามแพ็กเกจ)
 4. **สำคัญที่สุด: อย่าติ๊กช่องเหล่านี้เด็ดขาด**
    - ❌ Add a README file
@@ -30,14 +31,14 @@
 
    ถ้า repo มี commit อยู่แล้ว คำสั่ง push ครั้งแรกจะถูกปฏิเสธ
 5. กด **Create repository**
-6. ในหน้าถัดไป GitHub จะโชว์ URL แบบ `https://github.com/<user>/3105-all-ios.git` — **ก็อปปี้ URL นี้ไว้** (ไม่ต้องรันคำสั่ง `git remote add ...` ที่ GitHub แนะนำ เพราะสคริปต์ทำให้แล้ว)
+6. ในหน้าถัดไป GitHub จะโชว์ URL แบบ `https://github.com/<user>/dekpop-app.git` — **ก็อปปี้ URL นี้ไว้** (ไม่ต้องรันคำสั่ง `git remote add ...` ที่ GitHub แนะนำ เพราะสคริปต์ทำให้แล้ว)
 
 **ทางเลือกสำหรับคนที่ชอบ CLI** (ข้ามการคลิกเว็บได้เลย):
 
 ```bash
 winget install --id GitHub.cli      # ติดตั้ง gh ครั้งแรก only
 gh auth login                       # เลือก GitHub.com → HTTPS → Login with a web browser
-gh repo create 3105-all-ios --private --source=. --remote=origin --push
+gh repo create dekpop-app --private --source=. --remote=origin --push
 ```
 
 ข้อนี้จะสร้าง repo + ตั้ง `origin` + push ให้ในคำสั่งเดียว (ข้าม `scripts/push-to-github.sh`)
@@ -106,12 +107,12 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
 
 ---
 
-## 3. ให้ CI สร้าง `3105-unsigned.ipa`
+## 3. ให้ CI สร้าง `dekpop-unsigned.ipa`
 
 1. เปิด `https://github.com/<user>/<repo>/actions`
 2. การ push ขึ้น `main` จะเริ่ม workflow **Build unsigned IPA** อัตโนมัติ (หรือกด **Actions → Build unsigned IPA → Run workflow** เองก็ได้)
 3. กดเข้า run นั้น → รอประมาณ 5–15 นาที → ถ้าสถานะเขียว ให้เลื่อนลงหา **Artifacts**
-4. โหลด **`3105-unsigned-ipa`** → แตก ZIP → ได้ **`3105-unsigned.ipa`**
+4. โหลด **`dekpop-unsigned-ipa`** → แตก ZIP → ได้ **`dekpop-unsigned.ipa`**
 
 | เรื่อง | คำตอบ |
 |---|---|
@@ -121,11 +122,11 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
 | ไฟล์นี้ติดตั้งได้เลยไหม | **ไม่ได้** ยังไม่เซ็น ต้องทำข้อ 4 |
 | ถ้า run เป็นสีแดง | กดเข้าไปก็อปปี้ log error มาให้ช่วยแก้ (มักเป็นเรื่อง Xcode SDK / API ของ iOS ใหม่) |
 
-### ✅ สถานะล่าสุด: build สำเร็จแล้ว
+### ✅ ประวัติ: build ของรุ่น 3105 เดิมสำเร็จแล้ว (รุ่นก่อนรีแบรนด์)
 
 - Actions run [#43250078558](https://github.com/Popyza1234/app/actions/runs/43250078558): **success ทุก step** — Checkout, Show toolchain, Build unsigned IPA, Verify IPA layout, Upload artifact
-- artifact `3105-unsigned-ipa` = 3,268,242 bytes
-- **`3105-unsigned.ipa` ถูกดาวน์โหลดมาไว้ที่ root โปรเจกต์แล้ว** (3,277,941 bytes)
+- artifact `dekpop-unsigned-ipa` = 3,268,242 bytes
+- **`dekpop-unsigned.ipa` ถูกดาวน์โหลดมาไว้ที่ root โปรเจกต์แล้ว** (3,277,941 bytes)
   - Bundle ID `com.apple.mobile.MobileHouseArrest` | เวอร์ชัน `1.1.1 (7)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
   - ตรวจแล้วว่ามีสตริง "All iOS versions" ครบ EN / VI / ZH → โค้ดที่แก้ถูก compile จริง
 
@@ -145,18 +146,18 @@ python scripts/download-unsigned-ipa.py
 
 **บน iPhone — ง่ายสุด ไม่ต้องใช้คอม**
 
-1. เอา `3105-unsigned.ipa`, `.p12`, `.mobileprovision` ใส่เครื่อง (Files / AirDrop)
+1. เอา `dekpop-unsigned.ipa`, `.p12`, `.mobileprovision` ใส่เครื่อง (Files / AirDrop)
 2. เปิด **ESign** → import certificate/profile → เลือก IPA → **Sign** → **Install**
 
 **บน Windows — ใช้ zsign**
 
 ```powershell
-.\scripts\resign-windows-zsign.ps1 -Ipa .\3105-unsigned.ipa `
+.\scripts\resign-windows-zsign.ps1 -Ipa .\dekpop-unsigned.ipa `
   -P12 .\enterprise.p12 -P12Password 'YOUR_PASSWORD' `
   -MobileProvision .\profile.mobileprovision
 ```
 
-ได้ `3105-signed.ipa` แล้วติดตั้งผ่าน ESign, enterprise OTA (HTTPS + `itms-services` manifest), MDM หรือ Apple Configurator
+ได้ `dekpop-signed.ipa` แล้วติดตั้งผ่าน ESign, enterprise OTA (HTTPS + `itms-services` manifest), MDM หรือ Apple Configurator
 
 > ⚠️ **ใบรับรอง enterprise สร้างเองไม่ได้** ต้องออกจากบัญชี **Apple Developer Enterprise Program** ที่องค์กรของคุณเป็นเจ้าของและคุณได้รับอนุญาตให้ใช้ อย่าใช้ใบรับรองของผู้อื่น และห้ามอัปโหลด `.p12` / รหัส / token ขึ้น GitHub หรือส่งในแชท
 >
@@ -169,10 +170,10 @@ python scripts/download-unsigned-ipa.py
 | อยาก "สร้าง" อะไร | ทำยังไง |
 |---|---|
 | GitHub repo | `github.com/new` → สร้าง **แบบว่างเปล่า** (หรือ `gh repo create ...`) |
-| `3105-unsigned.ipa` | `./scripts/push-to-github.sh <url>` → Actions → artifact `3105-unsigned-ipa` |
+| `dekpop-unsigned.ipa` | `./scripts/push-to-github.sh <url>` → Actions → artifact `dekpop-unsigned-ipa` |
 | push ติดล็อกอิน | ดับเบิลคลิก `scripts\push-now.cmd` → **Sign in with your browser** |
 | ขึ้น `No remote given` | ใช้ `push-now.cmd` ตัวใหม่ หรือ `cd /c/Users/Administrator/Desktop/3105-1.1.1 && git push -u origin main` |
-| `3105-signed.ipa` | ESign บนเครื่อง หรือ `resign-windows-zsign.ps1` + ใบรับรอง enterprise ของคุณ |
+| `dekpop-signed.ipa` | ESign บนเครื่อง หรือ `resign-windows-zsign.ps1` + ใบรับรอง enterprise ของคุณ |
 | ติดตั้งบน iPhone | ESign / enterprise OTA / MDM / Apple Configurator |
 
 โปรเจกต์ไม่รองรับ SideStore, AltStore, 3uTools และ LiveContainer

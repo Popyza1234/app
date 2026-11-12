@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install a SIGNED 3105 IPA onto a USB-connected device.
+# Install a SIGNED dekpop IPA onto a USB-connected device.
 # Usage: ./scripts/install-ipa.sh <signed.ipa>
 set -euo pipefail
 

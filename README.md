@@ -1,97 +1,72 @@
 <p align="center">
-  <img src="docs/images/app-icon.png" width="132" alt="3105 app icon">
+  <img src="docs/images/app-icon.png" width="132" alt="dekpop app icon">
 </p>
 
-<h1 align="center">3105</h1>
+<h1 align="center">dekpop</h1>
 
 <p align="center">
-  A native iOS workspace for app-container files, portable patches, limited cleanup, and PosterBoard wallpaper packages.
+  A Files-only native iOS app for browsing and managing app-container files.
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-E6753A?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.2.0-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
-  <img alt="Languages" src="https://img.shields.io/badge/languages-English%20%7C%20Tiếng%20Việt%20%7C%20简体中文-E6753A?style=flat-square">
+  <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
 </p>
 
 <p align="center">
   <a href="README.vi.md">Tiếng Việt</a> ·
-  <a href="docs/PATCH_GUIDE.md">Patch guide</a> ·
+  <a href="docs/QUICKSTART.th.md">คู่มือภาษาไทย</a> ·
   <a href="#compatibility">Compatibility</a> ·
   <a href="#license">License</a>
 </p>
 
 > [!WARNING]
-> 3105 is research software for personal device management. Keep a backup and use it only on devices and data you own. Simulator screenshots demonstrate UI only; they do not verify device-level access.
+> dekpop is research software for personal device management. Keep a backup and use it only on devices and data you own. It can modify files inside app containers.
 
-## Preview
+## What's new in 1.2.0 — the dekpop edition
 
-<p align="center">
-  <img src="docs/images/home.png" width="245" alt="3105 Home">
-  &nbsp;
-  <img src="docs/images/patches.png" width="245" alt="3105 Patches">
-  &nbsp;
-  <img src="docs/images/cleaner.png" width="245" alt="3105 Cleaner">
-</p>
+- **Completely redesigned UI** — a violet-to-pink brand system, custom wordmark, gradient hero card with device/iOS/access status, rounded controls, and a new 1024×1024 app icon.
+- **Files is the only feature** — the tab bar, dashboard, patches, cleaner, Wallpaper Lab, onboarding, attribution sheet, update prompt and patch-import URL handling are gone. The Files browser opens directly at launch.
+- **Own identity** — display name, product name, executable and `.app` bundle are `dekpop`; version `1.2.0` (build 8); localizations in English / Vietnamese / Simplified Chinese updated to dekpop.
+- **Unchanged core** — the app-container browser, multi-tab navigation, search, Quick Look, copy/move/rename/delete, import, ZIP create/extract and the `dekpop` workspace folder all still work.
+- **CI renamed** — the artifact is now `dekpop-unsigned-ipa` containing `dekpop-unsigned.ipa` (`Payload/dekpop.app/`).
 
-## What's new in 1.1.1
+> [!IMPORTANT]
+> The bundle identifier is intentionally still `com.apple.mobile.MobileHouseArrest`. `mcm_bridge.m` checks this identifier before MHA-C2 container activation; changing it breaks Files. Only the visible identity changed.
 
-- **All iOS versions** — the verified-range and beta-build whitelist is gone. Every iOS version that can install the app (deployment target iOS 16.0) is enabled, including iOS 27 release builds, later betas, and future majors.
-- **No hard abort on unknown builds** — `offsets_init` falls back to the newest known offsets and logs an `offsets: ... unverified` hint instead of terminating the exploit.
-- **Forward-compatible kernel detection** — iOS 27+ builds are accepted even when the kernel's second-word magic differs from iOS 26.
-- **Wallpaper Lab everywhere** — the wallpaper tab is no longer limited to iOS 17/18/26/27.
-
-See [Compatibility](#compatibility) for the offset caveat on unverified releases.
-
-## What's new in 1.1.0
-
-- **Broader iOS support** — verified range now includes iOS 17.0–17.7.x (kernel exploit), iOS 18.0–18.7.1 (kernel exploit), iOS 26.0–26.6.1 and iOS 27 Developer Beta 1–4 / Public Beta 1–2.
-- **Wrong-password feedback** — importing a `.3105` patch with an incorrect password now shows "Incorrect password" instead of failing silently.
-- **Onboarding for reinstalls** — onboarding reappears after overwriting the app with the same version, so fresh and overwritten installs both see the guided setup.
-
-See the complete [Patch workspace guide](docs/PATCH_GUIDE.md).
-
-## What's new in 1.0.1
-
-- **Patch workspace v2** — build patches as a normal bundle-based directory tree under `On My iPhone/3105/Patches`; Apply and Export synchronize the workspace automatically.
-- **Safer recovery** — original files are journaled before writes; Restore puts existing files back, removes files introduced by the patch, and removes patch-created directories once empty.
-- **More capable Files tab** — independent tabs, preserved folder position, multi-selection, ZIP creation and extraction, plus a denser and more consistent grouped layout.
-- **Responsive navigation** — iPad split-view and landscape support, optional Cleaner/Wallpaper tabs, stable search fields, and refined icon/row sizing.
-- **Wallpaper guidance** — corrected PosterBoard activation steps, including the iOS 27 Collections prerequisite.
-
-See the complete [Patch workspace guide](docs/PATCH_GUIDE.md).
+Legacy guides under `docs/PATCH_GUIDE*.md` and release notes describe features of the upstream 1.0/1.1 project; those screens are no longer reachable in dekpop.
 
 ## Highlights
 
 - **App Data Browser** — resolves volatile container UUIDs to stable app bundle identifiers and exposes a native file workspace.
 - **File operations** — search, preview, share, import multiple files, copy, move, paste, rename, delete, create files and folders, make ZIP archives, and safely handle name conflicts.
-- **Portable `.3105` patches** — bundle-based rules survive container-ID changes between devices; projects may include files or folders, support optional password protection, and can be imported from Files or a secure website link.
-- **Limited Cleaner** — scans only each app's `Library/Caches` and `tmp`, sorts recoverable size in either direction, supports bulk selection, and requires confirmation before deletion.
-- **Wallpaper Lab** — imports `.tendies` packages, validates payloads, journals installed items, and resets only content installed by 3105.
-- **No jailbreak installation** — 3105 does not install a persistent jailbreak, bootstrap, or daemon and does not inject code into third-party apps. Because it still uses device exploits and can modify app data, no universal guarantee can be made against every app's integrity or jailbreak-detection policy.
+- **Multi-tab browsing** — independent tabs with preserved folder positions (iPad gets a tab strip).
+- **dekpop workspace** — your own folder under `On My iPhone`, available from the Files browser.
+- **No jailbreak installation** — no persistent jailbreak, bootstrap, or daemon is installed; no code is injected into third-party apps.
 - **Localized interface** — English, Vietnamese, and Simplified Chinese.
 
 ## Compatibility
 
-3105 no longer gates device-level features by iOS version or build. Every iOS version that can install the app is enabled:
+Every iOS version that can install the app is enabled — no version or build whitelist:
 
 | Item | Status |
 | --- | --- |
 | Supported versions | All iOS versions 16.0 and later (release, beta, and future majors) |
-| Build whitelist | Removed — no beta build list |
+| Build whitelist | Removed |
 | Deployment target | iOS 16.0 |
 | Offset fallback | iOS 26.0 baseline for unverified 26.1+; iOS 17.0 baseline for below 17.0 |
 
 > [!NOTE]
-> The kernel exploit still needs offsets that match the running kernel. On an iOS version not covered by the offset table the exploit may fail; the app now logs an `offsets: ... unverified` hint and falls back to the newest known offsets instead of aborting. A failed exploit attempt may restart the app.
+> The kernel exploit still needs offsets matching the running kernel. On an iOS version not covered by the offset table the exploit may fail; it logs an `offsets: ... unverified` hint and falls back to the newest known offsets instead of aborting. A failed attempt may restart the app.
 
 ## Installation notes
 
 - Device functionality requires signing with an **enterprise certificate**.
 - SideStore, AltStore, 3uTools, and LiveContainer are not supported installation paths.
-- The target bundle identifier is intentionally `com.apple.mobile.MobileHouseArrest`; changing it can break the MHA-C2 app-container workflow.
-- The source tree does not contain certificates, provisioning profiles, signed applications, or IPA files; release assets may provide an unsigned IPA.
+- The bundle identifier is intentionally `com.apple.mobile.MobileHouseArrest`; changing it breaks the MHA-C2 app-container workflow.
+- The source tree contains no certificates, provisioning profiles, signed applications, or IPA files; CI produces an **unsigned** IPA.
 
 ## Build, sign & install
 
@@ -106,16 +81,16 @@ security import /path/to/enterprise.p12 -k ~/Library/Keychains/login.keychain-db
 security find-identity -v -p codesigning
 
 # 3. Re-sign with an enterprise profile covering com.apple.mobile.MobileHouseArrest
-./scripts/resign-ipa.sh 3105-unsigned.ipa "iPhone Distribution: Your Enterprise" /path/to/profile.mobileprovision 3105-signed.ipa
+./scripts/resign-ipa.sh dekpop-unsigned.ipa "iPhone Distribution: Your Enterprise" /path/to/profile.mobileprovision dekpop-signed.ipa
 
 # 4. Install onto a USB-connected device (Apple Configurator or libimobiledevice)
-./scripts/install-ipa.sh 3105-signed.ipa
+./scripts/install-ipa.sh dekpop-signed.ipa
 ```
 
-For `Product > Archive > Distribute App (Enterprise)`, copy `scripts/ExportOptions-Enterprise.plist` and replace `YOUR_TEAM_ID` / `YOUR_ENTERPRISE_PROFILE_NAME`. For enterprise OTA or MDM delivery, host the **signed** IPA plus an `itms-services` manifest over HTTPS (or push it through your MDM); an unsigned IPA cannot be installed.
+The Xcode target is still named `3105` (`xcodebuild -target 3105`), but `PRODUCT_NAME` is `dekpop`, so the built bundle is `dekpop.app`. For `Product > Archive > Distribute App (Enterprise)`, copy `scripts/ExportOptions-Enterprise.plist` and replace `YOUR_TEAM_ID` / `YOUR_ENTERPRISE_PROFILE_NAME`. For enterprise OTA or MDM delivery, host the **signed** IPA plus an `itms-services` manifest over HTTPS (or push it through your MDM); an unsigned IPA cannot be installed.
 
 > [!CAUTION]
-> Use only an enterprise certificate you are authorized to use. Never commit `.p12`, passwords, or `.mobileprovision` files, and never paste private keys into chats or issue trackers. `.gitignore` already excludes signing material and build artifacts. `com.apple.mobile.MobileHouseArrest` is an Apple-reserved identifier, so a standard developer account usually cannot create a matching App ID — that is why the project distributes an unsigned IPA for re-signing instead of a ready-to-install build.
+> Use only an enterprise certificate you are authorized to use. Never commit `.p12`, passwords, or `.mobileprovision` files, and never paste private keys into chats or issue trackers. `.gitignore` already excludes signing material and build artifacts. `com.apple.mobile.MobileHouseArrest` is an Apple-reserved identifier, so a standard developer account usually cannot create a matching App ID — that is why the project distributes an unsigned IPA for re-signing.
 
 ## Without a Mac
 
@@ -123,23 +98,23 @@ For `Product > Archive > Distribute App (Enterprise)`, copy `scripts/ExportOptio
 
 An enterprise certificate and a provisioning profile covering `com.apple.mobile.MobileHouseArrest` are still required — no workaround removes that. The Mac itself is optional:
 
-1. **Build in CI** — `.github/workflows/build-unsigned-ipa.yml` runs on a GitHub-hosted `macos-latest` runner (free for public repos; private repos use your plan's minutes). Push the repo, open **Actions > Build unsigned IPA > Run workflow**, then download the `3105-unsigned-ipa` artifact. No certificate is needed for this step (`CODE_SIGNING_ALLOWED=NO`).
-2. **Sign on the iPhone with ESign** — copy the unsigned IPA to the device (Files / AirDrop), import your `.p12` + `.mobileprovision` into ESign, then sign and install. This is the path the project's release notes use and it needs no computer at all.
+1. **Build in CI** — `.github/workflows/build-unsigned-ipa.yml` runs on a GitHub-hosted `macos-latest` runner (free for public repos; private repos use your plan's minutes). Push the repo, open **Actions > Build unsigned IPA > Run workflow**, then download the `dekpop-unsigned-ipa` artifact. No certificate is needed for this step (`CODE_SIGNING_ALLOWED=NO`).
+2. **Sign on the iPhone with ESign** — copy the unsigned IPA to the device (Files / AirDrop), import your `.p12` + `.mobileprovision` into ESign, then sign and install.
 3. **Sign on Windows/Linux with zsign** — `zhlynn/zsign` re-signs an IPA without Xcode:
 
    ```powershell
-   .\scripts\resign-windows-zsign.ps1 -Ipa .\3105-unsigned.ipa `
+   .\scripts\resign-windows-zsign.ps1 -Ipa .\dekpop-unsigned.ipa `
      -P12 .\enterprise.p12 -P12Password 'YOUR_PASSWORD' `
      -MobileProvision .\profile.mobileprovision
    ```
 
-   Copy `3105-signed.ipa` to the device and install it with ESign, or serve it over HTTPS with an `itms-services` manifest / push it through MDM. Installation from Windows still needs one of these paths (3uTools is not a supported installer for 3105).
+   Copy `dekpop-signed.ipa` to the device and install it with ESign, or serve it over HTTPS with an `itms-services` manifest / push it through MDM.
 
 ### Push to GitHub from Windows (no Mac)
 
 The project is already initialized as a Git repository with a local commit. You only supply the URL of **your own** repository — the script never handles or prints a token.
 
-1. Create a **new empty repository** on GitHub. Do **not** tick "Add a README", a license, or a `.gitignore` (an empty remote avoids a rejected first push), and leave the default branch as `main`.
+1. Create a **new empty repository** on GitHub. Do **not** tick "Add a README", a license, or a `.gitignore`, and leave the default branch as `main`.
 2. From the project root, in **Git Bash** (or WSL / macOS Terminal), run:
 
    ```bash
@@ -149,10 +124,10 @@ The project is already initialized as a Git repository with a local commit. You 
    Authentication happens in Git Credential Manager / your normal `git` credential prompt. If you use a Personal Access Token, paste it **only** into that prompt — never into a chat, issue, or file. The script stages and commits any remaining changes, verifies that no `.p12`, `.mobileprovision`, `.env`, or similar secret is tracked, checks that the CI workflow is included, forces the `main` branch, sets `origin`, and pushes.
 
    If a non-interactive shell reports `could not read Username` / `Authentication failed`, run `scripts\push-now.cmd` from Windows Explorer or `cmd` so Git Credential Manager can open its sign-in window. The launcher is self-contained: it has a default remote (overridable with the first argument), finds the project folder even when the `.cmd` was opened from a copied/downloaded location, initializes Git and commits if needed, sets `origin`, pushes `main`, and prints the Actions/artifact steps. No token is stored by the script.
-3. Pushing to `main` triggers **Build unsigned IPA** automatically; you can also start it manually under **Actions > Build unsigned IPA > Run workflow**. A GitHub-hosted `macos-latest` runner builds `3105-unsigned.ipa` and uploads it as the `3105-unsigned-ipa` artifact (retained 14 days).
-4. Download and unzip the artifact. It contains `3105-unsigned.ipa`, which is **unsigned** — sign it with your own authorized enterprise certificate and matching provisioning profile (ESign on-device, or `scripts/resign-windows-zsign.ps1`) before installing via ESign, enterprise OTA / MDM, or Apple Configurator.
+3. Pushing to `main` triggers **Build unsigned IPA** automatically; you can also start it manually under **Actions > Build unsigned IPA > Run workflow**. A GitHub-hosted `macos-latest` runner builds `dekpop-unsigned.ipa` and uploads it as the `dekpop-unsigned-ipa` artifact (retained 14 days).
+4. Download and unzip the artifact. It contains `dekpop-unsigned.ipa`, which is **unsigned** — sign it with your own authorized enterprise certificate and matching provisioning profile (ESign on-device, or `scripts/resign-windows-zsign.ps1`) before installing via ESign, enterprise OTA / MDM, or Apple Configurator.
 
-   To fetch it from the command line, double-click `scripts\download-unsigned-ipa.cmd` or run `python scripts/download-unsigned-ipa.py`. It finds the latest successful run, uses the GitHub credential already cached by Git Credential Manager (never printed or stored), saves `3105-unsigned.ipa` to the project root, and verifies `Info.plist`. Artifacts expire after 14 days — re-run the workflow if the artifact has expired.
+   To fetch it from the command line, double-click `scripts\download-unsigned-ipa.cmd` or run `python scripts/download-unsigned-ipa.py`. It finds the latest successful run, uses the GitHub credential already cached by Git Credential Manager (never printed or stored), saves `dekpop-unsigned.ipa` to the project root, and verifies `Info.plist`. Artifacts expire after 14 days — re-run the workflow if the artifact has expired.
 
 If the first push is rejected because the remote already has commits, run `git pull --rebase origin main && git push -u origin main`, or recreate the repository empty.
 
@@ -163,21 +138,29 @@ Rented cloud Macs (MacInCloud, MacStadium, AWS EC2 Mac) are a last resort if you
 ## Project layout
 
 ```text
-3105/
+dekpop/
 ├── ThreeOneOSFive/          # SwiftUI app, helpers, native bridges, localizations
-├── ThreeOneOSFive.xcodeproj # Xcode project and 3105 scheme
-├── scripts/                 # unsigned IPA build, re-sign, install, GitHub push, artifact download
+│   ├── App.swift            # @main DekpopApp + AppState (kernel access bootstrap)
+│   ├── ContentView.swift    # Files-only root view
+│   ├── views/               # AppDataBrowserView, FileBrowserView, DesignSystem, tab controls
+│   └── Assets.xcassets/     # dekpop app icon
+├── ThreeOneOSFive.xcodeproj # Xcode project (target name 3105, PRODUCT_NAME dekpop)
+├── scripts/                 # unsigned IPA build, re-sign, install, GitHub push, artifact download, icon generator
 ├── .github/workflows/       # macOS-runner CI build for an unsigned IPA
-└── docs/images/             # Repository artwork and current UI previews
+└── docs/                    # Thai quick-start, legacy guides, artwork
 ```
+
+`scripts/generate-app-icon.py` regenerates the icon (`python -m pip install Pillow` first).
+
+> Non-Files view/helper sources remain in the Xcode target so the project keeps compiling unchanged, but nothing in the app navigates to them. Files-coupled helpers with "Patch" in their names (`PatchWorkspaceService`, `PatchDraftCoordinator`, `PatchPathValidator`, …) are still required by the file browser.
 
 ## Security and responsible use
 
-Do not publish logs, app containers, cookies, account databases, or patch payloads containing personal data. Report security-sensitive issues privately to the maintainer.
+Do not publish logs, app containers, cookies, or account databases containing personal data. Report security-sensitive issues privately to the maintainer.
 
 ## Credits
 
-3105 is developed and designed by [YangJiii](https://x.com/duongduong0908).
+dekpop is a Files-only custom edition of the 3105 project by [YangJiii](https://x.com/duongduong0908).
 
 Special thanks to [0xjohnny](https://x.com/0xjohnny) for [FilzaSlop](https://github.com/0xjohnnydev/FilzaSlop) and related research:
 
@@ -190,4 +173,4 @@ The project also builds on work from Pocket Poster/Nugget, CrazyMind90, forcequi
 
 ## License
 
-Original portions of 3105 are distributed under the [GNU General Public License v3.0](LICENSE). Third-party components remain subject to their respective upstream copyright and license terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Original portions of the upstream 3105 project are distributed under the [GNU General Public License v3.0](LICENSE). Third-party components remain subject to their respective upstream copyright and license terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The dekpop branding and new UI assets follow the same license terms.
