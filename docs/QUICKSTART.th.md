@@ -121,6 +121,7 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
 | artifact เก็บนานแค่ไหน | 14 วัน |
 | ไฟล์นี้ติดตั้งได้เลยไหม | **ไม่ได้** ยังไม่เซ็น ต้องทำข้อ 4 |
 | ถ้า run เป็นสีแดง | กดเข้าไปก็อปปี้ log error มาให้ช่วยแก้ (มักเป็นเรื่อง Xcode SDK / API ของ iOS ใหม่) |
+| run ถูก **cancelled** หลังค้างคิว ~15 นาที และไม่มี log ของ step เลย | GitHub หา macOS runner ไม่ได้ชั่วคราว (**ไม่ใช่โค้ดพัง**) → กด **Re-run jobs** หรือ **Actions → Run workflow** ใหม่สักรอบ |
 
 ### ✅ ประวัติ build
 
