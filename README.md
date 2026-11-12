@@ -119,6 +119,8 @@ For `Product > Archive > Distribute App (Enterprise)`, copy `scripts/ExportOptio
 
 ## Without a Mac
 
+> ภาษาไทย: [docs/QUICKSTART.th.md](docs/QUICKSTART.th.md) — คู่มือแบบคลิกทีละขั้นตอน (สร้าง repo → push → โหลด IPA → เซ็น → ติดตั้ง)
+
 An enterprise certificate and a provisioning profile covering `com.apple.mobile.MobileHouseArrest` are still required — no workaround removes that. The Mac itself is optional:
 
 1. **Build in CI** — `.github/workflows/build-unsigned-ipa.yml` runs on a GitHub-hosted `macos-latest` runner (free for public repos; private repos use your plan's minutes). Push the repo, open **Actions > Build unsigned IPA > Run workflow**, then download the `3105-unsigned-ipa` artifact. No certificate is needed for this step (`CODE_SIGNING_ALLOWED=NO`).
