@@ -1,0 +1,48 @@
+name: Build unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build unsigned IPA on macOS runner
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcodebuild -showsdks | grep iphoneos || true
+
+      # No certificate or provisioning profile is needed: the script builds
+      # with CODE_SIGNING_ALLOWED=NO and packs Payload/3105.app into an IPA.
+      - name: Build unsigned IPA
+        run: |
+          chmod +x scripts/build-unsigned-ipa.sh
+          ./scripts/build-unsigned-ipa.sh
+
+      - name: Verify IPA layout
+        run: unzip -l 3105-unsigned.ipa | grep 'Payload/3105.app/Info.plist'
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3105-unsigned-ipa
+          path: 3105-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+# To also produce a SIGNED IPA, add a step after "Build unsigned IPA" that
+# decodes secrets (P12_BASE64, P12_PASSWORD, MOBILEPROVISION_BASE64) into
+# RUNNER_TEMP, imports the certificate into a temporary keychain, and calls
+# scripts/resign-ipa.sh. Only use a certificate your team owns and is licensed
+# to distribute; never commit signing material. Fork PRs receive no secrets.
