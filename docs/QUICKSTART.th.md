@@ -122,13 +122,15 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
 | ไฟล์นี้ติดตั้งได้เลยไหม | **ไม่ได้** ยังไม่เซ็น ต้องทำข้อ 4 |
 | ถ้า run เป็นสีแดง | กดเข้าไปก็อปปี้ log error มาให้ช่วยแก้ (มักเป็นเรื่อง Xcode SDK / API ของ iOS ใหม่) |
 
-### ✅ ประวัติ: build ของรุ่น 3105 เดิมสำเร็จแล้ว (รุ่นก่อนรีแบรนด์)
+### ✅ ประวัติ build
 
-- Actions run [#43250078558](https://github.com/Popyza1234/app/actions/runs/43250078558): **success ทุก step** — Checkout, Show toolchain, Build unsigned IPA, Verify IPA layout, Upload artifact
-- artifact `dekpop-unsigned-ipa` = 3,268,242 bytes
-- **`dekpop-unsigned.ipa` ถูกดาวน์โหลดมาไว้ที่ root โปรเจกต์แล้ว** (3,277,941 bytes)
-  - Bundle ID `com.apple.mobile.MobileHouseArrest` | เวอร์ชัน `1.1.1 (7)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
-  - ตรวจแล้วว่ามีสตริง "All iOS versions" ครบ EN / VI / ZH → โค้ดที่แก้ถูก compile จริง
+- **รุ่น 3105 เดิม (ก่อนรีแบรนด์):** Actions run [#43250078558](https://github.com/Popyza1234/app/actions/runs/43250078558) **success ทุก step** — Checkout, Show toolchain, Build unsigned IPA, Verify IPA layout, Upload artifact
+  - artifact `3105-unsigned-ipa` = 3,268,242 bytes → ไฟล์ `3105-unsigned.ipa` 3,277,941 bytes
+  - เวอร์ชัน `1.1.1 (7)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
+- **รุ่น dekpop 1.2.0 (ปัจจุบัน):** ทุกครั้งที่ push ขึ้น `main` workflow จะ build ใหม่ → artifact **`dekpop-unsigned-ipa`** → ไฟล์ **`dekpop-unsigned.ipa`**
+  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `1.2.0 (8)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
+  - Bundle ID ยังเป็น `com.apple.mobile.MobileHouseArrest` (จำเป็นสำหรับ MHA-C2 / ฟีเจอร์ Files)
+- การที่ CI ขึ้นเขียวแปลว่าโค้ดที่แก้ **ถูก compile จริงบน Xcode ของ GitHub** ไม่ใช่แค่แก้ไฟล์ในเครื่อง
 
 **โหลดซ้ำในอนาคต** (artifact หมดอายุ 14 วัน) — ดับเบิลคลิก `scripts\download-unsigned-ipa.cmd` หรือ:
 
