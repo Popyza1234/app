@@ -152,6 +152,8 @@ The project is already initialized as a Git repository with a local commit. You 
 3. Pushing to `main` triggers **Build unsigned IPA** automatically; you can also start it manually under **Actions > Build unsigned IPA > Run workflow**. A GitHub-hosted `macos-latest` runner builds `3105-unsigned.ipa` and uploads it as the `3105-unsigned-ipa` artifact (retained 14 days).
 4. Download and unzip the artifact. It contains `3105-unsigned.ipa`, which is **unsigned** — sign it with your own authorized enterprise certificate and matching provisioning profile (ESign on-device, or `scripts/resign-windows-zsign.ps1`) before installing via ESign, enterprise OTA / MDM, or Apple Configurator.
 
+   To fetch it from the command line, double-click `scripts\download-unsigned-ipa.cmd` or run `python scripts/download-unsigned-ipa.py`. It finds the latest successful run, uses the GitHub credential already cached by Git Credential Manager (never printed or stored), saves `3105-unsigned.ipa` to the project root, and verifies `Info.plist`. Artifacts expire after 14 days — re-run the workflow if the artifact has expired.
+
 If the first push is rejected because the remote already has commits, run `git pull --rebase origin main && git push -u origin main`, or recreate the repository empty.
 
 To have CI produce a *signed* IPA, add a step after the build that decodes secrets (`P12_BASE64`, `P12_PASSWORD`, `MOBILEPROVISION_BASE64`) into `RUNNER_TEMP`, imports the certificate into a temporary keychain, and calls `scripts/resign-ipa.sh`. Only do this with a certificate your team owns and is licensed to distribute; never commit signing material, and remember fork pull requests receive no secrets.
@@ -164,7 +166,7 @@ Rented cloud Macs (MacInCloud, MacStadium, AWS EC2 Mac) are a last resort if you
 3105/
 ├── ThreeOneOSFive/          # SwiftUI app, helpers, native bridges, localizations
 ├── ThreeOneOSFive.xcodeproj # Xcode project and 3105 scheme
-├── scripts/                 # unsigned IPA build, re-sign (macOS/Windows), install, export options, GitHub push
+├── scripts/                 # unsigned IPA build, re-sign, install, GitHub push, artifact download
 ├── .github/workflows/       # macOS-runner CI build for an unsigned IPA
 └── docs/images/             # Repository artwork and current UI previews
 ```

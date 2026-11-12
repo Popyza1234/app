@@ -121,6 +121,22 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
 | ไฟล์นี้ติดตั้งได้เลยไหม | **ไม่ได้** ยังไม่เซ็น ต้องทำข้อ 4 |
 | ถ้า run เป็นสีแดง | กดเข้าไปก็อปปี้ log error มาให้ช่วยแก้ (มักเป็นเรื่อง Xcode SDK / API ของ iOS ใหม่) |
 
+### ✅ สถานะล่าสุด: build สำเร็จแล้ว
+
+- Actions run [#43250078558](https://github.com/Popyza1234/app/actions/runs/43250078558): **success ทุก step** — Checkout, Show toolchain, Build unsigned IPA, Verify IPA layout, Upload artifact
+- artifact `3105-unsigned-ipa` = 3,268,242 bytes
+- **`3105-unsigned.ipa` ถูกดาวน์โหลดมาไว้ที่ root โปรเจกต์แล้ว** (3,277,941 bytes)
+  - Bundle ID `com.apple.mobile.MobileHouseArrest` | เวอร์ชัน `1.1.1 (7)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
+  - ตรวจแล้วว่ามีสตริง "All iOS versions" ครบ EN / VI / ZH → โค้ดที่แก้ถูก compile จริง
+
+**โหลดซ้ำในอนาคต** (artifact หมดอายุ 14 วัน) — ดับเบิลคลิก `scripts\download-unsigned-ipa.cmd` หรือ:
+
+```bash
+python scripts/download-unsigned-ipa.py
+```
+
+สคริปต์ใช้ credential ที่ Git Credential Manager เก็บไว้ในเครื่อง (ไม่พิมพ์ token ออกมา) หา run ล่าสุดที่ success แล้วแตก ZIP ใส่ `.ipa` ลง root พร้อมตรวจ Info.plist ให้ หรือโหลดเองที่ `https://github.com/Popyza1234/app/actions` → เลือก run → **Artifacts**
+
 ---
 
 ## 4. เซ็น แล้วติดตั้ง
