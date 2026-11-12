@@ -79,6 +79,31 @@ git push -u origin main
 
 > `origin` ถูกตั้งเป็น URL ที่คุณให้ไว้แล้ว และ branch `main` มี commit พร้อม push อยู่ — เหลือแค่ผ่านการล็อกอินเท่านั้น ถ้าขึ้น `push rejected` แปลว่า repo ไม่ว่าง ให้ทำตามข้อ `git pull --rebase origin main` ด้านบน หรือลบ repo แล้วสร้างใหม่แบบข้อ 1
 
+### ถ้าขึ้น `[ERROR] No remote given and 'origin' is not configured yet.`
+
+**สาเหตุ:** คุณเปิด `push-now.cmd` จาก **ก๊อปปี้ที่อยู่นอกโฟลเดอร์โปรเจกต์** (เช่น ไฟล์จากการ์ดในแชท หรือแตก ZIP ไว้ที่อื่น) จึงไม่เจอ `.git` และ `origin` — สคริปต์เวอร์ชันเก่าจะหยุดตรงนี้
+
+**แก้แล้วในเวอร์ชันปัจจุบัน** `push-now.cmd` ตอนนี้:
+
+- มี `DEFAULT_REPO` = URL repo ของคุณอยู่ในตัว (ดับเบิลคลิกได้เลย ไม่ต้องพิมพ์ argument)
+- ถ้าไม่เจอไฟล์โปรเจกต์ข้าง ๆ จะ **สลับไปใช้** `%USERPROFILE%\Desktop\3105-1.1.1` อัตโนมัติ
+- ถ้าไม่มี `.git` จะ `git init -b main` → stage → ตรวจ secret → commit → ตั้ง `origin` ให้เอง (ไม่ต้องง้อ Git Bash)
+- หา `git.exe` จาก `C:\Program Files\Git\cmd` เองถ้าไม่อยู่ใน PATH
+
+**วิธีที่เร็วที่สุด** — เปิด Git Bash แล้วพิมพ์บรรทัดเดียว (โฟลเดอร์โปรเจกต์มี `origin` + commit ครบแล้ว):
+
+```bash
+cd /c/Users/Administrator/Desktop/3105-1.1.1 && git push -u origin main
+```
+
+หรือดับเบิลคลิก **ไฟล์ตัวที่อยู่ในโฟลเดอร์โปรเจกต์จริง**:
+
+```
+C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
+```
+
+จากนั้นกด **Sign in with your browser** เมื่อหน้าต่างล็อกอินโผล่
+
 ---
 
 ## 3. ให้ CI สร้าง `3105-unsigned.ipa`
@@ -130,6 +155,7 @@ git push -u origin main
 | GitHub repo | `github.com/new` → สร้าง **แบบว่างเปล่า** (หรือ `gh repo create ...`) |
 | `3105-unsigned.ipa` | `./scripts/push-to-github.sh <url>` → Actions → artifact `3105-unsigned-ipa` |
 | push ติดล็อกอิน | ดับเบิลคลิก `scripts\push-now.cmd` → **Sign in with your browser** |
+| ขึ้น `No remote given` | ใช้ `push-now.cmd` ตัวใหม่ หรือ `cd /c/Users/Administrator/Desktop/3105-1.1.1 && git push -u origin main` |
 | `3105-signed.ipa` | ESign บนเครื่อง หรือ `resign-windows-zsign.ps1` + ใบรับรอง enterprise ของคุณ |
 | ติดตั้งบน iPhone | ESign / enterprise OTA / MDM / Apple Configurator |
 

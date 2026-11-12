@@ -9,7 +9,7 @@ All notable user-facing changes are documented in this file.
 - `scripts/build-unsigned-ipa.sh`, `scripts/resign-ipa.sh`, `scripts/install-ipa.sh`, `scripts/resign-windows-zsign.ps1`, `scripts/ExportOptions-Enterprise.plist` for building, re-signing, and installing an unsigned IPA.
 - `scripts/push-to-github.sh` and `.github/workflows/build-unsigned-ipa.yml` so a no-Mac workflow can produce `3105-unsigned.ipa` on a GitHub-hosted macOS runner. No certificates or tokens are stored in the repository.
 - `docs/QUICKSTART.th.md`: Thai step-by-step guide for creating an empty GitHub repo, pushing, downloading the CI artifact, and signing/installing the IPA.
-- `scripts/push-now.cmd`: double-clickable Windows launcher for an interactive GitHub sign-in + `git push -u origin main`, for shells where a non-interactive push cannot prompt for credentials.
+- `scripts/push-now.cmd`: double-clickable Windows launcher for an interactive GitHub sign-in + `git push -u origin main`, for shells where a non-interactive push cannot prompt for credentials. Self-contained: default remote (overridable via first argument), project-folder detection with a Desktop fallback, and full `git init` / stage / secret check / commit / `chmod +x` / `origin` setup without requiring Git Bash.
 
 ### Changed
 
