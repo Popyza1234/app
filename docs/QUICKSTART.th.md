@@ -128,10 +128,11 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
 - **รุ่น 3105 เดิม (ก่อนรีแบรนด์):** Actions run [#43250078558](https://github.com/Popyza1234/app/actions/runs/43250078558) **success ทุก step** — Checkout, Show toolchain, Build unsigned IPA, Verify IPA layout, Upload artifact
   - artifact `3105-unsigned-ipa` = 3,268,242 bytes → ไฟล์ `3105-unsigned.ipa` 3,277,941 bytes
   - เวอร์ชัน `1.1.1 (7)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
-- **รุ่น dekpop 1.2.0 (ปัจจุบัน):** ทุกครั้งที่ push ขึ้น `main` workflow จะ build ใหม่ → artifact **`dekpop-unsigned-ipa`** → ไฟล์ **`dekpop-unsigned.ipa`**
-  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `1.2.0 (8)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
+- **รุ่น dekpop 1.3.0 (ปัจจุบัน):** ทุกครั้งที่ push ขึ้น `main` workflow จะ build ใหม่ → artifact **`dekpop-unsigned-ipa`** → ไฟล์ **`dekpop-unsigned.ipa`**
+  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `1.3.0 (9)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
   - Bundle ID ยังเป็น `com.apple.mobile.MobileHouseArrest` (จำเป็นสำหรับ MHA-C2 / ฟีเจอร์ Files)
 - การที่ CI ขึ้นเขียวแปลว่าโค้ดที่แก้ **ถูก compile จริงบน Xcode ของ GitHub** ไม่ใช่แค่แก้ไฟล์ในเครื่อง
+- **รุ่น 1.3.0 รองรับ 2 ภาษา:** English และ ไทย (สลับได้จากไอคอนรูปโลกใน toolbar หรือตัวเลือก `English / ไทย` ด้านบนหน้า Files) ใน IPA จะมีแค่ `en.lproj` กับ `th.lproj` และ `CFBundleLocalizations = (en, th)`
 
 **โหลดซ้ำในอนาคต** (artifact หมดอายุ 14 วัน) — ดับเบิลคลิก `scripts\download-unsigned-ipa.cmd` หรือ:
 

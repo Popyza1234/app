@@ -8,12 +8,12 @@ private enum OnboardingStep: Int, CaseIterable {
 }
 
 struct OnboardingView: View {
-    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
+    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.defaultRawValue
     @State private var step: OnboardingStep = .language
     @State private var dragOffset: CGFloat = 0
     var onComplete: () -> Void
 
-    private var language: AppLanguage { AppLanguage(rawValue: languageCode) ?? .english }
+    private var language: AppLanguage { AppLanguage.resolving(languageCode) }
 
     var body: some View {
         ZStack {
@@ -104,7 +104,7 @@ struct OnboardingView: View {
                                 Text(option.displayName)
                                     .font(.body.weight(.semibold))
                                     .foregroundStyle(.primary)
-                                Text(option.rawValue == "en" ? "English" : option.rawValue == "vi" ? "Tiếng Việt" : "简体中文")
+                                Text(option.nativeHint)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }

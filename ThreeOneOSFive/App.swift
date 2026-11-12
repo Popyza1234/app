@@ -5,7 +5,7 @@ struct DekpopApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var patchDraftCoordinator = PatchDraftCoordinator()
     @StateObject private var fileOperationCoordinator = FileOperationCoordinator()
-    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
+    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.defaultRawValue
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -14,7 +14,7 @@ struct DekpopApp: App {
     }
 
     private var language: AppLanguage {
-        AppLanguage(rawValue: languageCode) ?? .english
+        AppLanguage.resolving(languageCode)
     }
 
     var body: some Scene {
@@ -26,6 +26,10 @@ struct DekpopApp: App {
                 .environment(\.appLanguage, language)
                 .environment(\.locale, language.locale)
                 .onAppear {
+                    // Migrate stored codes from the removed Vietnamese / Chinese builds.
+                    if AppLanguage(rawValue: languageCode) == nil {
+                        languageCode = AppLanguage.english.rawValue
+                    }
                     appState.detectSupport()
                 }
                 .onChange(of: scenePhase) { phase in

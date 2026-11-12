@@ -123,6 +123,9 @@ struct FileBrowserView: View {
             )
         }
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                DekpopLanguageMenu()
+            }
             if let filesTabSession {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     FilesTabToolbarButton(session: filesTabSession)

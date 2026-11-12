@@ -44,6 +44,9 @@ struct AppDataBrowserView: View {
             .navigationTitle(DekpopBrand.displayName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    DekpopLanguageMenu()
+                }
                 ToolbarItem(placement: .principal) {
                     DekpopWordmark(compact: true)
                 }
@@ -126,6 +129,16 @@ struct AppDataBrowserView: View {
                     .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 6, trailing: 16))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+            }
+
+            Section {
+                DekpopLanguagePicker()
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    .listRowBackground(Color.clear)
+            } header: {
+                Text(language.text("dekpop.language"))
+            } footer: {
+                Text(language.text("dekpop.language_hint"))
             }
 
             if let workspaceURL {

@@ -2,6 +2,26 @@
 
 All notable user-facing changes are documented in this file.
 
+## [1.3.0] - 2026-11-12 — English + Thai
+
+### Added
+
+- Thai (`th.lproj/Localizable.strings`) with all 509 keys translated; every `%@` / `%lld` format specifier matches the English source.
+- `dekpop.language` and `dekpop.language_hint` keys for the new switcher.
+- `DekpopLanguageMenu` (globe icon) in the Files root toolbar **and** every folder view's toolbar, plus a visible segmented `DekpopLanguagePicker` at the top of the Files root list. These are reachable because `SettingsView` is no longer part of the Files-only app.
+- `AppLanguage.preferredDefault`: Thai devices start in Thai, everything else starts in English. Stored `vi` / `zh-Hans` values from older builds migrate to English on launch.
+- `README.th.md` as the Thai README; `CFBundleLocalizations = (en, th)`.
+
+### Changed
+
+- `AppLanguage` now has exactly two cases: `.english` and `.thai`; added `resolving(_:)` for safe migration and `nativeHint` for onboarding labels.
+- `Info.plist`, `project.pbxproj` and `DekpopBrand` bumped to `1.3.0` (build 9).
+- `knownRegions`, the `PBXVariantGroup` and the file references now contain `en` + `th` only.
+
+### Removed
+
+- `vi.lproj/Localizable.strings`, `zh-Hans.lproj/Localizable.strings` and `README.vi.md`. No Vietnamese or Simplified Chinese resources ship in the app bundle.
+
 ## [1.2.0] - 2026-11-12 — dekpop (Files-only edition)
 
 ### Changed

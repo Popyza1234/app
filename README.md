@@ -9,14 +9,14 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.2.0-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.3.0-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
 </p>
 
 <p align="center">
-  <a href="README.vi.md">Tiếng Việt</a> ·
+  <a href="README.th.md">ภาษาไทย</a> ·
   <a href="docs/QUICKSTART.th.md">คู่มือภาษาไทย</a> ·
   <a href="#compatibility">Compatibility</a> ·
   <a href="#license">License</a>
@@ -24,6 +24,14 @@
 
 > [!WARNING]
 > dekpop is research software for personal device management. Keep a backup and use it only on devices and data you own. It can modify files inside app containers.
+
+## What's new in 1.3.0 — English + Thai
+
+- **Exactly two languages** — English (`en`) and Thai (`th`) only. Vietnamese and Simplified Chinese localizations were removed from the project and the built bundle; `CFBundleLocalizations` is now `(en, th)`.
+- **Full Thai translation** — all 509 `Localizable.strings` keys are translated, with every `%@` / `%lld` format specifier preserved.
+- **Reachable language switcher** — because the app is Files-only and `SettingsView` is no longer reachable, a globe menu was added to both the Files root toolbar and every folder view, plus a visible segmented `English / ไทย` picker at the top of the Files list. The change applies immediately.
+- **Smart default** — Thai devices start in Thai; all other devices start in English. Old stored `vi` / `zh-Hans` values migrate to English automatically.
+- Version is now `1.3.0` (build 9). IPA layout and bundle identifier are unchanged.
 
 ## What's new in 1.2.0 — the dekpop edition
 
@@ -45,7 +53,7 @@ Legacy guides under `docs/PATCH_GUIDE*.md` and release notes describe features o
 - **Multi-tab browsing** — independent tabs with preserved folder positions (iPad gets a tab strip).
 - **dekpop workspace** — your own folder under `On My iPhone`, available from the Files browser.
 - **No jailbreak installation** — no persistent jailbreak, bootstrap, or daemon is installed; no code is injected into third-party apps.
-- **Localized interface** — English, Vietnamese, and Simplified Chinese.
+- **Two-language interface** — English and Thai, switchable instantly from the Files toolbar or the top of the Files list.
 
 ## Compatibility
 
@@ -143,6 +151,8 @@ dekpop/
 │   ├── App.swift            # @main DekpopApp + AppState (kernel access bootstrap)
 │   ├── ContentView.swift    # Files-only root view
 │   ├── views/               # AppDataBrowserView, FileBrowserView, DesignSystem, tab controls
+│   ├── en.lproj/            # English strings
+│   ├── th.lproj/            # Thai strings
 │   └── Assets.xcassets/     # dekpop app icon
 ├── ThreeOneOSFive.xcodeproj # Xcode project (target name 3105, PRODUCT_NAME dekpop)
 ├── scripts/                 # unsigned IPA build, re-sign, install, GitHub push, artifact download, icon generator

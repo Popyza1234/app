@@ -521,3 +521,5 @@
 "dekpop.status_ready" = "Ready";
 "dekpop.status_preparing" = "Preparing";
 "dekpop.workspace_subtitle" = "Your own folder in On My iPhone";
+"dekpop.language" = "Language";
+"dekpop.language_hint" = "Switch between English and Thai instantly.";

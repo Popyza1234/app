@@ -5,8 +5,8 @@ import UIKit
 /// for the product identity shown in the UI.
 enum DekpopBrand {
     static let displayName = "dekpop"
-    static let version = "1.2.0"
-    static let build = "8"
+    static let version = "1.3.0"
+    static let build = "9"
 }
 
 enum AppTheme {
@@ -199,6 +199,50 @@ struct DekpopFooterView: View {
         .listRowBackground(Color.clear)
         .listRowSeparator(.hidden)
         .accessibilityHidden(true)
+    }
+}
+
+/// Two-language switcher shown in every Files toolbar. Selecting an option
+/// writes `appLanguage`, which the root app observes to swap the locale and
+/// the localized string bundle immediately.
+struct DekpopLanguageMenu: View {
+    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.defaultRawValue
+    @Environment(\.appLanguage) private var language
+
+    var body: some View {
+        Menu {
+            ForEach(AppLanguage.allCases) { option in
+                Button {
+                    languageCode = option.rawValue
+                } label: {
+                    if languageCode == option.rawValue {
+                        Label(option.displayName, systemImage: "checkmark")
+                    } else {
+                        Text(option.displayName)
+                    }
+                }
+            }
+        } label: {
+            Image(systemName: "globe")
+        }
+        .accessibilityLabel(language.text("dekpop.language"))
+    }
+}
+
+/// Discoverable segmented switcher at the top of the Files root list.
+struct DekpopLanguagePicker: View {
+    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.defaultRawValue
+    @Environment(\.appLanguage) private var language
+
+    var body: some View {
+        Picker(language.text("dekpop.language"), selection: $languageCode) {
+            ForEach(AppLanguage.allCases) { option in
+                Text(option.displayName).tag(option.rawValue)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .accessibilityLabel(language.text("dekpop.language"))
     }
 }
 

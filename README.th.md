@@ -1,0 +1,90 @@
+<p align="center">
+  <img src="docs/images/app-icon.png" width="132" alt="ไอคอนแอป dekpop">
+</p>
+
+<h1 align="center">dekpop</h1>
+
+<p align="center">
+  แอป iOS แบบเนทีฟที่มีฟีเจอร์เดียว คือ Files สำหรับเรียกดูและจัดการไฟล์ในคอนเทนเนอร์ของแอป
+</p>
+
+<p align="center">
+  <img alt="เวอร์ชัน" src="https://img.shields.io/badge/version-1.3.0-6C4CF1?style=flat-square">
+  <img alt="ภาษา" src="https://img.shields.io/badge/ภาษา-English%20%7C%20ไทย-6C4CF1?style=flat-square">
+  <img alt="iOS" src="https://img.shields.io/badge/iOS-ทุกเวอร์ชัน%2016.0%2B-222222?style=flat-square">
+  <img alt="รุ่น" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
+</p>
+
+<p align="center">
+  <a href="README.md">English</a> ·
+  <a href="docs/QUICKSTART.th.md">คู่มือแบบคลิกทีละขั้นตอน</a>
+</p>
+
+> [!WARNING]
+> dekpop เป็นซอฟต์แวร์วิจัยสำหรับจัดการอุปกรณ์ของคุณเอง ควรสำรองข้อมูลก่อนใช้งาน และใช้เฉพาะกับอุปกรณ์และข้อมูลที่คุณเป็นเจ้าของ เพราะแอปสามารถแก้ไขไฟล์ภายในคอนเทนเนอร์ของแอปได้
+
+## มีอะไรใหม่ใน 1.3.0 — อังกฤษ + ไทย
+
+- **รองรับแค่ 2 ภาษา** คือ English (`en`) และ ไทย (`th`) เท่านั้น โดยลบไฟล์แปลภาษาเวียดนามและจีนตัวย่อออกจากโปรเจกต์และจาก bundle ที่ build แล้ว `CFBundleLocalizations` ตอนนี้คือ `(en, th)`
+- **แปลภาษาไทยครบทุกคีย์** รวม 509 คีย์ใน `Localizable.strings` โดยคง `%@` / `%lld` ทุกตัวให้ตรงกับต้นฉบับ
+- **สลับภาษาได้จากหน้าที่ใช้งานจริง** เนื่องจากแอปเหลือแค่ Files และหน้า Settings ไม่สามารถเข้าถึงได้แล้ว จึงเพิ่มเมนูรูปโลกใน toolbar ของหน้าหลักและทุกหน้าโฟลเดอร์ พร้อมตัวเลือกแบบแบ่งส่วน `English / ไทย` ด้านบนของรายการไฟล์ เปลี่ยนเมื่อไหร่ก็มีผลทันที
+- **เลือกภาษาเริ่มต้นอัตโนมัติ** อุปกรณ์ที่ตั้งภาษาไทยจะเปิดด้วยภาษาไทย ส่วนอื่น ๆ เปิดด้วยภาษาอังกฤษ ค่าที่เคยบันทึกเป็น `vi` / `zh-Hans` จะถูกย้ายไปภาษาอังกฤษอัตโนมัติ
+- เวอร์ชันปัจจุบัน `1.3.0` (build 9) โครงสร้าง IPA และ bundle identifier ไม่เปลี่ยนแปลง
+
+> [!IMPORTANT]
+> bundle identifier ยังคงเป็น `com.apple.mobile.MobileHouseArrest` โดยตั้งใจ เพราะ `mcm_bridge.m` ตรวจสอบค่านี้ก่อนเปิดใช้งานคอนเทนเนอร์แบบ MHA-C2 หากเปลี่ยนจะทำให้ฟีเจอร์ Files ใช้งานไม่ได้
+
+## ฟีเจอร์
+
+- **App Data Browser** — แปลง Container UUID ที่เปลี่ยนไปเรื่อย ๆ ให้เป็น app bundle identifier ที่เสถียร และเปิดพื้นที่ไฟล์แบบเนทีฟ
+- **จัดการไฟล์** — ค้นหา, ดูตัวอย่าง, แชร์, นำเข้าหลายไฟล์, คัดลอก, ย้าย, วาง, เปลี่ยนชื่อ, ลบ, สร้างไฟล์/โฟลเดอร์, สร้าง ZIP และจัดการชื่อซ้ำอย่างปลอดภัย
+- **หลายแท็บ** — แต่ละแท็บจำตำแหน่งโฟลเดอร์ของตัวเอง (บน iPad จะมีแถบแท็บ)
+- **พื้นที่ทำงาน dekpop** — โฟลเดอร์ของคุณเองใน `On My iPhone` เข้าถึงได้จากหน้า Files
+- **ไม่ต้องเจลเบรก** — ไม่ติดตั้ง jailbreak แบบถาวร ไม่มี bootstrap หรือ daemon และไม่ฉีดโค้ดเข้าแอปอื่น
+- **สองภาษา** — สลับระหว่าง English และ ไทยได้ทันทีจากไอคอนรูปโลกใน toolbar
+
+## ความเข้ากันได้
+
+รองรับทุกเวอร์ชัน iOS ที่ติดตั้งแอปได้ โดยไม่มีรายการเวอร์ชันหรือบิลด์ที่อนุญาต:
+
+| รายการ | สถานะ |
+| --- | --- |
+| เวอร์ชันที่รองรับ | iOS ทุกเวอร์ชัน 16.0 ขึ้นไป (ทั่วไป, เบต้า และเวอร์ชันในอนาคต) |
+| Build whitelist | ลบออกแล้ว |
+| Deployment target | iOS 16.0 |
+| สำรอง offsets | ใช้ baseline iOS 26.0 สำหรับ 26.1+ และ baseline iOS 17.0 สำหรับต่ำกว่า 17.0 |
+
+> [!NOTE]
+> ช่องโหว่เคอร์เนลยังต้องใช้ offsets ที่ตรงกับเคอร์เนลที่กำลังทำงาน หาก iOS เวอร์ชันนั้นไม่มีในตาราง offsets การรันอาจล้มเหลว โดยจะบันทึก `offsets: ... unverified` แล้วใช้ offsets ใหม่ล่าสุดแทนการหยุดทำงาน และแอปอาจเริ่มใหม่หลังล้มเหลว
+
+## การเซ็นและติดตั้ง
+
+- ฟีเจอร์ระดับอุปกรณ์ต้องเซ็นด้วย **ใบรับรอง enterprise** ที่คุณได้รับอนุญาตให้ใช้
+- ไม่รองรับการติดตั้งผ่าน SideStore, AltStore, 3uTools หรือ LiveContainer
+- Bundle identifier ต้องเป็น `com.apple.mobile.MobileHouseArrest` ห้ามเปลี่ยน
+- โปรเจกต์นี้ไม่มีใบรับรอง โปรไฟล์ รหัสผ่าน หรือ IPA ที่เซ็นแล้ว CI จะสร้าง IPA **แบบยังไม่เซ็น** เท่านั้น
+
+```bash
+# 1. สร้าง IPA แบบยังไม่เซ็น (ต้องมี Xcode)
+./scripts/build-unsigned-ipa.sh
+
+# 2. เซ็นด้วยใบรับรอง enterprise ของคุณเอง
+./scripts/resign-ipa.sh dekpop-unsigned.ipa "iPhone Distribution: Your Enterprise" /path/to/profile.mobileprovision dekpop-signed.ipa
+
+# 3. ติดตั้งบนอุปกรณ์ที่ต่อผ่าน USB
+./scripts/install-ipa.sh dekpop-signed.ipa
+```
+
+เป้าหมาย Xcode ยังชื่อ `3105` (`xcodebuild -target 3105`) แต่ `PRODUCT_NAME` คือ `dekpop` ดังนั้น bundle ที่ได้คือ `Payload/dekpop.app/`
+
+## ไม่มี Mac ทำอย่างไร
+
+ดู [docs/QUICKSTART.th.md](docs/QUICKSTART.th.md) สำหรับคำแนะนำแบบคลิกทีละขั้นตอน สรุปสั้น ๆ:
+
+1. Push โปรเจกต์ขึ้น GitHub → **Actions > Build unsigned IPA** จะ build บน macOS runner ให้โดยไม่ต้องใช้ใบรับรอง
+2. โหลด artifact `dekpop-unsigned-ipa` (หรือรัน `python scripts/download-unsigned-ipa.py`)
+3. เซ็นด้วย ESign บนเครื่อง หรือ `scripts/resign-windows-zsign.ps1` บน Windows/Linux
+4. ติดตั้งผ่าน ESign, enterprise OTA ผ่าน HTTPS, MDM หรือ Apple Configurator
+
+> [!CAUTION]
+> ใช้เฉพาะใบรับรอง enterprise ที่คุณได้รับอนุญาต อย่า commit ไฟล์ `.p12`, รหัสผ่าน หรือ `.mobileprovision` และอย่าวางคีย์ส่วนตัวในแชทหรือ issue
