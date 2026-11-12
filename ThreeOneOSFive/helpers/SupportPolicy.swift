@@ -1,6 +1,6 @@
 import Foundation
 
-/// 3105 no longer gates device features behind a whitelist of iOS versions or
+/// dekpop no longer gates device features behind a whitelist of iOS versions or
 /// specific beta builds. Every iOS version that can install the app (the
 /// deployment target is iOS 16.0) is enabled, including future releases.
 enum ExploitSupportPolicy {

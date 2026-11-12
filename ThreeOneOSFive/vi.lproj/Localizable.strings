@@ -479,7 +479,7 @@
 "wallpaper.install" = "Áp dụng";
 "wallpaper.install_warning_title" = "Cài gói hình nền này?";
 "wallpaper.install_warning_message" = "Áp dụng “%@” gồm %lld hình nền trên iOS %@ (%@)? Hình nền có sẵn sẽ được giữ nguyên.";
-"wallpaper.installed_by_3105" = "Hình nền do dekpop thêm";
+"wallpaper.installed_by_dekpop" = "Hình nền do dekpop thêm";
 "wallpaper.reset" = "Reset hình nền dekpop";
 "wallpaper.reset_footer" = "Chỉ xóa hình nền do dekpop thêm.";
 "wallpaper.reset_title" = "Reset hình nền đã thêm?";

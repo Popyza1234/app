@@ -15,7 +15,7 @@ All notable user-facing changes are documented in this file.
 - Non-Files views/helpers remain in the Xcode target so the project compiles unchanged, but are unreachable. Files-coupled helpers with "Patch" in the name are still required by the file browser.
 - Removed the last non-Files **Create Patch** context-menu action from `FileBrowserView`, including its draft/error helpers and `PatchDraftCoordinator` environment object.
 - The Files home now resolves the app's own Documents folder directly instead of calling `PatchWorkspaceService`, so the patch-era `Patches` directory is no longer created on launch.
-- Rebranded remaining internal identifiers from `3105` to `dekpop`: in-app log prefix, Quick Look preview folder, staging/temp file names, log/attribution views, update URLs and User-Agent.
+- Rebranded remaining internal identifiers from `3105` to `dekpop`: in-app and native log prefixes, Quick Look preview folder, staging/temp file names, sandbox probe name, log/attribution views, update URLs, User-Agent, and the legacy patch/wallpaper identifiers in unreachable code. Only the Xcode target/project folder names (`3105`, `ThreeOneOSFive`) and historical release notes still contain the old name.
 
 ### Tooling
 

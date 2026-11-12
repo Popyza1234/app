@@ -479,7 +479,7 @@
 "wallpaper.install" = "Apply";
 "wallpaper.install_warning_title" = "Install this wallpaper package?";
 "wallpaper.install_warning_message" = "Apply “%@” with %lld wallpapers on iOS %@ (%@)? Existing wallpapers stay unchanged.";
-"wallpaper.installed_by_3105" = "Wallpapers added by dekpop";
+"wallpaper.installed_by_dekpop" = "Wallpapers added by dekpop";
 "wallpaper.reset" = "Reset dekpop Wallpapers";
 "wallpaper.reset_footer" = "Only wallpapers added by dekpop are removed.";
 "wallpaper.reset_title" = "Reset added wallpapers?";

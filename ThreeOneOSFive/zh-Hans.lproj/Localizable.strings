@@ -479,7 +479,7 @@
 "wallpaper.install" = "应用";
 "wallpaper.install_warning_title" = "安装此壁纸包？";
 "wallpaper.install_warning_message" = "应用“%@”中的 %lld 张壁纸（iOS %@，%@）？现有壁纸不会改变。";
-"wallpaper.installed_by_3105" = "dekpop 添加的壁纸";
+"wallpaper.installed_by_dekpop" = "dekpop 添加的壁纸";
 "wallpaper.reset" = "重置 dekpop 壁纸";
 "wallpaper.reset_footer" = "只会移除 dekpop 添加的壁纸。";
 "wallpaper.reset_title" = "重置已添加的壁纸？";
