@@ -147,6 +147,8 @@ The project is already initialized as a Git repository with a local commit. You 
    ```
 
    Authentication happens in Git Credential Manager / your normal `git` credential prompt. If you use a Personal Access Token, paste it **only** into that prompt — never into a chat, issue, or file. The script stages and commits any remaining changes, verifies that no `.p12`, `.mobileprovision`, `.env`, or similar secret is tracked, checks that the CI workflow is included, forces the `main` branch, sets `origin`, and pushes.
+
+   If a non-interactive shell reports `could not read Username` / `Authentication failed`, run `scripts\push-now.cmd` from Windows Explorer or `cmd` so Git Credential Manager can open its sign-in window. It reuses the configured `origin`, pushes `main`, and prints the Actions/artifact steps. No token is stored by the script.
 3. Pushing to `main` triggers **Build unsigned IPA** automatically; you can also start it manually under **Actions > Build unsigned IPA > Run workflow**. A GitHub-hosted `macos-latest` runner builds `3105-unsigned.ipa` and uploads it as the `3105-unsigned-ipa` artifact (retained 14 days).
 4. Download and unzip the artifact. It contains `3105-unsigned.ipa`, which is **unsigned** — sign it with your own authorized enterprise certificate and matching provisioning profile (ESign on-device, or `scripts/resign-windows-zsign.ps1`) before installing via ESign, enterprise OTA / MDM, or Apple Configurator.
 

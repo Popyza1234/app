@@ -63,6 +63,22 @@ cd /c/Users/Administrator/Desktop/3105-1.1.1      # ปรับตามตำ�
 
 สคริปต์จะเช็กก่อน commit ว่าไม่มี `.p12` / `.mobileprovision` / `.env` หลุดขึ้นไป และเช็กว่า workflow กับ build script ถูก track อยู่
 
+### ถ้าขึ้น `could not read Username` / `Authentication failed`
+
+นี่คือ **เครื่องยังไม่ได้ล็อกอิน GitHub** — สคริปต์/ผู้ช่วยไม่สามารถล็อกอินแทนคุณได้ และ **ไม่ควรส่ง token มาในแชทเด็ดขาด**
+
+**ง่ายสุด (แนะนำ):** ดับเบิลคลิก **`scripts\push-now.cmd`** (หรือรันจาก `cmd`) ตัวนี้จะเรียก `git push -u origin main` แบบที่อนุญาตให้หน้าต่างล็อกอินโผล่ได้ → กด **Sign in with your browser** แล้วล็อกอินบัญชี GitHub ของคุณ หลังจากนั้น Git Credential Manager จะจำไว้ ครั้งหน้าไม่ต้องทำซ้ำ
+
+หรือพิมพ์เองใน Git Bash / Command Prompt:
+
+```bash
+git push -u origin main
+```
+
+ถ้าจะใช้ PAT: GitHub → **Settings → Developer settings → Personal access tokens → Tokens (classic)** → ติ๊ก `repo` → วาง token เป็น **password ตอน prompt** เท่านั้น (ห้ามวางในแชท / ไฟล์ / repo)
+
+> `origin` ถูกตั้งเป็น URL ที่คุณให้ไว้แล้ว และ branch `main` มี commit พร้อม push อยู่ — เหลือแค่ผ่านการล็อกอินเท่านั้น ถ้าขึ้น `push rejected` แปลว่า repo ไม่ว่าง ให้ทำตามข้อ `git pull --rebase origin main` ด้านบน หรือลบ repo แล้วสร้างใหม่แบบข้อ 1
+
 ---
 
 ## 3. ให้ CI สร้าง `3105-unsigned.ipa`
@@ -113,6 +129,7 @@ cd /c/Users/Administrator/Desktop/3105-1.1.1      # ปรับตามตำ�
 |---|---|
 | GitHub repo | `github.com/new` → สร้าง **แบบว่างเปล่า** (หรือ `gh repo create ...`) |
 | `3105-unsigned.ipa` | `./scripts/push-to-github.sh <url>` → Actions → artifact `3105-unsigned-ipa` |
+| push ติดล็อกอิน | ดับเบิลคลิก `scripts\push-now.cmd` → **Sign in with your browser** |
 | `3105-signed.ipa` | ESign บนเครื่อง หรือ `resign-windows-zsign.ps1` + ใบรับรอง enterprise ของคุณ |
 | ติดตั้งบน iPhone | ESign / enterprise OTA / MDM / Apple Configurator |
 
