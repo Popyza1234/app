@@ -13,6 +13,9 @@ All notable user-facing changes are documented in this file.
 - `Info.plist`: dropped patch document/URL/exported types, updated usage descriptions, removed the old `3105` metadata. The reserved bundle identifier `com.apple.mobile.MobileHouseArrest` is unchanged because MHA-C2 container activation requires it.
 - EN / VI / ZH-Hans localizations: all user-facing `3105` text changed to `dekpop`, plus four new `dekpop.*` keys for the hero card and workspace subtitle (503 → 507 keys per language).
 - Non-Files views/helpers remain in the Xcode target so the project compiles unchanged, but are unreachable. Files-coupled helpers with "Patch" in the name are still required by the file browser.
+- Removed the last non-Files **Create Patch** context-menu action from `FileBrowserView`, including its draft/error helpers and `PatchDraftCoordinator` environment object.
+- The Files home now resolves the app's own Documents folder directly instead of calling `PatchWorkspaceService`, so the patch-era `Patches` directory is no longer created on launch.
+- Rebranded remaining internal identifiers from `3105` to `dekpop`: in-app log prefix, Quick Look preview folder, staging/temp file names, log/attribution views, update URLs and User-Agent.
 
 ### Tooling
 

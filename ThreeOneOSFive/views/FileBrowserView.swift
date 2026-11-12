@@ -1644,7 +1644,7 @@ private enum FilePreviewService {
         }
 
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("3105-Preview", isDirectory: true)
+            .appendingPathComponent("dekpop-Preview", isDirectory: true)
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         let destination = directory.appendingPathComponent(sourceURL.lastPathComponent)
         do {

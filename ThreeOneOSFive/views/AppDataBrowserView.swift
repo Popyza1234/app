@@ -64,8 +64,12 @@ struct AppDataBrowserView: View {
             }
             .onAppear {
                 if workspaceURL == nil {
-                    workspaceURL = try? PatchWorkspaceService.documentsRootURL()
-                    _ = try? PatchWorkspaceService.patchesRootURL()
+                    workspaceURL = try? FileManager.default.url(
+                        for: .documentDirectory,
+                        in: .userDomainMask,
+                        appropriateFor: nil,
+                        create: true
+                    )
                 }
                 if !hasLoaded {
                     hasLoaded = true

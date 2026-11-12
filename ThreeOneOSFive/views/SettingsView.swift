@@ -14,7 +14,7 @@ struct SettingsView: View {
                         AppLogo()
 
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("3105").font(.headline)
+                            Text(DekpopBrand.displayName).font(.headline)
                             Text(language.text("common.version", appVersion))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
@@ -59,7 +59,7 @@ struct SettingsView: View {
                     creditsRow(
                         name: "GitHub",
                         role: language.text("social.github_role"),
-                        url: "https://github.com/YangJiiii/3105"
+                        url: "https://github.com/Popyza1234/app"
                     )
                     creditsRow(
                         name: "Cộng Đồng IOSVN",
