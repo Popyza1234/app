@@ -1,5 +1,9 @@
 * text=auto eol=lf
 
+# Windows batch launchers must keep CRLF line endings when checked out.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
 *.swift text diff=swift
 *.m text
 *.h text
