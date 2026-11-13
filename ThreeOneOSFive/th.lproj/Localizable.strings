@@ -695,3 +695,48 @@
 "safe.add_failed" = "เปิดโฟลเดอร์นี้ไม่ได้ กรุณาเลือกใหม่จากแอป Files";
 "safe.open_workspace" = "เปิด Documents ของ dekpop";
 "safe.empty_hint" = "เข้าคอนเทนเนอร์แอปไม่ได้บน iOS %@ แต่ไฟล์ยังใช้งานได้ — เปิดโฟลเดอร์ Documents ของ dekpop หรือเลือกโฟลเดอร์จากแอป Files";
+
+/* Activate UID (ลงไก่) */
+"activate.title" = "Activate UID";
+"activate.heading" = "ลงไก่ · Activate UID";
+"activate.subtitle" = "วาง JSON ของ guest account แล้วกด Activate ระบบจะผูก UID นี้เข้ากับ IP ของเครื่องนี้";
+"activate.input_label" = "JSON INPUT";
+"activate.placeholder" = "{ \"guest_account_info\": { \"com.garena.msdk.guest_uid\": \"xxxx\", \"com.garena.msdk.guest_password\": \"xxxx\" } }";
+"activate.activate" = "Activate";
+"activate.deactivate" = "Deactivate";
+"activate.result_title" = "ผลลัพธ์";
+"activate.ready_title" = "พร้อมใช้งาน";
+"activate.ready_detail" = "วาง JSON แล้วกด Activate";
+"activate.working_title" = "กำลังดำเนินการ";
+"activate.working_detail" = "กำลังผูก UID กับ IP ของเครื่องนี้…";
+"activate.deactivate_detail" = "กำลังยกเลิกการผูก IP กับ UID…";
+"activate.active_title" = "เปิดใช้งานแล้ว";
+"activate.active_detail" = "UID นี้ใช้งานกับ proxy บนเครื่องนี้ได้แล้ว";
+"activate.failed_title" = "ไม่สำเร็จ";
+"activate.uid_label" = "UID";
+"activate.proxy_label" = "PROXY · IP:PORT";
+"activate.copy" = "คัดลอก";
+"activate.copied" = "คัดลอกแล้ว";
+"activate.hint" = "ติดตั้งใบรับรองในแอพ proxy ก่อน แล้ว pin proxy จากนั้นกด Activate ที่นี่และเริ่ม VPN — การยกเลิกใช้ได้เฉพาะเครือข่ายเดิมที่ activate ไว้";
+"activate.error_empty" = "กรุณาวาง JSON ของ guest account ก่อน";
+"activate.error_json" = "JSON ไม่ถูกต้อง ตรวจสอบวงเล็บและเครื่องหมายคำพูด";
+"activate.error_generic" = "Activate ไม่สำเร็จ กรุณาลองใหม่";
+
+/* Activate UID — extended screen */
+"activate.paste" = "วางจากคลิปบอร์ด";
+"activate.format" = "จัดรูปแบบ JSON";
+"activate.clear" = "ล้าง";
+"activate.share" = "แชร์";
+"activate.history" = "UID ล่าสุด";
+"activate.history_clear" = "ล้าง";
+"activate.steps_title" = "วิธีใช้งาน";
+"activate.step_1" = "ติดตั้งใบรับรองของ proxy ในเครื่องนี้ก่อน";
+"activate.step_2" = "Pin proxy เป็น 82.26.104.242 : 8080 (HTTP)";
+"activate.step_3" = "วาง JSON ของ guest account ที่นี่ แล้วกด Activate";
+"activate.step_4" = "กดรัน VPN ในแอพ proxy แล้วเข้าเกมได้เลย";
+"activate.footer" = "การ activate ผูกกับ IP ของเครื่องนี้ ถ้าเปลี่ยนเครือข่ายหรือปิด VPN นานๆ อาจต้อง activate ใหม่";
+"activate.started" = "เริ่มใช้เมื่อ";
+"activate.error_missing" = "ไม่พบ guest_uid ใน JSON นี้";
+"activate.error_offline" = "เครื่องออฟไลน์อยู่ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่";
+"activate.error_transport" = "เชื่อมต่อเซิร์ฟเวอร์ activate ไม่ได้ กรุณาลองใหม่";
+"activate.error_clipboard" = "คลิปบอร์ดว่างอยู่";

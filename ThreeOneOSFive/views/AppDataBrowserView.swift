@@ -70,6 +70,12 @@ struct AppDataBrowserView: View {
                     DekpopWordmark(compact: true)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { activeSheet = .activateUID } label: {
+                        Image(systemName: "bolt.horizontal.circle")
+                    }
+                    .accessibilityLabel(language.text("activate.title"))
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button { activeSheet = .assetSets } label: {
                         Image(systemName: "cube.box")
                     }
@@ -154,6 +160,8 @@ struct AppDataBrowserView: View {
                 ModBrowserView(site: site)
             case .diagnostics(let report):
                 CompatibilityReportView(report: report)
+            case .activateUID:
+                ActivateUIDView()
             }
         }
         .fileImporter(
@@ -900,6 +908,7 @@ private enum HomeCategory: String, CaseIterable, Identifiable {
 }
 
 private enum FilesRootSheet: Identifiable {
+    case activateUID
     case assetSets
     case newShortcut
     case editShortcut(FolderShortcut)
@@ -908,6 +917,8 @@ private enum FilesRootSheet: Identifiable {
 
     var id: String {
         switch self {
+        case .activateUID:
+            return "activateUID"
         case .assetSets:
             return "assetSets"
         case .newShortcut:

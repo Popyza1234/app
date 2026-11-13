@@ -694,3 +694,48 @@
 "safe.add_failed" = "Could not open that folder. Please choose it again from the Files app.";
 "safe.open_workspace" = "Open dekpop Documents";
 "safe.empty_hint" = "App containers are unavailable on iOS %@. Files still work — open the dekpop Documents folder or choose any folder from the Files app.";
+
+/* Activate UID (down-gai) */
+"activate.title" = "Activate UID";
+"activate.heading" = "Activate UID";
+"activate.subtitle" = "Paste the guest JSON, then tap Activate. The proxy links this UID to this device's IP.";
+"activate.input_label" = "JSON INPUT";
+"activate.placeholder" = "{ \"guest_account_info\": { \"com.garena.msdk.guest_uid\": \"xxxx\", \"com.garena.msdk.guest_password\": \"xxxx\" } }";
+"activate.activate" = "Activate";
+"activate.deactivate" = "Deactivate";
+"activate.result_title" = "Result";
+"activate.ready_title" = "Ready";
+"activate.ready_detail" = "Paste JSON and tap Activate.";
+"activate.working_title" = "Processing";
+"activate.working_detail" = "Registering this device's IP with the UID…";
+"activate.deactivate_detail" = "Removing this IP from the UID…";
+"activate.active_title" = "Activated";
+"activate.active_detail" = "This UID now works with the proxy on this device.";
+"activate.failed_title" = "Failed";
+"activate.uid_label" = "UID";
+"activate.proxy_label" = "PROXY · IP:PORT";
+"activate.copy" = "Copy";
+"activate.copied" = "Copied";
+"activate.hint" = "Install the certificate in the proxy app first, pin the proxy, then activate here and start the VPN. Deactivating only works from the same network that activated it.";
+"activate.error_empty" = "Paste the guest JSON first.";
+"activate.error_json" = "That is not valid JSON. Check the brackets and quotes.";
+"activate.error_generic" = "Activation failed. Please try again.";
+
+/* Activate UID — extended screen */
+"activate.paste" = "Paste from clipboard";
+"activate.format" = "Format JSON";
+"activate.clear" = "Clear";
+"activate.share" = "Share";
+"activate.history" = "RECENT UIDS";
+"activate.history_clear" = "Clear";
+"activate.steps_title" = "How to use";
+"activate.step_1" = "Install the proxy provider's certificate on this device.";
+"activate.step_2" = "Pin the proxy as 82.26.104.242 : 8080 (HTTP).";
+"activate.step_3" = "Paste the guest JSON here and tap Activate.";
+"activate.step_4" = "Start the VPN in the proxy app, then open the game.";
+"activate.footer" = "The activation is bound to this device's IP address. Changing networks, or keeping the VPN off for a long time, may mean you have to activate again.";
+"activate.started" = "Started";
+"activate.error_missing" = "No guest_uid was found in that JSON.";
+"activate.error_offline" = "You appear to be offline. Check the connection and try again.";
+"activate.error_transport" = "Could not reach the activation server. Please try again.";
+"activate.error_clipboard" = "The clipboard is empty.";

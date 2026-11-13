@@ -13,10 +13,13 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
+            // Animated brand backdrop for the whole app.
+            DekpopAuroraBackground()
+
             AppDataBrowserView(tabSession: $filesTabs)
                 .tint(AppTheme.accent)
                 .imageScale(.small)
-                .background(AppTheme.pageBackground)
+                .background(Color.clear)
                 // Rebuild the browser when the palette changes so every
                 // theme-dependent colour is resolved again immediately.
                 .id(theme.selection)

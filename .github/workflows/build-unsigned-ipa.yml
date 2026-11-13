@@ -6,7 +6,7 @@ on:
     branches: [main, master]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -40,6 +40,18 @@ jobs:
           path: dekpop-unsigned.ipa
           if-no-files-found: error
           retention-days: 14
+
+      # Also publish the IPA as a public release asset so it can be downloaded
+      # without signing in to GitHub (artifacts always require a login).
+      - name: Publish IPA to a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="build-${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" dekpop-unsigned.ipa \
+            --title "dekpop unsigned build ${GITHUB_RUN_NUMBER}" \
+            --notes "Unsigned IPA built from ${GITHUB_SHA} — sign it before installing." \
+            --latest
 
 # To also produce a SIGNED IPA, add a step after "Build unsigned IPA" that
 # decodes secrets (P12_BASE64, P12_PASSWORD, MOBILEPROVISION_BASE64) into
