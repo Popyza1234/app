@@ -957,7 +957,10 @@ struct CompatibilityReportView: View {
                     .padding(.vertical, 4)
                 }
 
-                Section(language.text("compat.layers")) {
+                // A Section that carries both a header and a footer must use
+                // the explicit header/footer initialiser — the convenience
+                // `Section(String) { }` form has no footer overload.
+                Section {
                     ForEach(report.probes) { probe in
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: probe.succeeded
@@ -975,6 +978,8 @@ struct CompatibilityReportView: View {
                         }
                         .padding(.vertical, 2)
                     }
+                } header: {
+                    Text(language.text("compat.layers"))
                 } footer: {
                     Text(language.text("compat.footer"))
                 }
