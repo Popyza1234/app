@@ -106,14 +106,3 @@ struct DekpopAuroraBackground: View {
     }
 }
 
-/// Soft press feedback used by the activation screen's buttons.
-struct DekpopPressStyle: ButtonStyle {
-    var scale: CGFloat = 0.97
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? scale : 1)
-            .opacity(configuration.isPressed ? 0.9 : 1)
-            .animation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
-    }
-}
