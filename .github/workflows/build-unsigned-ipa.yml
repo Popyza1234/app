@@ -27,11 +27,24 @@ jobs:
       # with CODE_SIGNING_ALLOWED=NO and packs Payload/dekpop.app into an IPA.
       - name: Build unsigned IPA
         run: |
+          set -o pipefail
           chmod +x scripts/build-unsigned-ipa.sh
-          ./scripts/build-unsigned-ipa.sh
+          ./scripts/build-unsigned-ipa.sh 2>&1 | tee build.log
 
       - name: Verify IPA layout
         run: unzip -l dekpop-unsigned.ipa | grep 'Payload/dekpop.app/Info.plist'
+
+      # Artifact + workflow logs need a login to download; a failed build's log
+      # is published as a release asset so it stays readable without one.
+      - name: Publish build log on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="log-${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" build.log \
+            --title "build log ${GITHUB_RUN_NUMBER}" \
+            --notes "xcodebuild output for ${GITHUB_SHA}" || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
