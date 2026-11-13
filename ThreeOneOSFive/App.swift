@@ -103,19 +103,18 @@ class AppState: ObservableObject {
     private func refreshKernelExploitStatus() {
         guard !kernelExploitRunning else { return }
 
-        // iOS < 26: kernel R/W success persists (no sandbox probe)
-        // iOS >= 26: verify full sandbox escape is still active
-        if KernelExploit.requiresSandboxEscape {
-            if KernelExploit.hasSandboxAccess() {
-                if !exploitStatus.isSuccess {
-                    exploitStatus = .success(method: "kexploit")
-                    log("app: existing sandbox access is still active; skipping kernel exploit")
-                }
-            } else if exploitStatus.isSuccess {
-                exploitStatus = .notStarted
-                log("app: sandbox access is no longer active")
-            }
+        // Universal: sandbox access is an optional enhancement on every iOS
+        // version. If a live escape is already present, skip the kernel
+        // exploit entirely. A success is never downgraded back to .notStarted
+        // — kernel R/W persists for the lifetime of this process, and forcing
+        // a re-run when the optional escape disappeared is what broke iOS 27+.
+        if KernelExploit.hasSandboxAccess(),
+           !exploitStatus.isSuccess,
+           !exploitStatus.isFailed {
+            exploitStatus = .success(method: "sandbox")
+            log("app: active sandbox access detected; skipping kernel exploit")
         }
+        ContainerAccessPolicy.resetProbing()
     }
 
     func runKernelExploitIfNeeded() {
@@ -132,14 +131,13 @@ class AppState: ObservableObject {
                 self.kernelExploitRunning = false
                 if ok {
                     self.exploitStatus = .success(method: "kexploit")
-                    if KernelExploit.requiresSandboxEscape {
-                        log("app: kernel exploit success — sandbox access verified")
-                    } else {
-                        log("app: kernel exploit success — kernel access active")
-                    }
+                    ContainerAccessPolicy.resetProbing()
+                    log("app: kernel exploit success — universal file access active on iOS \(AppInfo.osVersion)")
                 } else {
                     self.exploitStatus = .failed(method: "kexploit", code: -1)
-                    log("app: kernel exploit failed — relaunch the app before retrying")
+                    // A kernel exploit failure is no longer a dead end: Files
+                    // keeps trying direct, MCM, grant and inode reads.
+                    log("app: kernel exploit failed — file browsing continues with fallback access layers")
                 }
             }
         }

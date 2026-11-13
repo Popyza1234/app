@@ -41,9 +41,35 @@ enum ContainerDiscoveryMerger {
     }
 }
 
+/// dekpop 2.0 — universal, capability-based file access policy.
+///
+/// The browser used to branch on `majorVersion >= 26`: older releases got
+/// direct reads and newer ones were forced through `bad_query` grants, with a
+/// failed sandbox escape treated as a fatal error. That is why iOS 27+ could
+/// not open any files. There is now a single chain on every iOS version:
+///
+///   1. direct `FileManager` read (MHA-C2 entitlement / sandbox escape)
+///   2. MCM container activation
+///   3. `bad_query` traversal grant + retry
+///   4. `bad_query_list` inode walk + raw MCM metadata plist reads
+///
+/// Layers are probed at runtime; a failing layer never disables the others.
 enum ContainerAccessPolicy {
+    /// Label shown in Settings. Deliberately version-neutral.
+    static let engineLabel = "Universal · direct / MCM / grant / inode"
+
+    private static let lock = NSLock()
+    private static var consecutiveGrantFailures = 0
+    private static var grantsPaused = false
+    private static let maxConsecutiveFailures = 3
+
+    /// A traversal grant is issued once for the container root; nested folders
+    /// inherit that sandbox extension, and `ContainerStore.listFiles` adds a
+    /// direct-read / inode fallback for any subfolder that is still denied.
+    /// The decision is capability-based (`shouldAttemptGrant`), never version
+    /// based — so iOS 27+ gets the same attempt as older releases.
     static func shouldRequestGrant(isRoot: Bool) -> Bool {
-        isRoot
+        isRoot && shouldAttemptGrant
     }
 
     static func shouldAttemptMCM(bundleID: String?) -> Bool {
@@ -52,6 +78,37 @@ enum ContainerAccessPolicy {
             return false
         }
         return UUID(uuidString: bundleID) == nil
+    }
+
+    static var shouldAttemptGrant: Bool {
+        lock.lock(); defer { lock.unlock() }
+        return !grantsPaused
+    }
+
+    /// Re-enable grant probing at the start of every browser reload and after
+    /// the kernel exploit succeeds, so a capability that appears later in the
+    /// process lifetime is picked up instead of being cached as unavailable.
+    static func resetProbing() {
+        lock.lock(); defer { lock.unlock() }
+        consecutiveGrantFailures = 0
+        grantsPaused = false
+    }
+
+    /// `bad_query` is cheap when it works but does a dlopen/XPC round trip on
+    /// every call. After a few consecutive failures in one reload we stop
+    /// retrying it and rely on direct + inode + metadata reads instead.
+    static func recordGrantResult(_ handle: Int64) {
+        lock.lock(); defer { lock.unlock() }
+        if handle >= 0 {
+            consecutiveGrantFailures = 0
+            grantsPaused = false
+            return
+        }
+        consecutiveGrantFailures += 1
+        if consecutiveGrantFailures >= maxConsecutiveFailures, !grantsPaused {
+            grantsPaused = true
+            log("access: traversal grants unavailable on this build — continuing with direct + inode + metadata reads")
+        }
     }
 }
 

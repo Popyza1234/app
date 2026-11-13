@@ -34,8 +34,8 @@
 "onboarding.welcome_message" = "Developed by YangJiii";
 "onboarding.welcome_badge" = "Official dekpop identity";
 "onboarding.versions_title" = "All iOS versions";
-"onboarding.versions_subtitle" = "dekpop runs on every iOS version it can be installed on. Version and build checks are disabled.";
-"onboarding.versions_note" = "Beta, release and future builds are all enabled. Device-level features may need updated kernel offsets on newer iOS releases.";
+"onboarding.versions_subtitle" = "dekpop opens files on every iOS version it can be installed on. Version and build checks are disabled, and file access no longer branches on the iOS version.";
+"onboarding.versions_note" = "iOS 27 and later use the same universal Files access chain as older releases: direct reads, MCM activation, traversal grants and inode/metadata fallbacks. Beta, release and future builds are all enabled.";
 "onboarding.versions_footer" = "This device: iOS %@ (%@)";
 "onboarding.beta" = "Beta";
 "onboarding.install_title" = "Certificate requirements";
@@ -229,10 +229,11 @@
 "settings.supported_versions" = "Supported iOS versions";
 "settings.supported_range" = "Supported range";
 "settings.all_versions" = "All iOS versions";
+"settings.access_engine" = "File access engine";
 "settings.beta_build" = "Beta %lld · %@";
 "settings.developer_beta_build" = "Developer Beta %lld · %@";
 "settings.developer_public_beta_build" = "Developer Beta %lld / Public Beta %lld · %@";
-"settings.supported_range_summary" = "All iOS versions (16.0+) are enabled. No build whitelist is applied.";
+"settings.supported_range_summary" = "All iOS versions (16.0+) are enabled. No build whitelist and no version-based file access split.";
 
 "kernel.section_title" = "Kernel Exploit";
 "kernel.run_exploit" = "Run Kernel Exploit";
@@ -242,7 +243,7 @@
 "kernel.footer_warning" = "In-memory only (not persistent). If it fails, relaunch the app before trying again.";
 "kernel.auto_run" = "Auto-run on launch";
 "kernel.failed_requires_relaunch" = "Relaunch the app before retrying.";
-"settings.supported_versions_footer" = "No version or build gating is applied. Device features are attempted on every iOS version; newer releases may need updated kernel offsets.";
+"settings.supported_versions_footer" = "No version or build gating is applied. Every iOS version uses the same capability-based chain: direct read, MCM activation, traversal grant, then inode and metadata fallbacks. A failed sandbox escape no longer disables Files on iOS 27+.";
 "settings.sandbox_token" = "Sandbox Token";
 "settings.generate_token" = "Generate Token";
 "settings.token_footer" = "Available after exploit access succeeds.";
@@ -665,3 +666,6 @@
 "theme.sakura" = "Sakura";
 "theme.forest" = "Forest";
 "theme.mono" = "Graphite";
+
+"announcement.200_title" = "dekpop 2.0 — Files on every iOS";
+"announcement.200_body" = "Major update: iOS 27 and later can now browse files exactly like older versions. The old iOS 26+ access split is gone — every release uses one capability-based engine (direct read → MCM → traversal grant → inode/metadata fallback), and a failed sandbox escape no longer blocks Files. Kernel offsets and kernel-base detection are now future-version safe.";

@@ -34,13 +34,16 @@ struct FileEntry: Identifiable, Hashable {
 }
 
 // MARK: - Store
+//
+// Universal access policy lives in `ContainerAccessPolicy`
+// (ContainerBrowserLogic.swift). dekpop 2.0 removed the old
+// `iOS >= 26 ? bad_query : direct` split: every iOS version runs the same
+// layered chain — direct FileManager read → MCM activation → bad_query grant
+// → inode walk / raw MCM metadata reads — selected by capability probes.
 
 enum ContainerStore {
     static let appDataRoot = "/var/mobile/Containers/Data/Application"
     static let systemDataRoot = "/var/mobile/Containers/Data/System"
-    private static var shouldUseBadQuery: Bool {
-        ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 26
-    }
     private static let applicationBundleRoots: [(path: String, nested: Bool)] = [
         ("/var/containers/Bundle/Application", true),
         ("/Applications", false),
@@ -86,11 +89,10 @@ enum ContainerStore {
     }
 
     static func resolveAppContainerPathByMetadataScan(bundleID: String) -> String? {
-        // iOS < 26: kernel R/W is enough, no need to require full sandbox escape
-        if KernelExploit.requiresSandboxEscape, !KernelExploit.hasSandboxAccess() {
-            log("patch: metadata scan skipped — sandbox access not active")
-            return nil
-        }
+        // Universal: never skip this fallback because of the OS version. Raw
+        // metadata reads succeed whenever any access layer is active, and cost
+        // nothing when they do not. Previously iOS 26+ bailed out here unless
+        // a full sandbox escape had succeeded.
         let dirs = enumerateDirectories(path: appDataRoot)
         guard !dirs.isEmpty else {
             log("patch: metadata scan unavailable — no containers enumerated")
@@ -332,7 +334,7 @@ enum ContainerStore {
             let cachePath = (servicePath as NSString).appendingPathComponent("Library/Caches")
             addCachePath(cachePath)
             leasedCachePaths.insert(ContainerDiscoveryMerger.canonicalPath(cachePath))
-        } else if shouldUseBadQuery {
+        } else {
             let detail = serviceLookupError.map { String($0) } ?? "no path"
             log("browser: MCM com.apple.lsd activation unavailable detail=\(detail)")
         }
@@ -364,15 +366,13 @@ enum ContainerStore {
             let hasLease = leasedCachePaths.contains(
                 ContainerDiscoveryMerger.canonicalPath(cachePath)
             )
-            let handle: Int64
-            if hasLease || !shouldUseBadQuery {
-                handle = -1
-            } else {
-                handle = grantContainerAccess(cachePath)
-                if handle < 0 {
-                    log("browser: LaunchServices traversal grant failed \(cachePath) -> \(handle)")
-                    continue
-                }
+            // Universal: a failed grant must never skip this cache path. On
+            // newer builds the direct read still succeeds without a grant,
+            // and on older builds the MCM lease already covers it. Previously
+            // iOS 26+ `continue`d here and lost every LaunchServices candidate.
+            let handle: Int64 = hasLease ? -1 : grantContainerAccess(cachePath)
+            if handle < 0 {
+                log("browser: LaunchServices grant unavailable \(cachePath) — attempting direct read")
             }
             defer {
                 if handle >= 0 { bad_query_release(handle) }
@@ -437,21 +437,21 @@ enum ContainerStore {
     }
 
     static func enumerateDirectoriesWithTraversalGrant(path: String) -> [String] {
-        if !shouldUseBadQuery {
-            if let names = try? FileManager.default.contentsOfDirectory(atPath: path), !names.isEmpty {
-                return names.map { (path as NSString).appendingPathComponent($0) }
-            }
-            return enumerateDirectories(path: path)
+        // Universal chain — identical on every iOS version:
+        //   direct read → traversal grant + retry → inode walk.
+        if let names = try? FileManager.default.contentsOfDirectory(atPath: path), !names.isEmpty {
+            return names.map { (path as NSString).appendingPathComponent($0) }
         }
 
         let handle = grantContainerAccess(path)
         if handle >= 0 {
             defer { bad_query_release(handle) }
             if let names = try? FileManager.default.contentsOfDirectory(atPath: path), !names.isEmpty {
+                log("browser: traversal grant enabled directory read \(path)")
                 return names.map { (path as NSString).appendingPathComponent($0) }
             }
         } else {
-            log("browser: root traversal grant failed \(path) -> \(handle)")
+            log("browser: root traversal grant unavailable \(path) — falling back to inode walk")
         }
 
         return enumerateDirectories(path: path)
@@ -494,10 +494,12 @@ enum ContainerStore {
     }
 
     static func grantContainerAccess(_ containerPath: String) -> Int64 {
-        guard shouldUseBadQuery else { return -1 }
+        guard ContainerAccessPolicy.shouldAttemptGrant else { return -1 }
         let clean = containerPath.hasSuffix("/") ? String(containerPath.dropLast()) : containerPath
         var pathC = clean.utf8CString.map { Int8($0) }
-        return bad_query(&pathC, true, nil, false)
+        let handle = bad_query(&pathC, true, nil, false)
+        ContainerAccessPolicy.recordGrantResult(handle)
+        return handle
     }
 
     static func containersFromFilesystem() -> [InstalledApp] {
@@ -683,17 +685,33 @@ enum ContainerStore {
 
     static func listFiles(at path: String) -> [FileEntry] {
         let fm = FileManager.default
-        guard let items = try? fm.contentsOfDirectory(atPath: path) else {
-            log("listFiles: FAILED for \(path) errno=\(errno)")
-            return []
+        let items: [String]
+        if let direct = try? fm.contentsOfDirectory(atPath: path) {
+            items = direct
+        } else {
+            // Universal fallback: the bad_query_list inode walk can still
+            // enumerate a directory that FileManager refuses on a newer
+            // kernel. Without this, iOS 27+ showed empty folders.
+            items = enumerateDirectories(path: path).map {
+                ($0 as NSString).lastPathComponent
+            }
+            if items.isEmpty {
+                log("listFiles: FAILED for \(path) errno=\(errno)")
+                return []
+            }
+            log("listFiles: inode fallback enumerated \(items.count) entries for \(path)")
         }
         var entries: [FileEntry] = []
         for item in items {
             if item.hasPrefix(".") { continue }
             let full = (path as NSString).appendingPathComponent(item)
             var isDir: ObjCBool = false
-            guard fm.fileExists(atPath: full, isDirectory: &isDir) else { continue }
-            let size = isDir.boolValue ? 0 : ((try? fm.attributesOfItem(atPath: full)[.size] as? Int64) ?? 0)
+            // On inode-only enumeration fileExists can be denied even though
+            // the entry is real; keep it instead of silently dropping it.
+            let exists = fm.fileExists(atPath: full, isDirectory: &isDir)
+            let size: Int64 = exists && !isDir.boolValue
+                ? ((try? fm.attributesOfItem(atPath: full)[.size] as? Int64) ?? 0)
+                : 0
             entries.append(FileEntry(name: item, path: full, isDirectory: isDir.boolValue, size: size))
         }
         return entries.sorted {

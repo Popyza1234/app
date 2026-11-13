@@ -49,6 +49,10 @@ struct SettingsView: View {
                         language.text("settings.supported_range"),
                         value: language.text("settings.all_versions")
                     )
+                    LabeledContent(
+                        language.text("settings.access_engine"),
+                        value: ContainerAccessPolicy.engineLabel
+                    )
                 } header: {
                     Text(language.text("settings.supported_versions"))
                 } footer: {

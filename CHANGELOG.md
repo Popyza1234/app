@@ -2,6 +2,51 @@
 
 All notable user-facing changes are documented in this file.
 
+## [2.0.0] - 2026-11-13 — Universal Files access (major update)
+
+### Fixed — iOS 27+ could not access files
+
+The version whitelist had already been removed, but a second, hidden split remained:
+`majorVersion >= 26` forced all file enumeration through `bad_query` traversal grants, and
+`KernelExploit.run()` treated a failed sandbox escape as a fatal error on iOS 26+. On iOS 27
+the sandbox escape / kernel offsets do not match yet, so the exploit was marked failed, grants
+returned `-1`, the metadata scan was skipped, and every LaunchServices candidate was dropped —
+Files showed nothing. Older iOS versions kept working because they took the direct-read path.
+
+### Changed
+
+- **One access chain for every iOS version.** `ContainerAccessPolicy` is now capability-based,
+  not version-based: direct `FileManager` read → MCM activation → `bad_query` traversal grant →
+  `bad_query_list` inode walk / raw MCM metadata plist. No layer is skipped because of a version
+  number, and a failing layer falls through to the next one.
+- `KernelExploit.run()` returns success as soon as kernel R/W is established on **any** iOS
+  version. Sandbox escape is now an optional enhancement; `proc_self()` returning 0 is no longer
+  fatal. `requiresSandboxEscape` and `shouldUseBadQuery` were removed.
+- `AppState` no longer downgrades a successful access state when the optional escape disappears,
+  so iOS 27+ is not stuck re-running the exploit. The hero card and launch screen show "ready"
+  based on support + exploit running, not on exploit success.
+- `ContainerStore.launchServicesStoreIdentifiers()` attempts a direct read even when a grant
+  fails (previously `continue`d and lost all candidates on iOS 26+).
+- `ContainerStore.resolveAppContainerPathByMetadataScan()` always runs (previously skipped on
+  iOS 26+ without full sandbox access).
+- `ContainerStore.enumerateDirectoriesWithTraversalGrant()` tries direct read → grant → inode
+  walk on every version; `listFiles(at:)` gained the inode fallback so folders are not empty
+  when `FileManager` refuses them.
+- `ContainerAccessPolicy.shouldRequestGrant` is now capability-based instead of version-based;
+  grant probing is rate-limited (3 consecutive failures) and reset on each reload and after a
+  successful kernel exploit, so a late-appearing capability is picked up. Nested folders inherit
+  the root grant and additionally get the direct-read / inode fallback in `listFiles`.
+- **Native layer is future-version safe.** `kexploit_opa334.m` no longer branches on the iOS
+  version to validate the kernel Mach-O header: the first validated header is accepted on any
+  build and the backwards walk is bounded (32 MB), so an unknown kernel layout cannot hang.
+  `offsets.m` treats an unknown CPU family on iOS 26+ as the newest known generation instead
+  of silently using the iOS 17 baseline offsets, and logs unverified future releases.
+- Settings shows the new **File access engine** value (`Universal · direct / MCM / grant / inode`).
+- The launch announcement is now localized through `announcement.200_title` / `_body` keys
+  instead of hard-coded Thai text.
+- English and Thai string tables: 648 keys each, perfect parity, no duplicates.
+- Version is now `2.0.0` (build 20). IPA layout and bundle identifier are unchanged.
+
 ## [Unreleased] - 2026-11-13 — themes, look & feel
 
 ### Added

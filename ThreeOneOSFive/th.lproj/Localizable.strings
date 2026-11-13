@@ -35,8 +35,8 @@
 "onboarding.welcome_message" = "พัฒนาโดย YangJiii";
 "onboarding.welcome_badge" = "เอกลักษณ์อย่างเป็นทางการของ dekpop";
 "onboarding.versions_title" = "รองรับ iOS ทุกเวอร์ชัน";
-"onboarding.versions_subtitle" = "dekpop ทำงานบน iOS ทุกเวอร์ชันที่ติดตั้งได้ โดยปิดการตรวจสอบเวอร์ชันและบิลด์แล้ว";
-"onboarding.versions_note" = "รองรับทั้งบิลด์เบต้า บิลด์ทั่วไป และบิลด์ในอนาคต ฟีเจอร์ระดับอุปกรณ์บน iOS ใหม่กว่าอาจต้องใช้ kernel offsets ที่อัปเดต";
+"onboarding.versions_subtitle" = "dekpop เปิดและเข้าถึงไฟล์ได้บน iOS ทุกเวอร์ชันที่ติดตั้งได้ ปิดการตรวจสอบเวอร์ชันและบิลด์แล้ว และไม่แยกวิธีเข้าถึงไฟล์ตามเวอร์ชัน iOS อีกต่อไป";
+"onboarding.versions_note" = "iOS 27 ขึ้นไปใช้ชุดการเข้าถึงไฟล์แบบเดียวกับ iOS รุ่นเก่าทุกประการ: อ่านโดยตรง, เปิดใช้งาน MCM, ขอสิทธิ์ traversal และสำรองด้วย inode/metadata รองรับทั้งบิลด์เบต้า บิลด์ทั่วไป และบิลด์ในอนาคต";
 "onboarding.versions_footer" = "อุปกรณ์นี้: iOS %@ (%@)";
 "onboarding.beta" = "เบต้า";
 "onboarding.install_title" = "ข้อกำหนดด้านใบรับรอง";
@@ -230,10 +230,11 @@
 "settings.supported_versions" = "เวอร์ชัน iOS ที่รองรับ";
 "settings.supported_range" = "ช่วงที่รองรับ";
 "settings.all_versions" = "iOS ทุกเวอร์ชัน";
+"settings.access_engine" = "กลไกการเข้าถึงไฟล์";
 "settings.beta_build" = "เบต้า %lld · %@";
 "settings.developer_beta_build" = "Developer Beta %lld · %@";
 "settings.developer_public_beta_build" = "Developer Beta %lld / Public Beta %lld · %@";
-"settings.supported_range_summary" = "เปิดใช้งาน iOS ทุกเวอร์ชัน (16.0+) โดยไม่มีรายการบิลด์ที่อนุญาต";
+"settings.supported_range_summary" = "เปิดใช้งาน iOS ทุกเวอร์ชัน (16.0+) ไม่มีรายการบิลด์ที่อนุญาต และไม่แยกวิธีเข้าถึงไฟล์ตามเวอร์ชัน";
 
 "kernel.section_title" = "ช่องโหว่เคอร์เนล";
 "kernel.run_exploit" = "รันช่องโหว่เคอร์เนล";
@@ -243,7 +244,7 @@
 "kernel.footer_warning" = "เฉพาะในหน่วยความจำ (ไม่คงอยู่) หากล้มเหลว ให้เปิดแอปใหม่ก่อนลองอีกครั้ง";
 "kernel.auto_run" = "รันอัตโนมัติเมื่อเปิดแอป";
 "kernel.failed_requires_relaunch" = "เปิดแอปใหม่ก่อนลองอีกครั้ง";
-"settings.supported_versions_footer" = "ไม่มีการตรวจสอบเวอร์ชันหรือบิลด์ ระบบจะลองใช้ฟีเจอร์ของอุปกรณ์บน iOS ทุกเวอร์ชัน เวอร์ชันใหม่กว่าอาจต้องใช้ kernel offsets ที่อัปเดต";
+"settings.supported_versions_footer" = "ไม่มีการตรวจสอบเวอร์ชันหรือบิลด์ ทุกเวอร์ชันใช้ชุดเข้าถึงแบบเดียวกันตามความสามารถจริง: อ่านโดยตรง → MCM → ขอสิทธิ์ traversal → สำรองด้วย inode/metadata แม้ sandbox escape ไม่สำเร็จ ไฟล์บน iOS 27+ ก็ยังเปิดได้";
 "settings.sandbox_token" = "โทเค็นแซนด์บ็อกซ์";
 "settings.generate_token" = "สร้างโทเค็น";
 "settings.token_footer" = "พร้อมใช้งานหลังขอสิทธิ์เข้าถึงของช่องโหว่สำเร็จ";
@@ -666,3 +667,6 @@
 "theme.sakura" = "ซากุระ";
 "theme.forest" = "ฟอเรสต์";
 "theme.mono" = "กราไฟต์";
+
+"announcement.200_title" = "dekpop 2.0 — ไฟล์ได้ทุก iOS";
+"announcement.200_body" = "อัปเดตใหญ่: iOS 27 ขึ้นไปเข้าไฟล์ได้เหมือน iOS รุ่นเก่าทุกประการแล้ว ลบการแยกวิธีเข้าถึงแบบ iOS 26+ ออก ทุกเวอร์ชันใช้กลไกเดียวกันตามความสามารถจริง (อ่านโดยตรง → MCM → ขอสิทธิ์ traversal → สำรองด้วย inode/metadata) แม้ sandbox escape ไม่สำเร็จก็ไม่ปิดการใช้งาน Files พร้อมปรับ kernel offsets และการค้นหา kernel base ให้รองรับเวอร์ชันในอนาคต";

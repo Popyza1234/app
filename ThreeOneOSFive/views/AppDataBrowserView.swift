@@ -623,6 +623,9 @@ struct AppDataBrowserView: View {
         isLoading = true
         isResolving = true
         errorMessage = nil
+        // Re-probe every access layer on each reload. Capabilities can appear
+        // after the kernel exploit finishes, so nothing is cached across loads.
+        ContainerAccessPolicy.resetProbing()
         let emptyMessage = language.text("browser.empty")
         DispatchQueue.global(qos: .userInitiated).async {
             let bundleMetadata = ContainerStore.applicationBundleMetadataCatalog()

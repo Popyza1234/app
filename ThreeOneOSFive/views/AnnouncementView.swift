@@ -59,11 +59,11 @@ struct AnnouncementView: View {
                     .accessibilityLabel(language.text("common.close"))
                 }
 
-                Text(announcement.title)
+                Text(language.text(announcement.titleKey))
                     .font(.title3.weight(.bold))
 
                 ScrollView {
-                    Text(announcement.body)
+                    Text(language.text(announcement.bodyKey))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

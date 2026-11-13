@@ -5,8 +5,10 @@ import Foundation
 /// the first entry is the one displayed, on every launch.
 struct DekpopAnnouncement: Identifiable {
     let id: String
-    let title: String
-    let body: String
+    /// Localization keys — the app ships exactly English and Thai, so the
+    /// notice follows the selected language instead of being hard-coded.
+    let titleKey: String
+    let bodyKey: String
     let imageName: String?
     let link: URL?
 }
@@ -14,9 +16,9 @@ struct DekpopAnnouncement: Identifiable {
 enum AnnouncementStore {
     static let announcements: [DekpopAnnouncement] = [
         DekpopAnnouncement(
-            id: "welcome-1.5.0",
-            title: "ยินดีต้อนรับสู่ dekpop 1.5.0",
-            body: "หน้าแรกมีแท็บ แอป / ทางลัด / มอด เพิ่มทางลัดโฟลเดอร์ได้เองและคัดลอกพาธไฟล์มาวางได้ทันที ส่วนมอดมี KenModz และ Cheat iOS VIP เปิดในแอป พร้อมไอคอนใหม่ทั้งหมด",
+            id: "universal-files-2.0.0",
+            titleKey: "announcement.200_title",
+            bodyKey: "announcement.200_body",
             imageName: "announcement-banner",
             link: nil
         )

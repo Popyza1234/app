@@ -127,7 +127,9 @@ struct DekpopLaunchView: View {
         if appState.unsupportedMessage != nil {
             return language.text("launch.status_unsupported")
         }
-        if appState.exploitStatus.isSuccess {
+        // File access is capability-based on every iOS version; a failed
+        // optional kernel exploit no longer leaves the launch screen stuck.
+        if appState.isSupported && !appState.kernelExploitRunning {
             return language.text("dekpop.status_ready")
         }
         return language.text("launch.status_loading")

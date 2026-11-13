@@ -5,8 +5,8 @@ import UIKit
 /// for the product identity shown in the UI.
 enum DekpopBrand {
     static let displayName = "dekpop"
-    static let version = "1.5.0"
-    static let build = "14"
+    static let version = "2.0.0"
+    static let build = "20"
 }
 
 // MARK: - Themes
@@ -446,7 +446,12 @@ struct DekpopHeroCard: View {
     @State private var drift = false
     @State private var sweep: CGFloat = -1.2
 
-    private var isReady: Bool { appState.exploitStatus.isSuccess }
+    /// Universal access: the browser keeps working through direct/MCM/grant/
+    /// inode fallbacks even when the optional kernel exploit fails, so a
+    /// failed exploit must not label iOS 27+ as "preparing" forever.
+    private var isReady: Bool {
+        appState.isSupported && !appState.kernelExploitRunning
+    }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.5.0-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.0.0-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -24,6 +24,18 @@
 
 > [!WARNING]
 > dekpop is research software for personal device management. Keep a backup and use it only on devices and data you own. It can modify files inside app containers.
+
+## What's new in 2.0.0 — Universal Files access
+
+> Major update. **iOS 27 and later can now browse files exactly like older iOS versions.**
+
+- **Root cause fixed.** A hidden `majorVersion >= 26` split forced iOS 26+ through `bad_query` grants and declared the app failed whenever the optional sandbox escape did not succeed. On iOS 27 that escape cannot be applied yet, so Files came up empty. Older releases kept working via direct reads — hence the version-dependent behaviour.
+- **One capability-based chain on every iOS version** — direct `FileManager` read → MCM activation → `bad_query` traversal grant → inode walk / raw MCM metadata plist. Layers are probed at runtime; a failing layer never disables the others. No version number is consulted anywhere in the file access path.
+- **Sandbox escape is now optional.** `KernelExploit.run()` succeeds as soon as kernel R/W is established, on any release. If the escape fails, direct/MCM/grant/inode fallbacks stay active instead of marking Files as failed.
+- **Folder listing has a fallback.** `listFiles(at:)` now falls back to the inode walk, so a folder that `FileManager` refuses on a newer kernel is no longer shown as empty. Grant probing is capability-based and re-tried on each reload.
+- **Future-proof native layer** — kernel-base detection accepts the first validated Mach-O header on any build with a bounded scan (no infinite loop on unknown layouts); unknown CPU families on iOS 26+ use the newest known offsets rather than the iOS 17 baseline.
+- Settings now shows the **File access engine**; the launch announcement is localized in English and Thai.
+- Version is now `2.0.0` (build 20). IPA layout, bundle identifier and the two-language setup are unchanged.
 
 ## What's new in 1.5.0 — Apps / Shortcuts / Mods
 
@@ -83,10 +95,12 @@ Every iOS version that can install the app is enabled — no version or build wh
 | Supported versions | All iOS versions 16.0 and later (release, beta, and future majors) |
 | Build whitelist | Removed |
 | Deployment target | iOS 16.0 |
-| Offset fallback | iOS 26.0 baseline for unverified 26.1+; iOS 17.0 baseline for below 17.0 |
+| File access engine | Universal · direct / MCM / grant / inode — identical on every iOS version |
+| Version-based access split | Removed in 2.0.0 (`>= 26` branch deleted) |
+| Offset fallback | iOS 26.0 baseline for unverified 26.1+ and future majors; iOS 17.0 baseline for below 17.0; unknown CPU families on iOS 26+ use the newest known generation |
 
 > [!NOTE]
-> The kernel exploit still needs offsets matching the running kernel. On an iOS version not covered by the offset table the exploit may fail; it logs an `offsets: ... unverified` hint and falls back to the newest known offsets instead of aborting. A failed attempt may restart the app.
+> The optional kernel exploit still needs offsets matching the running kernel. On an iOS version not covered by the offset table it may fail; it logs an `offsets: ... unverified` hint and falls back to the newest known offsets instead of aborting. **Files keeps working through the direct / MCM / grant / inode fallbacks regardless of that result** — a failed exploit no longer disables file access on iOS 27+.
 
 ## Installation notes
 
