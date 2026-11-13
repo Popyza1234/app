@@ -652,3 +652,8 @@
 "browser.shortcut_saved_message" = "%@ เปิดโฟลเดอร์นี้ได้แล้ว";
 "browser.shortcut_exists_title" = "มีทางลัดนี้อยู่แล้ว";
 "browser.shortcut_exists_message" = "โฟลเดอร์นี้มีทางลัดอยู่แล้ว";
+"launch.status_loading" = "กำลังเตรียมไฟล์ของคุณ…";
+"launch.status_unsupported" = "iOS เวอร์ชันนี้ยังไม่รองรับ";
+"announcement.badge" = "ประกาศ";
+"announcement.got_it" = "รับทราบ";
+"announcement.open_link" = "เปิดลิงก์";

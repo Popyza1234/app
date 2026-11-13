@@ -651,3 +651,8 @@
 "browser.shortcut_saved_message" = "%@ now opens this folder.";
 "browser.shortcut_exists_title" = "Shortcut already exists";
 "browser.shortcut_exists_message" = "This folder already has a shortcut.";
+"launch.status_loading" = "Preparing your files…";
+"launch.status_unsupported" = "This iOS version is not supported yet";
+"announcement.badge" = "Announcement";
+"announcement.got_it" = "Got it";
+"announcement.open_link" = "Open link";

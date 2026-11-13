@@ -76,6 +76,9 @@
 		3105CB05 /* AssetSetApplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA05; };
 		3105CB07 /* ModBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA07; };
 		3105CB08 /* ShortcutsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA08; };
+		3105CB09 /* Announcements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA09; };
+		3105CB0A /* AnnouncementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA0A; };
+		3105CB0B /* LaunchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA0B; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -165,6 +168,9 @@
 		3105CA05 /* AssetSetApplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetSetApplyView.swift; sourceTree = "<group>"; };
 		3105CA07 /* ModBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModBrowserView.swift; sourceTree = "<group>"; };
 		3105CA08 /* ShortcutsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsView.swift; sourceTree = "<group>"; };
+		3105CA09 /* Announcements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Announcements.swift; sourceTree = "<group>"; };
+		3105CA0A /* AnnouncementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementView.swift; sourceTree = "<group>"; };
+		3105CA0B /* LaunchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -246,6 +252,8 @@
 				3105CA05 /* AssetSetApplyView.swift */,
 				3105CA07 /* ModBrowserView.swift */,
 				3105CA08 /* ShortcutsView.swift */,
+				3105CA0A /* AnnouncementView.swift */,
+				3105CA0B /* LaunchView.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -292,6 +300,7 @@
 				3105A027 /* MG.swift */,
 				3105CA00 /* AssetSetModels.swift */,
 				3105CA01 /* AssetSetService.swift */,
+				3105CA09 /* Announcements.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -439,6 +448,9 @@
 				3105CB05,
 				3105CB07,
 				3105CB08,
+				3105CB09,
+				3105CB0A,
+				3105CB0B,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -464,7 +476,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -498,7 +510,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;

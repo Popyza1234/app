@@ -33,8 +33,10 @@
 - **Shortcut editor** — pick the target app container or the dekpop workspace, type or paste a path (absolute paths starting with `/` are accepted too), preview the exact folder that will open, and get a warning when the same folder already has a shortcut. Shortcuts can be edited, opened in a new tab, copied or deleted.
 - **Mods tab with two sites** — **KenModz** ([kenmodz.com](https://kenmodz.com/)) and **Cheat iOS VIP** ([mods.cheatiosvip.net](https://mods.cheatiosvip.net/)) open in a built-in browser that keeps the dekpop theme, remembers cookies and sessions, shows a progress bar, and offers back / forward / home / reload plus *Open in Safari*.
 - **Download Center removed** — the separate Downloads window is gone. Asset sets still live on the cube-box toolbar button and still use the same Apply flow, target picker and conflict policies.
+- **Branded launch screen + announcements** — the app opens on a gradient splash with an animated progress bar, then a one-shot announcement card (with image support) appears; new announcements resurface automatically.
+- **New app icon** — a dark clay tile replaces the old gradient folder icon.
 - Everything is stored in the dekpop document workspace (`AssetSets/`), so shortcuts survive app updates and stay reachable from the Files browser.
-- Version is now `1.5.0` (build 13). IPA layout and bundle identifier are unchanged.
+- Version is now `1.5.0` (build 14). IPA layout and bundle identifier are unchanged.
 
 ## What's new in 1.3.0 — English + Thai
 

@@ -7,6 +7,9 @@ All notable user-facing changes are documented in this file.
 ### Added
 
 - **Home category tabs** — a segmented picker above the list (Apps / Shortcuts / Mods) replaces the old Quick Access row. Search is scoped to the selected tab and hidden on Mods.
+- **Branded launch screen** (`LaunchView.swift`) — a full-screen gradient splash with an animated logo, shimmer progress bar and live container-access status, shown briefly once per launch.
+- **Announcements** (`Announcements.swift`, `AnnouncementView.swift`) — a one-shot notice card appears after the launch screen; it supports a title, body, a bundled image and an optional link, and is remembered per announcement id so new notices resurface.
+- **New app icon** — the dark clay "p" tile replaces the gradient folder icon (`AppIcon-1024.png`).
 - **Editable folder shortcuts** (`ShortcutsView.swift`) — the Shortcuts tab lists saved folders with name, relative path, search, swipe-delete and a context menu (open in new tab, edit, copy path, delete). `ShortcutEditorView` picks a target app container or the dekpop workspace, accepts a relative or absolute path, previews the resolved folder, warns about duplicates, and can infer the target container from a pasted absolute path.
 - **Add shortcut from Files** — long-press any folder and choose **Add shortcut**, or use **Add shortcut** in the + menu for the current folder. Duplicate shortcuts are rejected with a notice.
 - **Copy path** — long-press any file or folder and choose **Copy path**, or **Copy this folder's path** in the + menu. The copied address can be pasted straight into the shortcut editor.
@@ -21,7 +24,7 @@ All notable user-facing changes are documented in this file.
 ### Changed
 
 - `DownloadShortcut` is now `FolderShortcut`, with `relativePath` and `resolvedPath(path:containerPath:)` helpers. Stored shortcuts remain in `AssetSets/download-shortcuts.json`, so existing shortcuts survive the upgrade.
-- Version is now `1.5.0` (build 13). IPA layout and bundle identifier are unchanged.
+- Version is now `1.5.0` (build 14). IPA layout and bundle identifier are unchanged.
 
 ## [1.4.0] - 2026-11-13 — Asset Sets (creator toolkit)
 
