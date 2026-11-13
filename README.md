@@ -63,6 +63,8 @@ Legacy guides under `docs/PATCH_GUIDE*.md` and release notes describe features o
 - **File operations** — search, preview, share, import multiple files, copy, move, paste, rename, delete, create files and folders, make ZIP archives, and safely handle name conflicts.
 - **Multi-tab browsing** — independent tabs with preserved folder positions (iPad gets a tab strip).
 - **dekpop workspace** — your own folder under `On My iPhone`, available from the Files browser.
+- **Folder shortcuts** — save any folder and open it in one tap, with copy-path support so a file address can be pasted into the shortcut editor.
+- **Mods browser** — KenModz and Cheat iOS VIP open inside dekpop with native navigation controls.
 - **No jailbreak installation** — no persistent jailbreak, bootstrap, or daemon is installed; no code is injected into third-party apps.
 - **Two-language interface** — English and Thai, switchable instantly from the Files toolbar or the top of the Files list.
 
@@ -161,7 +163,7 @@ dekpop/
 ├── ThreeOneOSFive/          # SwiftUI app, helpers, native bridges, localizations
 │   ├── App.swift            # @main DekpopApp + AppState (kernel access bootstrap)
 │   ├── ContentView.swift    # Files-only root view
-│   ├── views/               # AppDataBrowserView, FileBrowserView, DesignSystem, tab controls
+│   ├── views/               # AppDataBrowserView, FileBrowserView, ModBrowserView, ShortcutsView, DesignSystem
 │   ├── en.lproj/            # English strings
 │   ├── th.lproj/            # Thai strings
 │   └── Assets.xcassets/     # dekpop app icon
