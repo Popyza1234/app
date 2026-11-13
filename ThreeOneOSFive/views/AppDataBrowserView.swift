@@ -13,6 +13,7 @@ struct AppDataBrowserView: View {
     @State private var errorMessage: String?
     @State private var hasLoaded = false
     @State private var workspaceURL: URL?
+    @State private var showAssetSets = false
     @Binding private var tabSession: FilesTabSession
 
     init(tabSession: Binding<FilesTabSession>) {
@@ -49,6 +50,12 @@ struct AppDataBrowserView: View {
                 }
                 ToolbarItem(placement: .principal) {
                     DekpopWordmark(compact: true)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showAssetSets = true } label: {
+                        Image(systemName: "cube.box")
+                    }
+                    .accessibilityLabel(language.text("asset.sets_title"))
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     FilesTabToolbarButton(session: $tabSession)
@@ -97,6 +104,9 @@ struct AppDataBrowserView: View {
                     )
                 }
             }
+        }
+        .sheet(isPresented: $showAssetSets) {
+            AssetSetsView(apps: apps)
         }
     }
 

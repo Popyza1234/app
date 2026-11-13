@@ -2,6 +2,27 @@
 
 All notable user-facing changes are documented in this file.
 
+## [1.4.0] - 2026-11-13 — Asset Sets (creator toolkit)
+
+### Added
+
+- **Asset Set Manager** — a new in-app toolkit for organizing your own files into named, reusable sets (character / outfit / weapon / bundle categories). Reachable from the cube-box toolbar button on the Files root.
+- `AssetSetModels.swift` / `AssetSetService.swift` — generic data model and JSON persistence inside the dekpop document workspace (`AssetSets/` folder).
+- `AssetSetsView` — grid of sets with category filter chips and search.
+- `AssetSetDetailView` — preview, item list, rename/edit/delete, and **Apply** to copy the set's files into a target you choose.
+- `AssetSetEditorView` — create/edit a set, import your own files via the system file picker (including while creating a brand-new set), assign each file to a slot (head/face/body/pants/shoes/accessory/weapon/other), and change slots later.
+- `AssetSetApplyView` — choose an app container discovered by dekpop, the dekpop workspace folder, a folder from the Files app, or a custom path; optionally copy into a subfolder. Conflict policy: replace / keep both / skip. Results report copied, skipped and failed counts.
+- New localization keys (`asset.*`, `common.save`) added to both English and Thai (now 579 keys each).
+
+### Fixed
+
+- Importing files while creating a new set now works; previously the import silently did nothing. Cancelling an edit discards only the files staged during that session.
+- Deleting a set or an individual item now removes its files from disk instead of leaving them orphaned in `AssetSets/`.
+
+### Changed
+
+- Version is now `1.4.0` (build 10). IPA layout and bundle identifier are unchanged.
+
 ## [1.3.0] - 2026-11-12 — English + Thai
 
 ### Added

@@ -68,6 +68,12 @@
 		3105A234 /* AppDataBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105A105; };
 		3105A228 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3105A120; };
 		3105A211 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3105A031; };
+		3105CB00 /* AssetSetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA00; };
+		3105CB01 /* AssetSetService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA01; };
+		3105CB02 /* AssetSetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA02; };
+		3105CB03 /* AssetSetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA03; };
+		3105CB04 /* AssetSetEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA04; };
+		3105CB05 /* AssetSetApplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA05; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -149,6 +155,12 @@
 		3105I101 /* FilesTabSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesTabSwitcherView.swift; sourceTree = "<group>"; };
 		3105A121 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3105B124 /* th */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = th; path = th.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3105CA00 /* AssetSetModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetSetModels.swift; sourceTree = "<group>"; };
+		3105CA01 /* AssetSetService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetSetService.swift; sourceTree = "<group>"; };
+		3105CA02 /* AssetSetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetSetsView.swift; sourceTree = "<group>"; };
+		3105CA03 /* AssetSetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetSetDetailView.swift; sourceTree = "<group>"; };
+		3105CA04 /* AssetSetEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetSetEditorView.swift; sourceTree = "<group>"; };
+		3105CA05 /* AssetSetApplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetSetApplyView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -224,6 +236,10 @@
 				3105E101 /* CleanerView.swift */,
 				3105F106 /* WallpaperLabView.swift */,
 				3105F108 /* OnboardingView.swift */,
+				3105CA02 /* AssetSetsView.swift */,
+				3105CA03 /* AssetSetDetailView.swift */,
+				3105CA04 /* AssetSetEditorView.swift */,
+				3105CA05 /* AssetSetApplyView.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -268,6 +284,8 @@
 				3105A025 /* Utils.swift */,
 				3105A026 /* SBX.swift */,
 				3105A027 /* MG.swift */,
+				3105CA00 /* AssetSetModels.swift */,
+				3105CA01 /* AssetSetService.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -407,6 +425,12 @@
 				3105H200,
 				3105I200,
 				3105I201,
+				3105CB00,
+				3105CB01,
+				3105CB02,
+				3105CB03,
+				3105CB04,
+				3105CB05,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -432,7 +456,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -448,7 +472,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.4.0;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.mobile.MobileHouseArrest";
 				PRODUCT_NAME = dekpop;
@@ -466,7 +490,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -482,7 +506,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.4.0;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.mobile.MobileHouseArrest";
 				PRODUCT_NAME = dekpop;

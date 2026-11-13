@@ -56,7 +56,7 @@ enum FileTransferMode: Equatable {
     case move
 }
 
-enum FileConflictPolicy: Equatable {
+enum FileConflictPolicy: Hashable {
     case fail
     case replace
     case keepBoth
