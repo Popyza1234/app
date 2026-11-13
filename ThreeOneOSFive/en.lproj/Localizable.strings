@@ -641,3 +641,13 @@
 "downloads.shortcut_target" = "Target folder";
 "downloads.shortcut_default_name" = "Shortcut";
 "downloads.quick_access" = "Quick access";
+
+"kenmodz.title" = "KenModz";
+"kenmodz.subtitle" = "Skins and mods from kenmodz.com";
+"kenmodz.forward" = "Forward";
+"kenmodz.reload" = "Reload";
+"kenmodz.home" = "Home";
+"kenmodz.open_external" = "Open in Safari";
+"kenmodz.error_title" = "Can't open KenModz";
+"kenmodz.error_message" = "Check your connection and try again.";
+"kenmodz.retry" = "Try again";

@@ -642,3 +642,13 @@
 "downloads.shortcut_target" = "โฟลเดอร์ปลายทาง";
 "downloads.shortcut_default_name" = "ทางลัด";
 "downloads.quick_access" = "เข้าถึงเร็ว";
+
+"kenmodz.title" = "KenModz";
+"kenmodz.subtitle" = "สกินและมอดจาก kenmodz.com";
+"kenmodz.forward" = "ไปข้างหน้า";
+"kenmodz.reload" = "โหลดใหม่";
+"kenmodz.home" = "หน้าแรก";
+"kenmodz.open_external" = "เปิดใน Safari";
+"kenmodz.error_title" = "เปิด KenModz ไม่ได้";
+"kenmodz.error_message" = "ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง";
+"kenmodz.retry" = "ลองอีกครั้ง";

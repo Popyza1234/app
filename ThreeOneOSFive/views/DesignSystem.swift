@@ -6,7 +6,7 @@ import UIKit
 enum DekpopBrand {
     static let displayName = "dekpop"
     static let version = "1.4.0"
-    static let build = "11"
+    static let build = "12"
 }
 
 enum AppTheme {

@@ -120,6 +120,8 @@ struct AppDataBrowserView: View {
                         }
                     }
                 }
+            case .kenModz:
+                KenModzView()
             }
         }
     }
@@ -169,6 +171,31 @@ struct AppDataBrowserView: View {
                             Text(language.text("downloads.title"))
                                 .font(.subheadline.weight(.bold))
                             Text(language.text("downloads.summary_subtitle"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    activeSheet = .kenModz
+                } label: {
+                    HStack(spacing: 10) {
+                        AppRowIcon(
+                            systemName: "globe",
+                            tint: AppTheme.accentSecondary,
+                            frameSize: 34
+                        )
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(language.text("kenmodz.title"))
+                                .font(.subheadline.weight(.bold))
+                            Text(language.text("kenmodz.subtitle"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -471,6 +498,7 @@ struct AppDataBrowserView: View {
 private enum FilesRootSheet: String, Identifiable {
     case assetSets
     case downloads
+    case kenModz
 
     var id: String { rawValue }
 }

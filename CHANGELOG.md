@@ -15,7 +15,8 @@ All notable user-facing changes are documented in this file.
 - **Download Center** (`DownloadsView`) — a dedicated window reachable from the Quick Access row on the Files root. Saved sets appear as one-tap downloads with their remembered destination, per-set copied/skipped/failed results, last-download time, and a **Download all** action.
 - **Saved destinations** — each asset set can remember an app container, workspace or custom folder plus an optional subfolder, so installing a mod no longer requires picking a target every time.
 - **Folder shortcuts** — save locations (app container, workspace or custom folder + subfolder) that open directly in the Files browser on tap, either in the current tab or a new tab. Shortcuts support add, edit, swipe-delete and search.
-- New localization keys (`asset.*`, `downloads.*`, `common.save`) added to both English and Thai (now 624 keys each).
+- **KenModz** (`KenModzView`) — an in-app browser for [kenmodz.com](https://kenmodz.com/) that keeps the dekpop theme and English/Thai controls. Opens from Quick Access, persists cookies/sessions through the default `WKWebsiteDataStore`, shows a reading-progress bar, and provides back / forward / home / reload plus **Open in Safari**. External schemes open in the system browser, and error states offer retry.
+- New localization keys (`asset.*`, `downloads.*`, `kenmodz.*`, `common.save`) added to both English and Thai (now 633 keys each).
 
 ### Fixed
 
@@ -24,7 +25,7 @@ All notable user-facing changes are documented in this file.
 
 ### Changed
 
-- Version is now `1.4.0` (build 11). IPA layout and bundle identifier are unchanged.
+- Version is now `1.4.0` (build 12). IPA layout and bundle identifier are unchanged.
 
 ## [1.3.0] - 2026-11-12 — English + Thai
 

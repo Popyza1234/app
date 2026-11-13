@@ -129,11 +129,12 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
   - artifact `3105-unsigned-ipa` = 3,268,242 bytes → ไฟล์ `3105-unsigned.ipa` 3,277,941 bytes
   - เวอร์ชัน `1.1.1 (7)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
 - **รุ่น dekpop 1.4.0 (ปัจจุบัน):** ทุกครั้งที่ push ขึ้น `main` workflow จะ build ใหม่ → artifact **`dekpop-unsigned-ipa`** → ไฟล์ **`dekpop-unsigned.ipa`**
-  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `1.4.0 (11)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
+  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `1.4.0 (12)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
   - Bundle ID ยังเป็น `com.apple.mobile.MobileHouseArrest` (จำเป็นสำหรับ MHA-C2 / ฟีเจอร์ Files)
 - การที่ CI ขึ้นเขียวแปลว่าโค้ดที่แก้ **ถูก compile จริงบน Xcode ของ GitHub** ไม่ใช่แค่แก้ไฟล์ในเครื่อง
 - **รุ่น 1.4.0 เพิ่มเซ็ตไฟล์:** รวมไฟล์ของคุณเองเป็นชุด กำหนดหมวดหมู่/ช่อง แล้วคัดลอกไปยังคอนเทนเนอร์แอป โฟลเดอร์ dekpop โฟลเดอร์จาก Files หรือพาธกำหนดเอง
-- **ศูนย์ดาวน์โหลด (build 11):** บันทึกปลายทางของแต่ละเซ็ตแล้วติดตั้งซ้ำได้ในแตะเดียว พร้อมทางลัดเข้าโฟลเดอร์ที่ตั้งไว้จากหน้า Files โดยไม่ต้องค้นหา
+- **ศูนย์ดาวน์โหลด:** บันทึกปลายทางของแต่ละเซ็ตแล้วติดตั้งซ้ำได้ในแตะเดียว พร้อมทางลัดเข้าโฟลเดอร์ที่ตั้งไว้จากหน้า Files โดยไม่ต้องค้นหา
+- **KenModz (build 12):** เปิด kenmodz.com ในเบราว์เซอร์ของแอปจาก Quick Access หน้าตาเข้ากับ dekpop มีปุ่มย้อนกลับ/ไปข้างหน้า/หน้าแรก/โหลดใหม่ และเปิดใน Safari ได้ คุกกี้และเซสชันถูกจำไว้
 - **รุ่น 1.3.0 รองรับ 2 ภาษา:** English และ ไทย (สลับได้จากไอคอนรูปโลกใน toolbar หรือตัวเลือก `English / ไทย` ด้านบนหน้า Files) ใน IPA จะมีแค่ `en.lproj` กับ `th.lproj` และ `CFBundleLocalizations = (en, th)`
 
 **โหลดซ้ำในอนาคต** (artifact หมดอายุ 14 วัน) — ดับเบิลคลิก `scripts\download-unsigned-ipa.cmd` หรือ:

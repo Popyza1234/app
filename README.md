@@ -32,6 +32,7 @@
 - Apply reports copied, skipped and failed counts, and supports replace / keep both / skip conflict policies.
 - **Download Center** — open it from the Quick Access row on the Files root to reinstall any saved set in one tap into its remembered destination, see copied/skipped/failed results, or download every configured set at once.
 - **Folder shortcuts** — save app containers, the dekpop workspace or custom folders (plus a subfolder) and open them instantly from the same window, in the current tab or a new one.
+- **KenModz** — a native-styled in-app browser for [kenmodz.com](https://kenmodz.com/), reachable from Quick Access. It keeps the dekpop look (theme, English/Thai controls), remembers cookies and sessions, shows a progress bar, and offers back / forward / home / reload plus *Open in Safari*. Sign-in and key pages open inside the app.
 - Everything is stored in the dekpop document workspace (`AssetSets/`), so it is reachable from the Files browser and survives app updates.
 - Works with files you own or have the right to use — no game-specific bundles, paths, or assets are baked in.
 
