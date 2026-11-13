@@ -30,6 +30,8 @@
 - **Asset Set Manager** — organize your own files into named, reusable sets directly inside dekpop. Open it from the cube-box toolbar button on the Files root.
 - Create a set, choose a category (character / outfit / weapon / bundle), import your own files, assign each to a slot, then **Apply** to copy the whole set into an app container, the dekpop folder, a folder from the Files app, or a custom path (with an optional subfolder).
 - Apply reports copied, skipped and failed counts, and supports replace / keep both / skip conflict policies.
+- **Download Center** — open it from the Quick Access row on the Files root to reinstall any saved set in one tap into its remembered destination, see copied/skipped/failed results, or download every configured set at once.
+- **Folder shortcuts** — save app containers, the dekpop workspace or custom folders (plus a subfolder) and open them instantly from the same window, in the current tab or a new one.
 - Everything is stored in the dekpop document workspace (`AssetSets/`), so it is reachable from the Files browser and survives app updates.
 - Works with files you own or have the right to use — no game-specific bundles, paths, or assets are baked in.
 

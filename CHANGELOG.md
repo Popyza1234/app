@@ -12,7 +12,10 @@ All notable user-facing changes are documented in this file.
 - `AssetSetDetailView` — preview, item list, rename/edit/delete, and **Apply** to copy the set's files into a target you choose.
 - `AssetSetEditorView` — create/edit a set, import your own files via the system file picker (including while creating a brand-new set), assign each file to a slot (head/face/body/pants/shoes/accessory/weapon/other), and change slots later.
 - `AssetSetApplyView` — choose an app container discovered by dekpop, the dekpop workspace folder, a folder from the Files app, or a custom path; optionally copy into a subfolder. Conflict policy: replace / keep both / skip. Results report copied, skipped and failed counts.
-- New localization keys (`asset.*`, `common.save`) added to both English and Thai (now 579 keys each).
+- **Download Center** (`DownloadsView`) — a dedicated window reachable from the Quick Access row on the Files root. Saved sets appear as one-tap downloads with their remembered destination, per-set copied/skipped/failed results, last-download time, and a **Download all** action.
+- **Saved destinations** — each asset set can remember an app container, workspace or custom folder plus an optional subfolder, so installing a mod no longer requires picking a target every time.
+- **Folder shortcuts** — save locations (app container, workspace or custom folder + subfolder) that open directly in the Files browser on tap, either in the current tab or a new tab. Shortcuts support add, edit, swipe-delete and search.
+- New localization keys (`asset.*`, `downloads.*`, `common.save`) added to both English and Thai (now 624 keys each).
 
 ### Fixed
 
@@ -21,7 +24,7 @@ All notable user-facing changes are documented in this file.
 
 ### Changed
 
-- Version is now `1.4.0` (build 10). IPA layout and bundle identifier are unchanged.
+- Version is now `1.4.0` (build 11). IPA layout and bundle identifier are unchanged.
 
 ## [1.3.0] - 2026-11-12 — English + Thai
 

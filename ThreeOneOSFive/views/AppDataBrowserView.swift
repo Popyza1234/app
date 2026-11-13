@@ -13,7 +13,7 @@ struct AppDataBrowserView: View {
     @State private var errorMessage: String?
     @State private var hasLoaded = false
     @State private var workspaceURL: URL?
-    @State private var showAssetSets = false
+    @State private var activeSheet: FilesRootSheet?
     @Binding private var tabSession: FilesTabSession
 
     init(tabSession: Binding<FilesTabSession>) {
@@ -52,7 +52,7 @@ struct AppDataBrowserView: View {
                     DekpopWordmark(compact: true)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { showAssetSets = true } label: {
+                    Button { activeSheet = .assetSets } label: {
                         Image(systemName: "cube.box")
                     }
                     .accessibilityLabel(language.text("asset.sets_title"))
@@ -105,8 +105,22 @@ struct AppDataBrowserView: View {
                 }
             }
         }
-        .sheet(isPresented: $showAssetSets) {
-            AssetSetsView(apps: apps)
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .assetSets:
+                AssetSetsView(apps: apps)
+            case .downloads:
+                DownloadsView(apps: apps) { destination, openInNewTab in
+                    activeSheet = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        if openInNewTab {
+                            tabSession.openTab(navigationPath: [destination])
+                        } else {
+                            tabSession.setActiveNavigationPath([destination])
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -139,6 +153,35 @@ struct AppDataBrowserView: View {
                     .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 6, trailing: 16))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+            }
+
+            Section {
+                Button {
+                    activeSheet = .downloads
+                } label: {
+                    HStack(spacing: 10) {
+                        AppRowIcon(
+                            systemName: "arrow.down.circle.fill",
+                            tint: AppTheme.accent,
+                            frameSize: 34
+                        )
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(language.text("downloads.title"))
+                                .font(.subheadline.weight(.bold))
+                            Text(language.text("downloads.summary_subtitle"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+                .buttonStyle(.plain)
+            } header: {
+                Text(language.text("downloads.quick_access"))
             }
 
             Section {
@@ -423,6 +466,13 @@ struct AppDataBrowserView: View {
             }
         }
     }
+}
+
+private enum FilesRootSheet: String, Identifiable {
+    case assetSets
+    case downloads
+
+    var id: String { rawValue }
 }
 
 private enum AppBrowserOverlayState: Equatable {
