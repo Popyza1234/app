@@ -669,3 +669,4 @@
 
 "announcement.200_title" = "dekpop 2.0 — Files on every iOS";
 "announcement.200_body" = "Major update: iOS 27 and later can now browse files exactly like older versions. The old iOS 26+ access split is gone — every release uses one capability-based engine (direct read → MCM → traversal grant → inode/metadata fallback), and a failed sandbox escape no longer blocks Files. Kernel offsets and kernel-base detection are now future-version safe.";
+"dekpop.access_engine_line" = "Universal file access · every iOS version";

@@ -41,7 +41,7 @@ Files showed nothing. Older iOS versions kept working because they took the dire
   build and the backwards walk is bounded (32 MB), so an unknown kernel layout cannot hang.
   `offsets.m` treats an unknown CPU family on iOS 26+ as the newest known generation instead
   of silently using the iOS 17 baseline offsets, and logs unverified future releases.
-- Settings shows the new **File access engine** value (`Universal · direct / MCM / grant / inode`).
+- The Files hero card now shows a localized **"Universal file access · every iOS version"** line; the (currently unreachable) `SettingsView` also displays the engine label `Universal · direct / MCM / grant / inode`.
 - The launch announcement is now localized through `announcement.200_title` / `_body` keys
   instead of hard-coded Thai text.
 - English and Thai string tables: 648 keys each, perfect parity, no duplicates.

@@ -34,7 +34,7 @@
 - **Sandbox escape is now optional.** `KernelExploit.run()` succeeds as soon as kernel R/W is established, on any release. If the escape fails, direct/MCM/grant/inode fallbacks stay active instead of marking Files as failed.
 - **Folder listing has a fallback.** `listFiles(at:)` now falls back to the inode walk, so a folder that `FileManager` refuses on a newer kernel is no longer shown as empty. Grant probing is capability-based and re-tried on each reload.
 - **Future-proof native layer** — kernel-base detection accepts the first validated Mach-O header on any build with a bounded scan (no infinite loop on unknown layouts); unknown CPU families on iOS 26+ use the newest known offsets rather than the iOS 17 baseline.
-- Settings now shows the **File access engine**; the launch announcement is localized in English and Thai.
+- The Files hero card shows a localized **Universal file access · every iOS version** line; the launch announcement is localized in English and Thai.
 - Version is now `2.0.0` (build 20). IPA layout, bundle identifier and the two-language setup are unchanged.
 
 ## What's new in 1.5.0 — Apps / Shortcuts / Mods

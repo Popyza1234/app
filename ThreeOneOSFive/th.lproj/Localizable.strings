@@ -670,3 +670,4 @@
 
 "announcement.200_title" = "dekpop 2.0 — ไฟล์ได้ทุก iOS";
 "announcement.200_body" = "อัปเดตใหญ่: iOS 27 ขึ้นไปเข้าไฟล์ได้เหมือน iOS รุ่นเก่าทุกประการแล้ว ลบการแยกวิธีเข้าถึงแบบ iOS 26+ ออก ทุกเวอร์ชันใช้กลไกเดียวกันตามความสามารถจริง (อ่านโดยตรง → MCM → ขอสิทธิ์ traversal → สำรองด้วย inode/metadata) แม้ sandbox escape ไม่สำเร็จก็ไม่ปิดการใช้งาน Files พร้อมปรับ kernel offsets และการค้นหา kernel base ให้รองรับเวอร์ชันในอนาคต";
+"dekpop.access_engine_line" = "เข้าถึงไฟล์แบบสากล · ทุกเวอร์ชัน iOS";

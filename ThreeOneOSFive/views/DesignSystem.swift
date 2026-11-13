@@ -483,6 +483,15 @@ struct DekpopHeroCard: View {
                     infoChip(icon: "iphone", value: AppInfo.displayMachineName)
                     infoChip(icon: "checkmark.circle", value: "iOS \(AppInfo.osVersion)")
                 }
+
+                // Reachable indicator of the 2.0.0 universal access engine.
+                // SettingsView has no call site in this Files-only build, so
+                // this is where users see that no version split is applied.
+                Label(language.text("dekpop.access_engine_line"), systemImage: "arrow.triangle.branch")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color.white.opacity(0.9))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .padding(16)
         }
