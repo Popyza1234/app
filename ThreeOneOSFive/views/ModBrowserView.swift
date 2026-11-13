@@ -2,16 +2,45 @@ import SwiftUI
 import UIKit
 import WebKit
 
-struct KenModzView: View {
+struct ModSite: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let subtitleKey: String
+    let url: URL
+
+    static let kenModz = ModSite(
+        id: "kenmodz",
+        title: "KenModz",
+        subtitleKey: "mods.site_kenmodz_subtitle",
+        url: URL(string: "https://kenmodz.com/")!
+    )
+
+    static let cheatIOSVIP = ModSite(
+        id: "cheatiosvip",
+        title: "Cheat iOS VIP",
+        subtitleKey: "mods.site_cheat_subtitle",
+        url: URL(string: "https://mods.cheatiosvip.net/")!
+    )
+
+    static let all: [ModSite] = [.kenModz, .cheatIOSVIP]
+}
+
+struct ModBrowserView: View {
     @Environment(\.appLanguage) private var language
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
-    @StateObject private var model = KenModzWebViewModel()
+    let site: ModSite
+    @StateObject private var model: ModBrowserModel
+
+    init(site: ModSite) {
+        self.site = site
+        _model = StateObject(wrappedValue: ModBrowserModel(homeURL: site.url))
+    }
 
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                KenModzWebContainer(model: model)
+                ModBrowserWebContainer(model: model)
 
                 if model.isLoading {
                     ProgressView(value: min(max(model.progress, 0), 1))
@@ -30,7 +59,7 @@ struct KenModzView: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 bottomBar
             }
-            .navigationTitle(language.text("kenmodz.title"))
+            .navigationTitle(site.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -43,11 +72,11 @@ struct KenModzView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        openURL(model.currentURL ?? KenModzWebViewModel.homeURL)
+                        openURL(model.currentURL ?? model.homeURL)
                     } label: {
                         Image(systemName: "safari")
                     }
-                    .accessibilityLabel(language.text("kenmodz.open_external"))
+                    .accessibilityLabel(language.text("mods.open_external"))
                 }
             }
             .onAppear {
@@ -67,7 +96,7 @@ struct KenModzView: View {
             }
             navigationButton(
                 systemName: "chevron.right",
-                label: language.text("kenmodz.forward"),
+                label: language.text("mods.forward"),
                 enabled: model.canGoForward
             ) {
                 model.goForward()
@@ -75,7 +104,7 @@ struct KenModzView: View {
             Spacer(minLength: 0)
             navigationButton(
                 systemName: "house",
-                label: language.text("kenmodz.home"),
+                label: language.text("mods.home"),
                 enabled: true
             ) {
                 model.loadHome()
@@ -83,7 +112,7 @@ struct KenModzView: View {
             Spacer(minLength: 0)
             navigationButton(
                 systemName: "arrow.clockwise",
-                label: language.text("kenmodz.reload"),
+                label: language.text("mods.reload"),
                 enabled: true
             ) {
                 model.reload()
@@ -126,25 +155,25 @@ struct KenModzView: View {
             }
             .frame(width: 60, height: 60)
 
-            Text(language.text("kenmodz.error_title"))
+            Text(language.text("mods.error_title"))
                 .font(.headline)
                 .multilineTextAlignment(.center)
 
-            Text(message.isEmpty ? language.text("kenmodz.error_message") : message)
+            Text(message.isEmpty ? language.text("mods.error_message") : message)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
 
             HStack(spacing: 12) {
-                Button(language.text("kenmodz.retry")) {
+                Button(language.text("mods.retry")) {
                     model.reload()
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(AppTheme.accent)
 
-                Button(language.text("kenmodz.open_external")) {
-                    openURL(model.currentURL ?? KenModzWebViewModel.homeURL)
+                Button(language.text("mods.open_external")) {
+                    openURL(model.currentURL ?? model.homeURL)
                 }
                 .buttonStyle(.bordered)
             }
@@ -155,8 +184,8 @@ struct KenModzView: View {
     }
 }
 
-private struct KenModzWebContainer: UIViewRepresentable {
-    @ObservedObject var model: KenModzWebViewModel
+private struct ModBrowserWebContainer: UIViewRepresentable {
+    @ObservedObject var model: ModBrowserModel
 
     func makeUIView(context: Context) -> WKWebView {
         model.webView
@@ -165,8 +194,8 @@ private struct KenModzWebContainer: UIViewRepresentable {
     func updateUIView(_ uiView: WKWebView, context: Context) {}
 }
 
-final class KenModzWebViewModel: NSObject, ObservableObject {
-    static let homeURL = URL(string: "https://kenmodz.com/")!
+final class ModBrowserModel: NSObject, ObservableObject {
+    let homeURL: URL
 
     @Published private(set) var canGoBack = false
     @Published private(set) var canGoForward = false
@@ -179,7 +208,8 @@ final class KenModzWebViewModel: NSObject, ObservableObject {
     private var observers: [NSKeyValueObservation] = []
     private var hasStarted = false
 
-    override init() {
+    init(homeURL: URL) {
+        self.homeURL = homeURL
         let configuration = WKWebViewConfiguration()
         configuration.defaultWebpagePreferences.allowsContentJavaScript = true
         configuration.allowsInlineMediaPlayback = true
@@ -201,7 +231,7 @@ final class KenModzWebViewModel: NSObject, ObservableObject {
 
     func loadHome() {
         errorMessage = nil
-        webView.load(URLRequest(url: Self.homeURL))
+        webView.load(URLRequest(url: homeURL))
     }
 
     func reload() {
@@ -243,7 +273,7 @@ final class KenModzWebViewModel: NSObject, ObservableObject {
         ]
     }
 
-    private func publish(_ update: @escaping (KenModzWebViewModel) -> Void) {
+    private func publish(_ update: @escaping (ModBrowserModel) -> Void) {
         if Thread.isMainThread {
             update(self)
         } else {
@@ -261,7 +291,7 @@ final class KenModzWebViewModel: NSObject, ObservableObject {
     }
 }
 
-extension KenModzWebViewModel: WKNavigationDelegate {
+extension ModBrowserModel: WKNavigationDelegate {
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,
@@ -300,7 +330,7 @@ extension KenModzWebViewModel: WKNavigationDelegate {
     }
 }
 
-extension KenModzWebViewModel: WKUIDelegate {
+extension ModBrowserModel: WKUIDelegate {
     func webView(
         _ webView: WKWebView,
         createWebViewWith configuration: WKWebViewConfiguration,

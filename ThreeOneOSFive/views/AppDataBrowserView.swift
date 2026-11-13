@@ -7,13 +7,16 @@ struct AppDataBrowserView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var apps: [InstalledApp] = []
+    @State private var shortcuts: [FolderShortcut] = []
     @State private var isLoading = false
     @State private var isResolving = false
     @State private var searchText = ""
     @State private var errorMessage: String?
     @State private var hasLoaded = false
     @State private var workspaceURL: URL?
+    @State private var selectedCategory: HomeCategory = .apps
     @State private var activeSheet: FilesRootSheet?
+    @State private var copiedPath: String?
     @Binding private var tabSession: FilesTabSession
 
     init(tabSession: Binding<FilesTabSession>) {
@@ -25,6 +28,14 @@ struct AppDataBrowserView: View {
         let q = searchText.lowercased()
         return apps.filter {
             $0.name.lowercased().contains(q) || $0.bundleID.lowercased().contains(q)
+        }
+    }
+
+    private var filteredShortcuts: [FolderShortcut] {
+        guard !searchText.isEmpty else { return shortcuts }
+        let q = searchText.lowercased()
+        return shortcuts.filter {
+            $0.name.lowercased().contains(q) || $0.relativePath.lowercased().contains(q)
         }
     }
 
@@ -81,9 +92,15 @@ struct AppDataBrowserView: View {
                         create: true
                     )
                 }
+                loadShortcuts()
                 if !hasLoaded {
                     hasLoaded = true
                     reload()
+                }
+            }
+            .onChange(of: tabSession.activeTab?.navigationPath.count ?? 0) { count in
+                if count == 0 {
+                    loadShortcuts()
                 }
             }
             .navigationDestination(for: FileBrowserDestination.self) { destination in
@@ -105,24 +122,44 @@ struct AppDataBrowserView: View {
                 }
             }
         }
-        .sheet(item: $activeSheet) { sheet in
+        .sheet(item: $activeSheet, onDismiss: loadShortcuts) { sheet in
             switch sheet {
             case .assetSets:
                 AssetSetsView(apps: apps)
-            case .downloads:
-                DownloadsView(apps: apps) { destination, openInNewTab in
-                    activeSheet = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                        if openInNewTab {
-                            tabSession.openTab(navigationPath: [destination])
-                        } else {
-                            tabSession.setActiveNavigationPath([destination])
-                        }
-                    }
+            case .newShortcut:
+                ShortcutEditorView(
+                    apps: apps,
+                    shortcut: nil,
+                    existingShortcuts: shortcuts
+                ) { shortcut in
+                    addShortcut(shortcut)
                 }
-            case .kenModz:
-                KenModzView()
+            case .editShortcut(let shortcut):
+                ShortcutEditorView(
+                    apps: apps,
+                    shortcut: shortcut,
+                    existingShortcuts: shortcuts
+                ) { updated in
+                    updateShortcut(updated)
+                }
+            case .site(let site):
+                ModBrowserView(site: site)
             }
+        }
+        .alert(
+            language.text("browser.copy_path_done"),
+            isPresented: Binding(
+                get: { copiedPath != nil },
+                set: { isPresented in
+                    if !isPresented { copiedPath = nil }
+                }
+            )
+        ) {
+            Button(language.text("common.done"), role: .cancel) {
+                copiedPath = nil
+            }
+        } message: {
+            Text(copiedPath ?? "")
         }
     }
 
@@ -138,53 +175,268 @@ struct AppDataBrowserView: View {
             if horizontalSizeClass == .regular {
                 FilesTabStrip(session: $tabSession)
             }
-            AppSearchField(
-                text: $searchText,
-                prompt: language.text("browser.search"),
-                clearLabel: language.text("common.clear")
-            )
+            categoryPicker
+            if selectedCategory != .mods {
+                AppSearchField(
+                    text: $searchText,
+                    prompt: language.text(selectedCategory == .apps ? "browser.search" : "shortcuts.search"),
+                    clearLabel: language.text("common.clear")
+                )
+            }
             Divider()
-            appRows
+            homeRows
         }
     }
 
-    private var appRows: some View {
-        List {
-            Section {
-                DekpopHeroCard()
-                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 6, trailing: 16))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
+    private var categoryPicker: some View {
+        Picker(language.text("home.category"), selection: $selectedCategory) {
+            ForEach(HomeCategory.allCases) { category in
+                Text(language.text(category.titleKey)).tag(category)
             }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(AppTheme.pageBackground)
+        .onChange(of: selectedCategory) { _ in
+            searchText = ""
+        }
+    }
 
-            Section {
-                Button {
-                    activeSheet = .downloads
-                } label: {
+    @ViewBuilder
+    private var homeRows: some View {
+        List {
+            switch selectedCategory {
+            case .apps:
+                appsContent
+            case .shortcuts:
+                shortcutsContent
+            case .mods:
+                modsContent
+            }
+        }
+        .listStyle(.insetGrouped)
+        .environment(\.defaultMinListRowHeight, 48)
+        .scrollDismissesKeyboard(.interactively)
+        .overlay {
+            if selectedCategory == .apps {
+                Group {
+                    switch overlayState {
+                    case .loading:
+                        ProgressView(language.text("browser.loading"))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    case .empty:
+                        emptyView
+                    case .noResults:
+                        searchEmptyView
+                    case .none:
+                        EmptyView()
+                    }
+                }
+                .transition(.opacity)
+                .animation(interfaceAnimation, value: overlayState)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var appsContent: some View {
+        Section {
+            DekpopHeroCard()
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 6, trailing: 16))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+        }
+
+        Section {
+            DekpopLanguagePicker()
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                .listRowBackground(Color.clear)
+        } header: {
+            Text(language.text("dekpop.language"))
+        } footer: {
+            Text(language.text("dekpop.language_hint"))
+        }
+
+        if let workspaceURL {
+            Section(language.text("browser.workspace")) {
+                let workspaceDestination = FileBrowserDestination(
+                    containerPath: workspaceURL.path,
+                    startPath: workspaceURL.path,
+                    title: DekpopBrand.displayName,
+                    bundleID: nil
+                )
+                NavigationLink(value: workspaceDestination) {
                     HStack(spacing: 10) {
                         AppRowIcon(
-                            systemName: "arrow.down.circle.fill",
-                            tint: AppTheme.accent,
+                            systemName: "folder.fill",
+                            tint: AppTheme.accentSecondary,
                             frameSize: 34
                         )
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(language.text("downloads.title"))
+                            Text(DekpopBrand.displayName)
                                 .font(.subheadline.weight(.bold))
-                            Text(language.text("downloads.summary_subtitle"))
+                            Text(language.text("dekpop.workspace_subtitle"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                 }
-                .buttonStyle(.plain)
+                .contextMenu {
+                    openInNewTabButton(workspaceDestination)
+                }
+            }
+        }
+        Section {
+            ForEach(filteredApps) { app in
+                if app.containerPath.isEmpty {
+                    appRow(app)
+                } else {
+                    let appDestination = FileBrowserDestination(
+                        containerPath: app.containerPath,
+                        startPath: app.containerPath,
+                        title: app.displayName,
+                        bundleID: app.bundleID
+                    )
+                    NavigationLink(value: appDestination) {
+                        appRow(app)
+                    }
+                    .contextMenu {
+                        openInNewTabButton(appDestination)
+                    }
+                }
+            }
+        } header: {
+            HStack(spacing: 8) {
+                Text(language.text("browser.apps_count", Int64(filteredApps.count)))
+                Spacer()
+                if isResolving {
+                    ProgressView()
+                        .controlSize(.mini)
+                    Text(language.text("browser.mha_scanning"))
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .textCase(nil)
+        }
+        Section {
+            DekpopFooterView()
+        }
+    }
 
+    @ViewBuilder
+    private var shortcutsContent: some View {
+        Section {
+            Button {
+                activeSheet = .newShortcut
+            } label: {
+                HStack(spacing: 10) {
+                    AppRowIcon(
+                        systemName: "plus",
+                        tint: AppTheme.accent,
+                        frameSize: 34
+                    )
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(language.text("shortcuts.add"))
+                            .font(.subheadline.weight(.bold))
+                        Text(language.text("shortcuts.add_subtitle"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 4)
+            }
+            .buttonStyle(.plain)
+        } header: {
+            Text(language.text("shortcuts.title"))
+        } footer: {
+            Text(language.text("shortcuts.footer"))
+        }
+
+        if filteredShortcuts.isEmpty {
+            Section {
+                VStack(spacing: 8) {
+                    Image(systemName: searchText.isEmpty ? "bookmark" : "magnifyingglass")
+                        .font(.system(size: AppTheme.emptyIconSize, weight: .light))
+                        .foregroundStyle(.secondary)
+                    Text(language.text(searchText.isEmpty
+                        ? "shortcuts.empty_title"
+                        : "shortcuts.search_empty"))
+                        .font(.subheadline.weight(.medium))
+                    if searchText.isEmpty {
+                        Text(language.text("shortcuts.empty_message"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+            }
+        } else {
+            Section {
+                ForEach(filteredShortcuts) { shortcut in
+                    NavigationLink(value: shortcut.fileBrowserDestination) {
+                        shortcutRow(shortcut)
+                    }
+                    .contextMenu {
+                        Button {
+                            openShortcut(shortcut, inNewTab: true)
+                        } label: {
+                            Label(language.text("browser.open_new_tab"), systemImage: "square.on.square")
+                        }
+                        Button {
+                            activeSheet = .editShortcut(shortcut)
+                        } label: {
+                            Label(language.text("shortcuts.edit"), systemImage: "pencil")
+                        }
+                        Button {
+                            copyPath(shortcut.startPath)
+                        } label: {
+                            Label(language.text("shortcuts.copy_path"), systemImage: "doc.on.doc")
+                        }
+                        Divider()
+                        Button(role: .destructive) {
+                            deleteShortcut(shortcut)
+                        } label: {
+                            Label(language.text("shortcuts.delete"), systemImage: "trash")
+                        }
+                    }
+                    .swipeActions {
+                        Button(role: .destructive) {
+                            deleteShortcut(shortcut)
+                        } label: {
+                            Label(language.text("shortcuts.delete"), systemImage: "trash")
+                        }
+                    }
+                }
+            } header: {
+                Text(language.text("shortcuts.count", Int64(filteredShortcuts.count)))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textCase(nil)
+            }
+        }
+
+        Section {
+            DekpopFooterView()
+        }
+    }
+
+    @ViewBuilder
+    private var modsContent: some View {
+        Section {
+            ForEach(ModSite.all) { site in
                 Button {
-                    activeSheet = .kenModz
+                    activeSheet = .site(site)
                 } label: {
                     HStack(spacing: 10) {
                         AppRowIcon(
@@ -193,121 +445,59 @@ struct AppDataBrowserView: View {
                             frameSize: 34
                         )
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(language.text("kenmodz.title"))
+                            Text(site.title)
                                 .font(.subheadline.weight(.bold))
-                            Text(language.text("kenmodz.subtitle"))
+                            Text(language.text(site.subtitleKey))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                                .lineLimit(2)
                         }
                         Spacer()
-                        Image(systemName: "chevron.right")
+                        Image(systemName: "arrow.up.right.square")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                 }
                 .buttonStyle(.plain)
-            } header: {
-                Text(language.text("downloads.quick_access"))
             }
+        } header: {
+            Text(language.text("mods.title"))
+        } footer: {
+            Text(language.text("mods.footer"))
+        }
 
-            Section {
-                DekpopLanguagePicker()
-                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                    .listRowBackground(Color.clear)
-            } header: {
-                Text(language.text("dekpop.language"))
-            } footer: {
-                Text(language.text("dekpop.language_hint"))
-            }
-
-            if let workspaceURL {
-                Section(language.text("browser.workspace")) {
-                    let workspaceDestination = FileBrowserDestination(
-                        containerPath: workspaceURL.path,
-                        startPath: workspaceURL.path,
-                        title: DekpopBrand.displayName,
-                        bundleID: nil
-                    )
-                    NavigationLink(value: workspaceDestination) {
-                        HStack(spacing: 10) {
-                            AppRowIcon(
-                                systemName: "folder.fill",
-                                tint: AppTheme.accentSecondary,
-                                frameSize: 34
-                            )
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(DekpopBrand.displayName)
-                                    .font(.subheadline.weight(.bold))
-                                Text(language.text("dekpop.workspace_subtitle"))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                    .contextMenu {
-                        openInNewTabButton(workspaceDestination)
-                    }
-                }
-            }
-            Section {
-                ForEach(filteredApps) { app in
-                    if app.containerPath.isEmpty {
-                        appRow(app)
-                    } else {
-                        let appDestination = FileBrowserDestination(
-                            containerPath: app.containerPath,
-                            startPath: app.containerPath,
-                            title: app.displayName,
-                            bundleID: app.bundleID
-                        )
-                        NavigationLink(value: appDestination) {
-                            appRow(app)
-                        }
-                        .contextMenu {
-                            openInNewTabButton(appDestination)
-                        }
-                    }
-                }
-            } header: {
-                HStack(spacing: 8) {
-                    Text(language.text("browser.apps_count", Int64(filteredApps.count)))
-                    Spacer()
-                    if isResolving {
-                        ProgressView()
-                            .controlSize(.mini)
-                        Text(language.text("browser.mha_scanning"))
-                    }
-                }
-                .font(.caption)
+        Section {
+            Text(language.text("mods.intro"))
+                .font(.footnote)
                 .foregroundStyle(.secondary)
-                .textCase(nil)
-            }
-            Section {
-                DekpopFooterView()
-            }
         }
-        .listStyle(.insetGrouped)
-        .environment(\.defaultMinListRowHeight, 48)
-        .scrollDismissesKeyboard(.interactively)
-        .overlay {
-            Group {
-                switch overlayState {
-                case .loading:
-                    ProgressView(language.text("browser.loading"))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                case .empty:
-                    emptyView
-                case .noResults:
-                    searchEmptyView
-                case .none:
-                    EmptyView()
-                }
-            }
-            .transition(.opacity)
-            .animation(interfaceAnimation, value: overlayState)
+
+        Section {
+            DekpopFooterView()
         }
+    }
+
+    private func shortcutRow(_ shortcut: FolderShortcut) -> some View {
+        HStack(spacing: 10) {
+            AppRowIcon(
+                systemName: "folder.fill",
+                tint: AppTheme.accentSecondary,
+                frameSize: 34
+            )
+            VStack(alignment: .leading, spacing: 2) {
+                Text(shortcut.name)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
+                Text(shortcut.relativePath)
+                    .font(.caption2.monospaced())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .truncationMode(.middle)
+            }
+            Spacer(minLength: 4)
+        }
+        .padding(.vertical, 4)
     }
 
     private func appRow(_ app: InstalledApp) -> some View {
@@ -343,6 +533,47 @@ struct AppDataBrowserView: View {
         } label: {
             Label(language.text("browser.open_new_tab"), systemImage: "square.on.square")
         }
+    }
+
+    private func openShortcut(_ shortcut: FolderShortcut, inNewTab: Bool) {
+        if inNewTab {
+            tabSession.openTab(navigationPath: [shortcut.fileBrowserDestination])
+        } else {
+            tabSession.setActiveNavigationPath([shortcut.fileBrowserDestination])
+        }
+    }
+
+    private func copyPath(_ path: String) {
+        UIPasteboard.general.string = path
+        copiedPath = path
+    }
+
+    private func loadShortcuts() {
+        shortcuts = AssetSetService.loadShortcuts()
+            .sorted { $0.createdAt > $1.createdAt }
+    }
+
+    private func addShortcut(_ shortcut: FolderShortcut) {
+        guard !shortcuts.contains(where: { $0.id == shortcut.id }) else { return }
+        var updated = shortcuts
+        updated.insert(shortcut, at: 0)
+        shortcuts = updated
+        AssetSetService.saveShortcuts(updated)
+    }
+
+    private func updateShortcut(_ shortcut: FolderShortcut) {
+        guard let index = shortcuts.firstIndex(where: { $0.id == shortcut.id }) else { return }
+        var updated = shortcuts
+        updated[index] = shortcut
+        shortcuts = updated
+        AssetSetService.saveShortcuts(updated)
+    }
+
+    private func deleteShortcut(_ shortcut: FolderShortcut) {
+        var updated = shortcuts
+        updated.removeAll { $0.id == shortcut.id }
+        shortcuts = updated
+        AssetSetService.saveShortcuts(updated)
     }
 
     private var emptyView: some View {
@@ -495,12 +726,36 @@ struct AppDataBrowserView: View {
     }
 }
 
-private enum FilesRootSheet: String, Identifiable {
-    case assetSets
-    case downloads
-    case kenModz
+private enum HomeCategory: String, CaseIterable, Identifiable {
+    case apps
+    case shortcuts
+    case mods
 
     var id: String { rawValue }
+
+    var titleKey: String {
+        "home.category_\(rawValue)"
+    }
+}
+
+private enum FilesRootSheet: Identifiable {
+    case assetSets
+    case newShortcut
+    case editShortcut(FolderShortcut)
+    case site(ModSite)
+
+    var id: String {
+        switch self {
+        case .assetSets:
+            return "assetSets"
+        case .newShortcut:
+            return "newShortcut"
+        case .editShortcut(let shortcut):
+            return "edit-\(shortcut.id.uuidString)"
+        case .site(let site):
+            return "site-\(site.id)"
+        }
+    }
 }
 
 private enum AppBrowserOverlayState: Equatable {

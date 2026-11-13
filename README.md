@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.4.0-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.5.0-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -25,16 +25,16 @@
 > [!WARNING]
 > dekpop is research software for personal device management. Keep a backup and use it only on devices and data you own. It can modify files inside app containers.
 
-## What's new in 1.4.0 — Asset Sets (creator toolkit)
+## What's new in 1.5.0 — Apps / Shortcuts / Mods
 
-- **Asset Set Manager** — organize your own files into named, reusable sets directly inside dekpop. Open it from the cube-box toolbar button on the Files root.
-- Create a set, choose a category (character / outfit / weapon / bundle), import your own files, assign each to a slot, then **Apply** to copy the whole set into an app container, the dekpop folder, a folder from the Files app, or a custom path (with an optional subfolder).
-- Apply reports copied, skipped and failed counts, and supports replace / keep both / skip conflict policies.
-- **Download Center** — open it from the Quick Access row on the Files root to reinstall any saved set in one tap into its remembered destination, see copied/skipped/failed results, or download every configured set at once.
-- **Folder shortcuts** — save app containers, the dekpop workspace or custom folders (plus a subfolder) and open them instantly from the same window, in the current tab or a new one.
-- **KenModz** — a native-styled in-app browser for [kenmodz.com](https://kenmodz.com/), reachable from Quick Access. It keeps the dekpop look (theme, English/Thai controls), remembers cookies and sessions, shows a progress bar, and offers back / forward / home / reload plus *Open in Safari*. Sign-in and key pages open inside the app.
-- Everything is stored in the dekpop document workspace (`AssetSets/`), so it is reachable from the Files browser and survives app updates.
-- Works with files you own or have the right to use — no game-specific bundles, paths, or assets are baked in.
+- **Category tabs on the home screen** — a segmented picker at the top switches between **Apps**, **Shortcuts** and **Mods**, so the app opens on exactly what you need.
+- **Editable folder shortcuts** — save any folder and jump straight into it. Create one from the Shortcuts tab, or from Files: long-press a folder and choose **Add shortcut**, or use **Add shortcut** in the + menu for the folder you are currently in.
+- **Copy a file address** — long-press any file or folder and choose **Copy path** (or **Copy this folder's path** in the + menu). Paste that path into the shortcut editor's **Paste** button; the editor detects which app container the path belongs to and stores just the relative part.
+- **Shortcut editor** — pick the target app container or the dekpop workspace, type or paste a path (absolute paths starting with `/` are accepted too), preview the exact folder that will open, and get a warning when the same folder already has a shortcut. Shortcuts can be edited, opened in a new tab, copied or deleted.
+- **Mods tab with two sites** — **KenModz** ([kenmodz.com](https://kenmodz.com/)) and **Cheat iOS VIP** ([mods.cheatiosvip.net](https://mods.cheatiosvip.net/)) open in a built-in browser that keeps the dekpop theme, remembers cookies and sessions, shows a progress bar, and offers back / forward / home / reload plus *Open in Safari*.
+- **Download Center removed** — the separate Downloads window is gone. Asset sets still live on the cube-box toolbar button and still use the same Apply flow, target picker and conflict policies.
+- Everything is stored in the dekpop document workspace (`AssetSets/`), so shortcuts survive app updates and stay reachable from the Files browser.
+- Version is now `1.5.0` (build 13). IPA layout and bundle identifier are unchanged.
 
 ## What's new in 1.3.0 — English + Thai
 

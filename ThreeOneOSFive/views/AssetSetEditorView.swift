@@ -19,8 +19,6 @@ struct AssetSetEditorView: View {
     private let workingSetID: UUID
     private let createdAt: Date
     private let originalItems: [AssetItem]
-    private let destination: AssetSetDestination?
-    private let lastAppliedAt: Date?
     private let onSave: (AssetSet) -> Void
 
     init(set: AssetSet?, onSave: @escaping (AssetSet) -> Void) {
@@ -29,8 +27,6 @@ struct AssetSetEditorView: View {
         self.workingSetID = set?.id ?? UUID()
         self.createdAt = set?.createdAt ?? Date()
         self.originalItems = set?.items ?? []
-        self.destination = set?.destination
-        self.lastAppliedAt = set?.lastAppliedAt
         _name = State(initialValue: set?.name ?? "")
         _category = State(initialValue: set?.category ?? .outfit)
         _version = State(initialValue: set?.version ?? "1.0")
@@ -49,9 +45,7 @@ struct AssetSetEditorView: View {
             version: version,
             iconName: category.iconName,
             createdAt: createdAt,
-            items: items,
-            destination: destination,
-            lastAppliedAt: lastAppliedAt
+            items: items
         )
     }
 

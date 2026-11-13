@@ -62,19 +62,19 @@ enum AssetSetService {
         assetSetsDirectoryURL?.appendingPathComponent(shortcutsFileName, isDirectory: false)
     }
 
-    static func loadShortcuts() -> [DownloadShortcut] {
+    static func loadShortcuts() -> [FolderShortcut] {
         guard let url = shortcutsStorageURL,
               FileManager.default.fileExists(atPath: url.path) else { return [] }
         do {
             let data = try Data(contentsOf: url)
-            return try JSONDecoder().decode([DownloadShortcut].self, from: data)
+            return try JSONDecoder().decode([FolderShortcut].self, from: data)
         } catch {
             log("shortcuts: failed to load: \(error.localizedDescription)")
             return []
         }
     }
 
-    static func saveShortcuts(_ shortcuts: [DownloadShortcut]) {
+    static func saveShortcuts(_ shortcuts: [FolderShortcut]) {
         guard let url = shortcutsStorageURL else { return }
         do {
             let data = try JSONEncoder().encode(shortcuts)
@@ -218,15 +218,6 @@ enum AssetSetService {
             skippedCount: skipped,
             failedCount: failed
         )
-    }
-
-    static func apply(
-        set: AssetSet,
-        to destination: AssetSetDestination,
-        conflictPolicy: FileConflictPolicy = .replace
-    ) -> AssetSetApplicationResult? {
-        guard let target = destination.targetURL(workspaceURL: workspaceURL) else { return nil }
-        return apply(set: set, to: target, conflictPolicy: conflictPolicy)
     }
 
     // MARK: - Helpers

@@ -2,6 +2,27 @@
 
 All notable user-facing changes are documented in this file.
 
+## [1.5.0] - 2026-11-13 — Apps / Shortcuts / Mods
+
+### Added
+
+- **Home category tabs** — a segmented picker above the list (Apps / Shortcuts / Mods) replaces the old Quick Access row. Search is scoped to the selected tab and hidden on Mods.
+- **Editable folder shortcuts** (`ShortcutsView.swift`) — the Shortcuts tab lists saved folders with name, relative path, search, swipe-delete and a context menu (open in new tab, edit, copy path, delete). `ShortcutEditorView` picks a target app container or the dekpop workspace, accepts a relative or absolute path, previews the resolved folder, warns about duplicates, and can infer the target container from a pasted absolute path.
+- **Add shortcut from Files** — long-press any folder and choose **Add shortcut**, or use **Add shortcut** in the + menu for the current folder. Duplicate shortcuts are rejected with a notice.
+- **Copy path** — long-press any file or folder and choose **Copy path**, or **Copy this folder's path** in the + menu. The copied address can be pasted straight into the shortcut editor.
+- **Cheat iOS VIP** — [mods.cheatiosvip.net](https://mods.cheatiosvip.net/) joins KenModz in the Mods tab. `ModBrowserView.swift` was generalized to a `ModSite` list; both sites share the same in-app browser (theme, cookies, progress bar, back / forward / home / reload, Open in Safari, error retry).
+- Localization keys for `home.*`, `shortcuts.*`, `mods.*` and the new browser path actions in both English and Thai (631 keys each, format specifiers matched).
+
+### Removed
+
+- **Download Center** (`DownloadsView.swift`) and the per-set saved destination fields (`AssetSet.destination`, `AssetSet.lastAppliedAt`, `AssetSetDestination`). Asset sets keep their Apply flow and target picker.
+- The old `KenModzView` / `kenmodz.*` keys and the `downloads.*` keys.
+
+### Changed
+
+- `DownloadShortcut` is now `FolderShortcut`, with `relativePath` and `resolvedPath(path:containerPath:)` helpers. Stored shortcuts remain in `AssetSets/download-shortcuts.json`, so existing shortcuts survive the upgrade.
+- Version is now `1.5.0` (build 13). IPA layout and bundle identifier are unchanged.
+
 ## [1.4.0] - 2026-11-13 — Asset Sets (creator toolkit)
 
 ### Added

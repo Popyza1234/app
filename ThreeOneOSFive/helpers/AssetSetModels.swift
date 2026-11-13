@@ -11,8 +11,6 @@ struct AssetSet: Identifiable, Codable, Equatable, Hashable {
     var iconName: String
     var createdAt: Date
     var items: [AssetItem]
-    var destination: AssetSetDestination? = nil
-    var lastAppliedAt: Date? = nil
 }
 
 struct AssetItem: Identifiable, Codable, Equatable, Hashable {
@@ -69,65 +67,8 @@ struct AssetSetApplicationResult: Equatable {
     let failedCount: Int
 }
 
-/// A saved install location so a set can be downloaded with one tap.
-struct AssetSetDestination: Codable, Equatable, Hashable {
-    enum Kind: String, Codable, CaseIterable, Identifiable {
-        case app
-        case workspace
-        case custom
-
-        var id: String { rawValue }
-
-        func localizedName(language: AppLanguage) -> String {
-            language.text("downloads.target_\(rawValue)")
-        }
-
-        var iconName: String {
-            switch self {
-            case .app: return "app"
-            case .workspace: return "folder.fill"
-            case .custom: return "folder"
-            }
-        }
-    }
-
-    var kind: Kind
-    var path: String
-    var subfolder: String
-    var displayName: String
-
-    var normalizedSubfolder: String {
-        subfolder
-            .split(separator: "/")
-            .map(String.init)
-            .filter { !$0.isEmpty && $0 != "." && $0 != ".." }
-            .joined(separator: "/")
-    }
-
-    var summary: String {
-        let base = displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? path
-            : displayName
-        return normalizedSubfolder.isEmpty ? base : base + "/" + normalizedSubfolder
-    }
-
-    func targetURL(workspaceURL: URL?) -> URL? {
-        let base: URL?
-        switch kind {
-        case .workspace:
-            base = workspaceURL
-        case .app, .custom:
-            base = path.isEmpty ? nil : URL(fileURLWithPath: path, isDirectory: true)
-        }
-        guard let base else { return nil }
-        return normalizedSubfolder.isEmpty
-            ? base
-            : base.appendingPathComponent(normalizedSubfolder, isDirectory: true)
-    }
-}
-
 /// A saved location that opens directly in the Files browser.
-struct DownloadShortcut: Identifiable, Codable, Equatable, Hashable {
+struct FolderShortcut: Identifiable, Codable, Equatable, Hashable {
     var id = UUID()
     var name: String
     var containerPath: String
@@ -142,5 +83,26 @@ struct DownloadShortcut: Identifiable, Codable, Equatable, Hashable {
             title: name,
             bundleID: bundleID
         )
+    }
+
+    /// Path shown in the UI: relative to the container when possible.
+    var relativePath: String {
+        guard !containerPath.isEmpty, startPath.hasPrefix(containerPath + "/") else {
+            return startPath
+        }
+        return String(startPath.dropFirst(containerPath.count + 1))
+    }
+
+    static func resolvedPath(path: String, containerPath: String) -> String {
+        let trimmed = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return containerPath }
+        if trimmed.hasPrefix("/") {
+            return URL(fileURLWithPath: trimmed).standardizedFileURL.path
+        }
+        guard !containerPath.isEmpty else { return trimmed }
+        return URL(fileURLWithPath: containerPath, isDirectory: true)
+            .appendingPathComponent(trimmed)
+            .standardizedFileURL
+            .path
     }
 }

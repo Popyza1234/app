@@ -180,6 +180,17 @@ struct FileBrowserView: View {
                         } label: {
                             Label(language.text("browser.new_folder"), systemImage: "folder.badge.plus")
                         }
+                        Divider()
+                        Button {
+                            copyPath(currentPath)
+                        } label: {
+                            Label(language.text("browser.copy_current_path"), systemImage: "link")
+                        }
+                        Button {
+                            addShortcutForCurrentFolder()
+                        } label: {
+                            Label(language.text("browser.add_shortcut"), systemImage: "bookmark")
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -423,6 +434,18 @@ struct FileBrowserView: View {
         ShareLink(item: URL(fileURLWithPath: entry.path)) {
             Label(language.text("browser.share"), systemImage: "square.and.arrow.up")
         }
+        Button {
+            copyPath(entry.path)
+        } label: {
+            Label(language.text("browser.copy_path"), systemImage: "link")
+        }
+        if entry.isDirectory {
+            Button {
+                addShortcut(name: entry.name, startPath: entry.path)
+            } label: {
+                Label(language.text("browser.add_shortcut"), systemImage: "bookmark")
+            }
+        }
         if !entry.isDirectory, entry.name.lowercased().hasSuffix(".zip") {
             Button {
                 extractArchive(entry)
@@ -468,6 +491,50 @@ struct FileBrowserView: View {
             ]
         )
         filesTabSession.wrappedValue = updatedSession
+    }
+
+    private func copyPath(_ path: String) {
+        UIPasteboard.general.string = path
+        operationNotice = FileReplacementNotice(
+            title: language.text("browser.copy_path_done"),
+            message: path
+        )
+    }
+
+    private func addShortcutForCurrentFolder() {
+        let folderName = currentPath == containerPath
+            ? title
+            : (currentPath as NSString).lastPathComponent
+        addShortcut(name: folderName, startPath: currentPath)
+    }
+
+    private func addShortcut(name: String, startPath: String) {
+        var shortcuts = AssetSetService.loadShortcuts()
+        guard !shortcuts.contains(where: { $0.startPath == startPath }) else {
+            operationNotice = FileReplacementNotice(
+                title: language.text("browser.shortcut_exists_title"),
+                message: language.text("browser.shortcut_exists_message")
+            )
+            return
+        }
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let component = (startPath as NSString).lastPathComponent
+        let shortcut = FolderShortcut(
+            name: trimmedName.isEmpty
+                ? (component.isEmpty ? language.text("shortcuts.default_name") : component)
+                : trimmedName,
+            containerPath: containerPath,
+            startPath: startPath,
+            bundleID: bundleID,
+            createdAt: Date()
+        )
+        shortcuts.insert(shortcut, at: 0)
+        AssetSetService.saveShortcuts(shortcuts)
+        operationNotice = FileReplacementNotice(
+            title: language.text("browser.shortcut_saved_title"),
+            message: language.text("browser.shortcut_saved_message", shortcut.name)
+        )
+        log("filebrowser: shortcut saved path=\(startPath)")
     }
 
     private var fileEmptyView: some View {
