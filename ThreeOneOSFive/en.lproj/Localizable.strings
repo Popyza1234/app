@@ -656,3 +656,12 @@
 "announcement.badge" = "Announcement";
 "announcement.got_it" = "Got it";
 "announcement.open_link" = "Open link";
+"theme.title" = "Theme";
+"theme.intro" = "Pick a look — colours, icons, gradients and the launch screen switch instantly.";
+"theme.footer" = "Your choice is remembered and still follows light or dark mode.";
+"theme.violet" = "Violet Pop";
+"theme.midnight" = "Midnight";
+"theme.sunset" = "Sunset";
+"theme.sakura" = "Sakura";
+"theme.forest" = "Forest";
+"theme.mono" = "Graphite";

@@ -10,6 +10,7 @@ struct DekpopLaunchView: View {
 
     @State private var started = false
     @State private var shimmerPhase: CGFloat = 0
+    @State private var floating = false
 
     var body: some View {
         ZStack {
@@ -61,6 +62,9 @@ struct DekpopLaunchView: View {
             withAnimation(.linear(duration: 1.4).repeatForever(autoreverses: false)) {
                 shimmerPhase = 1
             }
+            withAnimation(.easeInOut(duration: 5).repeatForever(autoreverses: true)) {
+                floating = true
+            }
         }
     }
 
@@ -69,17 +73,19 @@ struct DekpopLaunchView: View {
             Circle()
                 .fill(Color.white.opacity(0.10))
                 .frame(width: 260, height: 260)
-                .offset(x: 130, y: -240)
+                .offset(x: floating ? 108 : 130, y: floating ? -262 : -240)
             Circle()
                 .fill(Color.white.opacity(0.07))
                 .frame(width: 200, height: 200)
-                .offset(x: -160, y: 200)
+                .offset(x: floating ? -138 : -160, y: floating ? 224 : 200)
             Circle()
                 .fill(Color.white.opacity(0.06))
                 .frame(width: 120, height: 120)
-                .offset(x: -120, y: -300)
+                .offset(x: floating ? -100 : -120, y: floating ? -324 : -300)
         }
+        .blur(radius: 2)
         .ignoresSafeArea()
+        .allowsHitTesting(false)
     }
 
     private var logo: some View {

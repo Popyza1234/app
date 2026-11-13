@@ -1,8 +1,8 @@
 import Foundation
 
-/// A one-shot in-app announcement shown when the app opens.
-/// Add a new entry at the top of `announcements` (with a fresh `id`) to
-/// publish a new notice; users who already dismissed an older `id` will see it.
+/// An in-app announcement shown every time the app opens.
+/// Add a new entry at the top of `announcements` to publish a new notice;
+/// the first entry is the one displayed, on every launch.
 struct DekpopAnnouncement: Identifiable {
     let id: String
     let title: String
@@ -12,8 +12,6 @@ struct DekpopAnnouncement: Identifiable {
 }
 
 enum AnnouncementStore {
-    private static let dismissedPrefix = "announcement.dismissed."
-
     static let announcements: [DekpopAnnouncement] = [
         DekpopAnnouncement(
             id: "welcome-1.5.0",
@@ -24,15 +22,9 @@ enum AnnouncementStore {
         )
     ]
 
-    static func pending() -> DekpopAnnouncement? {
-        announcements.first { !isDismissed($0) }
-    }
-
-    static func markDismissed(_ announcement: DekpopAnnouncement) {
-        UserDefaults.standard.set(true, forKey: dismissedPrefix + announcement.id)
-    }
-
-    private static func isDismissed(_ announcement: DekpopAnnouncement) -> Bool {
-        UserDefaults.standard.bool(forKey: dismissedPrefix + announcement.id)
+    /// The notice shown after the launch screen — always the newest one,
+    /// every single launch.
+    static var current: DekpopAnnouncement? {
+        announcements.first
     }
 }

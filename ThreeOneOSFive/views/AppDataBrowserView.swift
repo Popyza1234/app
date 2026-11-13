@@ -59,6 +59,9 @@ struct AppDataBrowserView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     DekpopLanguageMenu()
                 }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    DekpopThemeToolbarButton()
+                }
                 ToolbarItem(placement: .principal) {
                     DekpopWordmark(compact: true)
                 }
@@ -186,6 +189,7 @@ struct AppDataBrowserView: View {
             Divider()
             homeRows
         }
+        .background(DekpopAnimatedBackground().ignoresSafeArea())
     }
 
     private var categoryPicker: some View {
@@ -198,7 +202,7 @@ struct AppDataBrowserView: View {
         .labelsHidden()
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(AppTheme.pageBackground)
+        .background(Color.clear)
         .onChange(of: selectedCategory) { _ in
             searchText = ""
         }
@@ -217,6 +221,7 @@ struct AppDataBrowserView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
         .environment(\.defaultMinListRowHeight, 48)
         .scrollDismissesKeyboard(.interactively)
         .overlay {

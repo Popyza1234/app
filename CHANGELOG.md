@@ -2,6 +2,23 @@
 
 All notable user-facing changes are documented in this file.
 
+## [Unreleased] - 2026-11-13 — themes, look & feel
+
+### Added
+
+- **Six themes** (`DekpopPaletteID`, `DekpopPalette`, `ThemeManager`) — Violet Pop, Midnight, Sunset, Sakura, Forest and Graphite. Each palette drives the accent, secondary accent, gradient, icons and launch screen, and still follows light/dark mode. The choice is saved in `UserDefaults` (`dekpop.theme`) and restored on the next launch.
+- **Theme picker** (`DekpopThemePicker`) — a sheet with a live preview card per palette, palette swatches, a checkmark on the active theme, selection haptics and a Done button. Reachable from the `paintpalette` toolbar button on the Files root and inside every folder.
+- **Animated background** (`DekpopAnimatedBackground`) — soft palette-coloured light drifts slowly behind the Files list (disabled automatically with Reduce Motion).
+- `DekpopPressStyle` springy press feedback and `DekpopHaptics` helpers.
+
+### Changed
+
+- `AppTheme` colours and gradients are now theme-aware computed values instead of fixed constants, so every existing call site follows the selected palette without changes.
+- The hero card gained drifting highlights, a moving sheen and a gradient border; the launch screen decorations now float.
+- The Files root list uses a transparent scroll background so the animated palette backdrop shows behind the cards.
+- The announcement card is now shown on **every** app launch instead of once per announcement id. Dismissing it only closes the card for the current session, so the newest notice (`AnnouncementStore.current`) always appears after the launch screen.
+- Localization keys `theme.*` added in English and Thai (636 → 645 keys each).
+
 ## [1.5.0] - 2026-11-13 — Apps / Shortcuts / Mods
 
 ### Added

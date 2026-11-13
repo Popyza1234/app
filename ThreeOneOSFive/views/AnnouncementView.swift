@@ -1,8 +1,7 @@
 import SwiftUI
 
-/// Full-screen announcement card shown once after the launch screen.
-/// Dismissing it is remembered per announcement id, so a fresh notice with a
-/// new id will be shown again on the next launch.
+/// Full-screen announcement card shown after the launch screen on every app
+/// launch. Dismissing it only closes the card for this session.
 struct AnnouncementView: View {
     @Environment(\.appLanguage) private var language
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -122,7 +121,6 @@ struct AnnouncementView: View {
     }
 
     private func close() {
-        AnnouncementStore.markDismissed(announcement)
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.22)) {
             appeared = false
         }

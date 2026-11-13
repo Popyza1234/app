@@ -9,41 +9,181 @@ enum DekpopBrand {
     static let build = "14"
 }
 
+// MARK: - Themes
+
+/// Every look the app can wear. The palette drives accents, icons, gradients,
+/// the hero card and the launch screen; the selection is persisted.
+enum DekpopPaletteID: String, CaseIterable, Identifiable {
+    case violet
+    case midnight
+    case sunset
+    case sakura
+    case forest
+    case mono
+
+    var id: String { rawValue }
+
+    var titleKey: String { "theme.\(rawValue)" }
+}
+
+/// One selectable theme. Colours are stored as `UIColor` so light/dark mode
+/// still resolves automatically while the palette itself changes.
+struct DekpopPalette: Identifiable {
+    let id: DekpopPaletteID
+    let lightAccent: UIColor
+    let darkAccent: UIColor
+    let lightSecondary: UIColor
+    let darkSecondary: UIColor
+    let brandStart: UIColor
+    let brandMiddle: UIColor
+    let brandEnd: UIColor
+
+    var accent: Color { AppTheme.dynamic(light: lightAccent, dark: darkAccent) }
+    var accentSecondary: Color { AppTheme.dynamic(light: lightSecondary, dark: darkSecondary) }
+
+    var brandGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(uiColor: brandStart), Color(uiColor: brandMiddle), Color(uiColor: brandEnd)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    static func rgb(_ r: CGFloat, _ g: CGFloat, _ b: CGFloat) -> UIColor {
+        UIColor(red: r, green: g, blue: b, alpha: 1)
+    }
+
+    static func palette(for id: DekpopPaletteID) -> DekpopPalette {
+        switch id {
+        case .violet:
+            return DekpopPalette(
+                id: .violet,
+                lightAccent: rgb(0.39, 0.24, 0.90),
+                darkAccent: rgb(0.70, 0.58, 1.00),
+                lightSecondary: rgb(0.93, 0.24, 0.52),
+                darkSecondary: rgb(1.00, 0.57, 0.76),
+                brandStart: rgb(0.15, 0.09, 0.42),
+                brandMiddle: rgb(0.43, 0.25, 0.94),
+                brandEnd: rgb(0.98, 0.32, 0.58)
+            )
+        case .midnight:
+            return DekpopPalette(
+                id: .midnight,
+                lightAccent: rgb(0.05, 0.42, 0.86),
+                darkAccent: rgb(0.36, 0.72, 1.00),
+                lightSecondary: rgb(0.00, 0.62, 0.74),
+                darkSecondary: rgb(0.32, 0.92, 0.96),
+                brandStart: rgb(0.02, 0.07, 0.24),
+                brandMiddle: rgb(0.06, 0.33, 0.74),
+                brandEnd: rgb(0.10, 0.76, 0.94)
+            )
+        case .sunset:
+            return DekpopPalette(
+                id: .sunset,
+                lightAccent: rgb(0.90, 0.35, 0.08),
+                darkAccent: rgb(1.00, 0.66, 0.38),
+                lightSecondary: rgb(0.92, 0.18, 0.42),
+                darkSecondary: rgb(1.00, 0.52, 0.62),
+                brandStart: rgb(0.34, 0.08, 0.12),
+                brandMiddle: rgb(0.86, 0.30, 0.13),
+                brandEnd: rgb(0.99, 0.70, 0.22)
+            )
+        case .sakura:
+            return DekpopPalette(
+                id: .sakura,
+                lightAccent: rgb(0.78, 0.18, 0.46),
+                darkAccent: rgb(1.00, 0.62, 0.78),
+                lightSecondary: rgb(0.84, 0.36, 0.70),
+                darkSecondary: rgb(0.98, 0.70, 0.92),
+                brandStart: rgb(0.32, 0.07, 0.20),
+                brandMiddle: rgb(0.80, 0.25, 0.52),
+                brandEnd: rgb(0.99, 0.74, 0.80)
+            )
+        case .forest:
+            return DekpopPalette(
+                id: .forest,
+                lightAccent: rgb(0.04, 0.48, 0.34),
+                darkAccent: rgb(0.34, 0.88, 0.66),
+                lightSecondary: rgb(0.52, 0.68, 0.14),
+                darkSecondary: rgb(0.80, 0.92, 0.38),
+                brandStart: rgb(0.02, 0.18, 0.14),
+                brandMiddle: rgb(0.04, 0.48, 0.34),
+                brandEnd: rgb(0.62, 0.86, 0.36)
+            )
+        case .mono:
+            return DekpopPalette(
+                id: .mono,
+                lightAccent: rgb(0.22, 0.22, 0.26),
+                darkAccent: rgb(0.88, 0.89, 0.94),
+                lightSecondary: rgb(0.44, 0.46, 0.52),
+                darkSecondary: rgb(0.64, 0.66, 0.72),
+                brandStart: rgb(0.08, 0.08, 0.10),
+                brandMiddle: rgb(0.28, 0.28, 0.33),
+                brandEnd: rgb(0.55, 0.56, 0.63)
+            )
+        }
+    }
+}
+
+/// Holds the active palette and remembers it between launches.
+final class ThemeManager: ObservableObject {
+    static let shared = ThemeManager()
+    static let storageKey = "dekpop.theme"
+
+    @Published var selection: DekpopPaletteID {
+        didSet {
+            guard selection != oldValue else { return }
+            UserDefaults.standard.set(selection.rawValue, forKey: Self.storageKey)
+        }
+    }
+
+    var palette: DekpopPalette { DekpopPalette.palette(for: selection) }
+
+    init() {
+        let stored = UserDefaults.standard.string(forKey: Self.storageKey) ?? ""
+        selection = DekpopPaletteID(rawValue: stored) ?? .violet
+    }
+}
+
+enum DekpopHaptics {
+    static func tap() {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
+    static func select() {
+        UISelectionFeedbackGenerator().selectionChanged()
+    }
+}
+
+/// Theme-aware colours. Every call site keeps using `AppTheme.accent`,
+/// `AppTheme.brandGradient`, … and simply follows the selected palette.
 enum AppTheme {
-    /// Adaptive violet accent. Kept as a `Color` so every existing call site
-    /// (`AppRowIcon`, tint, selection, buttons) keeps working unchanged.
-    static let accent = Color(
-        uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.70, green: 0.58, blue: 1.00, alpha: 1.00)
-                : UIColor(red: 0.39, green: 0.24, blue: 0.90, alpha: 1.00)
-        }
-    )
+    private static var palette: DekpopPalette { ThemeManager.shared.palette }
 
-    /// Hot-pink companion used for highlights and secondary icons.
-    static let accentSecondary = Color(
-        uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 1.00, green: 0.57, blue: 0.76, alpha: 1.00)
-                : UIColor(red: 0.93, green: 0.24, blue: 0.52, alpha: 1.00)
-        }
-    )
+    static func dynamic(light: UIColor, dark: UIColor) -> Color {
+        Color(
+            uiColor: UIColor { traits in
+                traits.userInterfaceStyle == .dark ? dark : light
+            }
+        )
+    }
 
-    static let brandStart = Color(red: 0.15, green: 0.09, blue: 0.42)
-    static let brandMiddle = Color(red: 0.43, green: 0.25, blue: 0.94)
-    static let brandEnd = Color(red: 0.98, green: 0.32, blue: 0.58)
+    static var accent: Color { palette.accent }
+    static var accentSecondary: Color { palette.accentSecondary }
 
-    static let brandGradient = LinearGradient(
-        colors: [brandStart, brandMiddle, brandEnd],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    static var brandStart: Color { Color(uiColor: palette.brandStart) }
+    static var brandMiddle: Color { Color(uiColor: palette.brandMiddle) }
+    static var brandEnd: Color { Color(uiColor: palette.brandEnd) }
 
-    static let softGradient = LinearGradient(
-        colors: [accent, accentSecondary],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    static var brandGradient: LinearGradient { palette.brandGradient }
+
+    static var softGradient: LinearGradient {
+        LinearGradient(
+            colors: [accent, accentSecondary],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
 
     static let pageBackground = Color(uiColor: .systemGroupedBackground)
     static let consoleBackground = Color(uiColor: .secondarySystemBackground)
@@ -58,6 +198,193 @@ enum AppTheme {
     static let appIconSize: CGFloat = 32
     static let emptyIconSize: CGFloat = 30
     static let selectionIconSize: CGFloat = 18
+}
+
+/// Soft, slowly drifting palette-coloured light behind the Files list.
+struct DekpopAnimatedBackground: View {
+    var palette: DekpopPalette = ThemeManager.shared.palette
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var drifting = false
+
+    var body: some View {
+        ZStack {
+            Color(uiColor: .systemGroupedBackground)
+
+            glow(palette.accent.opacity(0.22), size: 340, blur: 70)
+                .offset(x: drifting ? -120 : -50, y: drifting ? -250 : -170)
+
+            glow(palette.accentSecondary.opacity(0.18), size: 300, blur: 80)
+                .offset(x: drifting ? 140 : 70, y: drifting ? 280 : 210)
+
+            glow(Color(uiColor: palette.brandMiddle).opacity(0.14), size: 260, blur: 90)
+                .offset(x: drifting ? -40 : 10, y: drifting ? 60 : 100)
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .onAppear {
+            guard !reduceMotion, !drifting else { return }
+            withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
+                drifting = true
+            }
+        }
+    }
+
+    private func glow(_ color: Color, size: CGFloat, blur: CGFloat) -> some View {
+        Circle()
+            .fill(color)
+            .frame(width: size, height: size)
+            .blur(radius: blur)
+    }
+}
+
+/// Springy press feedback used by cards and pickers.
+struct DekpopPressStyle: ButtonStyle {
+    var scale: CGFloat = 0.96
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? scale : 1)
+            .opacity(configuration.isPressed ? 0.92 : 1)
+            .animation(.spring(response: 0.28, dampingFraction: 0.72), value: configuration.isPressed)
+    }
+}
+
+/// Sheet that lets the user switch the whole app's look, with a live preview
+/// card per palette. Changes apply immediately and are remembered.
+struct DekpopThemePicker: View {
+    @Environment(\.appLanguage) private var language
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ObservedObject private var theme = ThemeManager.shared
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(language.text("theme.intro"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    LazyVGrid(columns: columns, spacing: 12) {
+                        ForEach(DekpopPaletteID.allCases) { id in
+                            card(id)
+                        }
+                    }
+
+                    Text(language.text("theme.footer"))
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(16)
+            }
+            .background(DekpopAnimatedBackground(palette: theme.palette).ignoresSafeArea())
+            .navigationTitle(language.text("theme.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(language.text("common.done")) { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func card(_ id: DekpopPaletteID) -> some View {
+        let palette = DekpopPalette.palette(for: id)
+        let selected = theme.selection == id
+
+        return Button {
+            guard theme.selection != id else { return }
+            DekpopHaptics.select()
+            withAnimation(reduceMotion ? nil : .spring(response: 0.34, dampingFraction: 0.78)) {
+                theme.selection = id
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 9) {
+                preview(palette)
+
+                HStack(spacing: 5) {
+                    Text(language.text(id.titleKey))
+                        .font(.caption.weight(.bold))
+                        .lineLimit(1)
+                        .foregroundStyle(.primary)
+                    Spacer(minLength: 2)
+                    if selected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(palette.accent)
+                    }
+                }
+
+                HStack(spacing: 5) {
+                    Circle().fill(palette.accent).frame(width: 9, height: 9)
+                    Circle().fill(palette.accentSecondary).frame(width: 9, height: 9)
+                    Circle().fill(Color(uiColor: palette.brandMiddle)).frame(width: 9, height: 9)
+                    Circle().fill(Color(uiColor: palette.brandEnd)).frame(width: 9, height: 9)
+                    Spacer()
+                }
+            }
+            .padding(9)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(
+                        selected ? palette.accent : Color.primary.opacity(0.06),
+                        lineWidth: selected ? 2 : 1
+                    )
+            )
+            .shadow(
+                color: Color(uiColor: palette.brandMiddle).opacity(selected ? 0.30 : 0.10),
+                radius: selected ? 14 : 6,
+                x: 0,
+                y: selected ? 7 : 3
+            )
+        }
+        .buttonStyle(DekpopPressStyle(scale: 0.95))
+        .accessibilityLabel(language.text(id.titleKey))
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private func preview(_ palette: DekpopPalette) -> some View {
+        ZStack(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .fill(palette.brandGradient)
+
+            Circle()
+                .fill(Color.white.opacity(0.16))
+                .frame(width: 70, height: 70)
+                .offset(x: 76, y: -26)
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 4) {
+                    Circle().fill(Color.white.opacity(0.92)).frame(width: 9, height: 9)
+                    Capsule().fill(Color.white.opacity(0.55)).frame(width: 24, height: 5)
+                    Spacer(minLength: 0)
+                }
+                Capsule().fill(Color.white.opacity(0.38)).frame(width: 58, height: 5)
+                Capsule().fill(Color.white.opacity(0.22)).frame(width: 40, height: 5)
+                Spacer(minLength: 0)
+                HStack(spacing: 5) {
+                    Capsule().fill(Color.white.opacity(0.85)).frame(width: 34, height: 9)
+                    Capsule().fill(Color.white.opacity(0.30)).frame(width: 22, height: 9)
+                    Spacer(minLength: 0)
+                }
+            }
+            .padding(9)
+        }
+        .frame(height: 76)
+        .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+    }
 }
 
 /// The dekpop wordmark: a gradient folder tile next to the lowercase name.
@@ -113,7 +440,11 @@ struct DekpopWordmark: View {
 /// identity, device, iOS version and whether container access is ready.
 struct DekpopHeroCard: View {
     @Environment(\.appLanguage) private var language
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var appState: AppState
+
+    @State private var drift = false
+    @State private var sweep: CGFloat = -1.2
 
     private var isReady: Bool { appState.exploitStatus.isSuccess }
 
@@ -124,11 +455,13 @@ struct DekpopHeroCard: View {
             Circle()
                 .fill(Color.white.opacity(0.10))
                 .frame(width: 180, height: 180)
-                .offset(x: 62, y: -72)
+                .offset(x: drift ? 46 : 62, y: drift ? -56 : -72)
             Circle()
                 .fill(Color.white.opacity(0.07))
                 .frame(width: 130, height: 130)
-                .offset(x: -150, y: 92)
+                .offset(x: drift ? -134 : -150, y: drift ? 106 : 92)
+
+            sheen
 
             VStack(alignment: .leading, spacing: 13) {
                 HStack(spacing: 8) {
@@ -149,8 +482,48 @@ struct DekpopHeroCard: View {
             .padding(16)
         }
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: AppTheme.brandMiddle.opacity(0.24), radius: 14, x: 0, y: 6)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.38), Color.white.opacity(0.04)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: AppTheme.brandMiddle.opacity(0.28), radius: 16, x: 0, y: 7)
         .accessibilityElement(children: .combine)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 6.5).repeatForever(autoreverses: true)) {
+                drift = true
+            }
+            withAnimation(.linear(duration: 3.2).repeatForever(autoreverses: false)) {
+                sweep = 1.4
+            }
+        }
+    }
+
+    private var sheen: some View {
+        GeometryReader { proxy in
+            LinearGradient(
+                colors: [
+                    Color.white.opacity(0),
+                    Color.white.opacity(0.20),
+                    Color.white.opacity(0)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(width: 96)
+            .rotationEffect(.degrees(16))
+            .offset(x: sweep * proxy.size.width)
+            .blendMode(.plusLighter)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
     private var statusPill: some View {
@@ -243,6 +616,35 @@ struct DekpopLanguagePicker: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .accessibilityLabel(language.text("dekpop.language"))
+    }
+}
+
+private struct DekpopOpenThemePickerKey: EnvironmentKey {
+    static let defaultValue: () -> Void = {}
+}
+
+extension EnvironmentValues {
+    /// Present the theme picker. Handled by the root view so the sheet lives
+    /// outside the subtree that is rebuilt when the palette changes.
+    var dekpopOpenThemePicker: () -> Void {
+        get { self[DekpopOpenThemePickerKey.self] }
+        set { self[DekpopOpenThemePickerKey.self] = newValue }
+    }
+}
+
+/// Toolbar entry point for the theme picker.
+struct DekpopThemeToolbarButton: View {
+    @Environment(\.appLanguage) private var language
+    @Environment(\.dekpopOpenThemePicker) private var openThemePicker
+
+    var body: some View {
+        Button {
+            DekpopHaptics.tap()
+            openThemePicker()
+        } label: {
+            Image(systemName: "paintpalette")
+        }
+        .accessibilityLabel(language.text("theme.title"))
     }
 }
 

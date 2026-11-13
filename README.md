@@ -33,7 +33,7 @@
 - **Shortcut editor** — pick the target app container or the dekpop workspace, type or paste a path (absolute paths starting with `/` are accepted too), preview the exact folder that will open, and get a warning when the same folder already has a shortcut. Shortcuts can be edited, opened in a new tab, copied or deleted.
 - **Mods tab with two sites** — **KenModz** ([kenmodz.com](https://kenmodz.com/)) and **Cheat iOS VIP** ([mods.cheatiosvip.net](https://mods.cheatiosvip.net/)) open in a built-in browser that keeps the dekpop theme, remembers cookies and sessions, shows a progress bar, and offers back / forward / home / reload plus *Open in Safari*.
 - **Download Center removed** — the separate Downloads window is gone. Asset sets still live on the cube-box toolbar button and still use the same Apply flow, target picker and conflict policies.
-- **Branded launch screen + announcements** — the app opens on a gradient splash with an animated progress bar, then a one-shot announcement card (with image support) appears; new announcements resurface automatically.
+- **Branded launch screen + announcements** — the app opens on a gradient splash with an animated progress bar, then the announcement card (with image support) appears on every launch.
 - **New app icon** — a dark clay tile replaces the old gradient folder icon.
 - Everything is stored in the dekpop document workspace (`AssetSets/`), so shortcuts survive app updates and stay reachable from the Files browser.
 - Version is now `1.5.0` (build 14). IPA layout and bundle identifier are unchanged.
@@ -58,6 +58,10 @@
 > The bundle identifier is intentionally still `com.apple.mobile.MobileHouseArrest`. `mcm_bridge.m` checks this identifier before MHA-C2 container activation; changing it breaks Files. Only the visible identity changed.
 
 Legacy guides under `docs/PATCH_GUIDE*.md` and release notes describe features of the upstream 1.0/1.1 project; those screens are no longer reachable in dekpop.
+
+## Themes
+
+Six looks ship in the app — **Violet Pop**, **Midnight**, **Sunset**, **Sakura**, **Forest** and **Graphite**. Switch them from the palette button in the toolbar (Files root and every folder); the picker previews each palette and applies it instantly to accents, icons, the hero card, gradients and the launch screen. The selection is remembered and still follows light/dark mode.
 
 ## Highlights
 

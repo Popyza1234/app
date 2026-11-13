@@ -657,3 +657,12 @@
 "announcement.badge" = "ประกาศ";
 "announcement.got_it" = "รับทราบ";
 "announcement.open_link" = "เปิดลิงก์";
+"theme.title" = "ธีม";
+"theme.intro" = "เลือกสไตล์ที่ชอบ สี ไอคอน ไล่สี และหน้าเปิดแอปจะเปลี่ยนทันที";
+"theme.footer" = "ระบบจำธีมที่เลือกไว้ และยังปรับตามโหมดสว่าง/มืดให้เอง";
+"theme.violet" = "ม่วงป็อป";
+"theme.midnight" = "มิดไนต์";
+"theme.sunset" = "ซันเซ็ต";
+"theme.sakura" = "ซากุระ";
+"theme.forest" = "ฟอเรสต์";
+"theme.mono" = "กราไฟต์";
