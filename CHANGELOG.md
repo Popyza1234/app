@@ -2,6 +2,51 @@
 
 All notable user-facing changes are documented in this file.
 
+## [2.1.0] - 2026-11-13 — 27.0.1 compatibility, safe folders and diagnostics
+
+### What was reported
+
+After 2.0.0, iOS **27.0.1** still appeared "unsupported" / Files still showed an
+empty list. No whitelist or version comparison remained in the code, so this was
+**not** a version check: on that kernel the optional exploit and every privileged
+container layer are unavailable, and the empty-app overlay hid the only folder
+that always works (the app's own Documents).
+
+### Added
+
+- **Explicit universal acceptance** — `ExploitSupportPolicy.accepts(version:build:)`
+  is now the single acceptance gate and ignores both parameters. `27.0.1`,
+  four-component beta strings and future majors are accepted exactly like `16.0`.
+  `AppState.detectSupport()` logs the accepted version on every launch.
+- The **"iOS <version> · supported"** badge is now shown on the Files hero card,
+  and `launch.status_unsupported` can no longer be displayed — the launch screen
+  has no unsupported branch at all.
+- **Safe folders (guaranteed file access on any iOS version)** — a **Choose a
+  folder…** button opens the system document picker (`UTType.folder`). The chosen
+  folder is stored as a security-scoped bookmark (`SafeFolderBookmarks`) and opens
+  in the normal `FileBrowserView`. This needs no exploit, no private entitlement
+  and no kernel offsets, so Files genuinely works on 27.0.1.
+- A **Files that always work** section on the Files root, and the same actions
+  (**Open dekpop Documents**, **Choose a folder…**, **Compatibility diagnostics**)
+  directly in the empty state, so a failed container scan never leaves a dead end.
+- **Compatibility diagnostics** (`CompatibilitySelfTest` + `CompatibilityReportView`)
+  — probes own Documents, direct container read, MCM activation, traversal grant,
+  inode enumeration and sandbox escape, shows OK/unavailable per layer with the
+  exact error detail/handle, writes each result to the in-app log, and can copy the whole
+  report for sharing.
+- English and Thai string tables: 672 keys each, perfect parity, no format-specifier
+  mismatches.
+
+### Changed
+
+- Version is now `2.1.0` (build 21). IPA layout, bundle identifier and the
+  two-language setup are unchanged.
+
+> Note: browsing *other apps' containers* still requires kernel offsets that
+> match the running kernel. Apple has not published those for iOS 27.0.1, so that
+> specific capability may still be unavailable; the diagnostics report shows
+> exactly which layer fails. Safe folders and dekpop Documents work regardless.
+
 ## [2.0.0] - 2026-11-13 — Universal Files access (major update)
 
 ### Fixed — iOS 27+ could not access files

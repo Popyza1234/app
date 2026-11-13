@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-2.0.0-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.1.0-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -24,6 +24,19 @@
 
 > [!WARNING]
 > dekpop is research software for personal device management. Keep a backup and use it only on devices and data you own. It can modify files inside app containers.
+
+## What's new in 2.1.0 — 27.0.1 compatibility & safe folders
+
+> iOS **27.0.1** is explicitly accepted, and Files now works there even when app-container access is blocked.
+
+- **No version gate at all.** `ExploitSupportPolicy.accepts(version:build:)` is the one acceptance gate and ignores both arguments, so `27.0.1`, beta builds and future majors are accepted exactly like `16.0`. The Files hero card shows **"iOS 27.0.1 · supported"**, and the launch screen can no longer display an "unsupported" message.
+- **Why it still looked broken:** on iOS 27.0.1 the optional kernel exploit has no matching offsets, so every privileged container layer fails. That is a capability limitation, not a version restriction — but the empty-app overlay hid the one folder that always works.
+- **Files that always work.** A **Choose a folder…** button opens the system document picker; the selected folder is saved as a security-scoped bookmark and browsed with the normal file browser. No exploit, no private entitlement, no kernel offsets — so file access genuinely works on 27.0.1. The dekpop Documents folder is always available too.
+- **No dead end.** The empty state now offers **Open dekpop Documents**, **Choose a folder…** and **Compatibility diagnostics** directly.
+- **Compatibility diagnostics** shows a per-layer report (own Documents, direct container read, MCM, traversal grant, inode walk, sandbox escape) with the exact failure detail, logs it, and can copy it for sharing.
+- Version is now `2.1.0` (build 21). English/Thai: 672 keys each, perfect parity.
+
+> Browsing *other apps' containers* still needs kernel offsets matching the running kernel; those are not available for iOS 27.0.1. The diagnostics report tells you precisely which layer fails. Safe folders and dekpop Documents work regardless.
 
 ## What's new in 2.0.0 — Universal Files access
 
@@ -93,7 +106,9 @@ Every iOS version that can install the app is enabled — no version or build wh
 | Item | Status |
 | --- | --- |
 | Supported versions | All iOS versions 16.0 and later (release, beta, and future majors) |
+| iOS 27.0.1 | Explicitly accepted — no whitelist, no maximum version |
 | Build whitelist | Removed |
+| Guaranteed file access | dekpop Documents + folders chosen in the Files app (works even when container access is blocked) |
 | Deployment target | iOS 16.0 |
 | File access engine | Universal · direct / MCM / grant / inode — identical on every iOS version |
 | Version-based access split | Removed in 2.0.0 (`>= 26` branch deleted) |

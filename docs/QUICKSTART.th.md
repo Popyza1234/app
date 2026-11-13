@@ -128,10 +128,11 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
 - **รุ่น 3105 เดิม (ก่อนรีแบรนด์):** Actions run [#43250078558](https://github.com/Popyza1234/app/actions/runs/43250078558) **success ทุก step** — Checkout, Show toolchain, Build unsigned IPA, Verify IPA layout, Upload artifact
   - artifact `3105-unsigned-ipa` = 3,268,242 bytes → ไฟล์ `3105-unsigned.ipa` 3,277,941 bytes
   - เวอร์ชัน `1.1.1 (7)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
-- **รุ่น dekpop 2.0.0 (ปัจจุบัน):** ทุกครั้งที่ push ขึ้น `main` workflow จะ build ใหม่ → artifact **`dekpop-unsigned-ipa`** → ไฟล์ **`dekpop-unsigned.ipa`**
-  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `2.0.0 (20)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
+- **รุ่น dekpop 2.1.0 (ปัจจุบัน):** ทุกครั้งที่ push ขึ้น `main` workflow จะ build ใหม่ → artifact **`dekpop-unsigned-ipa`** → ไฟล์ **`dekpop-unsigned.ipa`**
+  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `2.1.0 (21)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
   - Bundle ID ยังเป็น `com.apple.mobile.MobileHouseArrest` (จำเป็นสำหรับ MHA-C2 / ฟีเจอร์ Files)
 - การที่ CI ขึ้นเขียวแปลว่าโค้ดที่แก้ **ถูก compile จริงบน Xcode ของ GitHub** ไม่ใช่แค่แก้ไฟล์ในเครื่อง
+- **รุ่น 2.1.0 — รองรับ 27.0.1 + ไฟล์ที่เปิดได้เสมอ:** การ์ดหน้า Files แสดง **iOS 27.0.1 · รองรับ** และไม่มีข้อความ "ยังไม่รองรับ" อีก ถ้าเข้าคอนเทนเนอร์แอปไม่ได้บนเคอร์เนลใหม่ ให้กด **เปิด Documents ของ dekpop** หรือ **เลือกโฟลเดอร์…** (ตัวเลือกไฟล์ของระบบ เก็บเป็น security-scoped bookmark) เพื่อเปิดไฟล์ได้จริงโดยไม่ต้องใช้ช่องโหว่ และกด **ตรวจสอบความเข้ากันได้** เพื่อดูทีละชั้นว่าอันไหนล้มเหลว พร้อมปุ่มคัดลอกรายงาน
 - **รุ่น 2.0.0 — เข้าถึงไฟล์ได้ทุก iOS:** iOS 27 ขึ้นไปเปิด Files ได้เหมือนรุ่นเก่าแล้ว ลบการแยกแบบ `iOS >= 26` ออก ทุกเวอร์ชันใช้ชุดเข้าถึงเดียวกัน (อ่านตรง → MCM → ขอสิทธิ์ → inode/metadata) และ sandbox escape ที่ไม่สำเร็จไม่ปิด Files อีกต่อไป; ดูข้อความ **เข้าถึงไฟล์แบบสากล · ทุกเวอร์ชัน iOS** ได้ที่การ์ดด้านบนของหน้า Files
 - **รุ่น 1.5.0 — แท็บหมวดหมู่:** หน้าแรกมีแถบเลือก **แอป / ทางลัด / มอด** ไม่ต้องเลื่อนหา
 - **หน้าเปิดแอป + ประกาศ:** ตอนเข้าแอปมีหน้าโหลดไล่สีสวยพร้อมแถบโหลด และการ์ดประกาศพร้อมรูปภาพที่แสดงทุกครั้งที่เข้าแอป พร้อมไอคอนแอพใหม่

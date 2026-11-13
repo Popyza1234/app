@@ -667,6 +667,30 @@
 "theme.forest" = "Forest";
 "theme.mono" = "Graphite";
 
-"announcement.200_title" = "dekpop 2.0 — Files on every iOS";
-"announcement.200_body" = "Major update: iOS 27 and later can now browse files exactly like older versions. The old iOS 26+ access split is gone — every release uses one capability-based engine (direct read → MCM → traversal grant → inode/metadata fallback), and a failed sandbox escape no longer blocks Files. Kernel offsets and kernel-base detection are now future-version safe.";
+"announcement.200_title" = "dekpop 2.1 — iOS 27.0.1 supported";
+"announcement.200_body" = "iOS 27.0.1 is explicitly accepted — there is no version whitelist and no maximum version. Files now also works even when app-container access is blocked: open the dekpop Documents folder or choose any folder from the Files app (saved as a secure bookmark, no exploit needed). A new Compatibility diagnostics screen shows exactly which access layer works on your device and can copy the report.";
 "dekpop.access_engine_line" = "Universal file access · every iOS version";
+
+"compat.version_badge" = "iOS %@ · supported";
+"compat.title" = "Compatibility report";
+"compat.supported_badge" = "Supported on this device";
+"compat.header_detail" = "iOS %@ (%@) — every version is accepted; no whitelist is applied.";
+"compat.layers" = "File access layers";
+"compat.version" = "iOS version accepted";
+"compat.documents" = "Own Documents folder";
+"compat.direct" = "Direct container read";
+"compat.mcm" = "MCM activation";
+"compat.grant" = "Traversal grant";
+"compat.inode" = "Inode enumeration";
+"compat.sandbox" = "Sandbox escape (optional)";
+"compat.footer" = "Orange rows are simply unavailable on this kernel — they are not version restrictions. Use a safe folder from the Files app to browse files on any iOS version, then copy this report to share the exact failure.";
+"compat.copy" = "Copy report";
+"safe.section" = "Files that always work";
+"safe.section_footer" = "These folders use the system file picker and security-scoped bookmarks. They work on every iOS version, including 27.0.1, even when app-container access is blocked.";
+"safe.folder_subtitle" = "Granted through the Files app";
+"safe.remove" = "Remove";
+"safe.choose_folder" = "Choose a folder…";
+"safe.diagnostics" = "Compatibility diagnostics";
+"safe.add_failed" = "Could not open that folder. Please choose it again from the Files app.";
+"safe.open_workspace" = "Open dekpop Documents";
+"safe.empty_hint" = "App containers are unavailable on iOS %@. Files still work — open the dekpop Documents folder or choose any folder from the Files app.";

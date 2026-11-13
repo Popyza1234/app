@@ -5,8 +5,8 @@ import UIKit
 /// for the product identity shown in the UI.
 enum DekpopBrand {
     static let displayName = "dekpop"
-    static let version = "2.0.0"
-    static let build = "20"
+    static let version = "2.1.0"
+    static let build = "21"
 }
 
 // MARK: - Themes
@@ -488,6 +488,14 @@ struct DekpopHeroCard: View {
                 // SettingsView has no call site in this Files-only build, so
                 // this is where users see that no version split is applied.
                 Label(language.text("dekpop.access_engine_line"), systemImage: "arrow.triangle.branch")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color.white.opacity(0.9))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+
+                // Explicit proof that this exact version string — including
+                // point releases like 27.0.1 — is accepted.
+                Label(language.text("compat.version_badge", AppInfo.osVersion), systemImage: "checkmark.seal.fill")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(Color.white.opacity(0.9))
                     .lineLimit(1)

@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 struct AppDataBrowserView: View {
     @Environment(\.appLanguage) private var language
@@ -17,6 +18,9 @@ struct AppDataBrowserView: View {
     @State private var selectedCategory: HomeCategory = .apps
     @State private var activeSheet: FilesRootSheet?
     @State private var copiedPath: String?
+    @State private var safeFolders: [SafeFolder] = []
+    @State private var showingFolderPicker = false
+    @State private var safeFolderNotice: String?
     @Binding private var tabSession: FilesTabSession
 
     init(tabSession: Binding<FilesTabSession>) {
@@ -96,6 +100,7 @@ struct AppDataBrowserView: View {
                     )
                 }
                 loadShortcuts()
+                safeFolders = SafeFolderBookmarks.load()
                 if !hasLoaded {
                     hasLoaded = true
                     reload()
@@ -147,7 +152,19 @@ struct AppDataBrowserView: View {
                 }
             case .site(let site):
                 ModBrowserView(site: site)
+            case .diagnostics(let report):
+                CompatibilityReportView(report: report)
             }
+        }
+        .fileImporter(
+            isPresented: $showingFolderPicker,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            handleFolderPicker(result)
+        }
+        .onChange(of: activeSheet?.id) { _ in
+            safeFolders = SafeFolderBookmarks.load()
         }
         .alert(
             language.text("browser.copy_path_done"),
@@ -294,6 +311,7 @@ struct AppDataBrowserView: View {
                 }
             }
         }
+        safeAccessSection
         Section {
             ForEach(filteredApps) { app in
                 if app.containerPath.isEmpty {
@@ -581,6 +599,119 @@ struct AppDataBrowserView: View {
         AssetSetService.saveShortcuts(updated)
     }
 
+    // MARK: - Safe access (works on iOS 27.0.1 without any exploit)
+
+    @ViewBuilder
+    private var safeAccessSection: some View {
+        Section {
+            ForEach(safeFolders) { folder in
+                Button { openSafeFolder(folder) } label: {
+                    HStack(spacing: 10) {
+                        AppRowIcon(
+                            systemName: "folder.fill",
+                            tint: .green,
+                            frameSize: 34
+                        )
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(folder.name)
+                                .font(.subheadline.weight(.bold))
+                            Text(language.text("safe.folder_subtitle"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+                .buttonStyle(.plain)
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        SafeFolderBookmarks.remove(id: folder.id)
+                        safeFolders = SafeFolderBookmarks.load()
+                    } label: {
+                        Label(language.text("safe.remove"), systemImage: "trash")
+                    }
+                }
+            }
+
+            Button { showingFolderPicker = true } label: {
+                Label(language.text("safe.choose_folder"), systemImage: "folder.badge.plus")
+            }
+            Button { showDiagnostics() } label: {
+                Label(language.text("safe.diagnostics"), systemImage: "stethoscope")
+            }
+        } header: {
+            Text(language.text("safe.section"))
+        } footer: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(language.text("safe.section_footer"))
+                if let safeFolderNotice {
+                    Text(safeFolderNotice)
+                        .foregroundStyle(.orange)
+                }
+            }
+        }
+    }
+
+    private func showDiagnostics() {
+        // The probes touch the filesystem and the container manager; keep
+        // them off the main thread so the UI never freezes on a slow device.
+        DispatchQueue.global(qos: .userInitiated).async {
+            let report = CompatibilitySelfTest.run()
+            DispatchQueue.main.async {
+                self.activeSheet = .diagnostics(report)
+            }
+        }
+    }
+
+    private func handleFolderPicker(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            guard SafeFolderBookmarks.add(url: url) else {
+                safeFolderNotice = language.text("safe.add_failed")
+                log("safe: bookmark creation failed for \(url.lastPathComponent)")
+                return
+            }
+            safeFolderNotice = nil
+            safeFolders = SafeFolderBookmarks.load()
+            log("safe: granted folder \(url.lastPathComponent)")
+            openSafeFolder(safeFolders.last { $0.name == url.lastPathComponent })
+        case .failure(let error):
+            safeFolderNotice = error.localizedDescription
+            log("safe: folder picker failed — \(error.localizedDescription)")
+        }
+    }
+
+    private func openSafeFolder(_ folder: SafeFolder?) {
+        guard let folder, let url = SafeFolderBookmarks.resolve(folder) else {
+            safeFolderNotice = language.text("safe.add_failed")
+            return
+        }
+        let destination = FileBrowserDestination(
+            containerPath: url.path,
+            startPath: url.path,
+            title: folder.name,
+            bundleID: nil
+        )
+        tabSession.setActiveNavigationPath([destination])
+    }
+
+    private func openWorkspace() {
+        guard let path = workspaceURL?.path else { return }
+        tabSession.setActiveNavigationPath([
+            FileBrowserDestination(
+                containerPath: path,
+                startPath: path,
+                title: DekpopBrand.displayName,
+                bundleID: nil
+            )
+        ])
+    }
+
     private var emptyView: some View {
         VStack(spacing: 14) {
             ZStack {
@@ -591,14 +722,36 @@ struct AppDataBrowserView: View {
                     .foregroundStyle(.white)
             }
             .frame(width: 60, height: 60)
-            Text(errorMessage ?? language.text("browser.empty"))
+            Text(language.text("safe.empty_hint", AppInfo.osVersion))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+            Button { openWorkspace() } label: {
+                Label(language.text("safe.open_workspace"), systemImage: "folder.fill")
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(AppTheme.accent)
+
+            Button { showingFolderPicker = true } label: {
+                Label(language.text("safe.choose_folder"), systemImage: "folder.badge.plus")
+            }
+            .buttonStyle(.bordered)
+
+            Button { showDiagnostics() } label: {
+                Label(language.text("safe.diagnostics"), systemImage: "stethoscope")
+            }
+            .buttonStyle(.bordered)
+
             Button(language.text("browser.retry")) { reload() }
-                .buttonStyle(.borderedProminent)
-                .tint(AppTheme.accent)
+                .font(.footnote)
         }
         .padding()
     }
@@ -751,6 +904,7 @@ private enum FilesRootSheet: Identifiable {
     case newShortcut
     case editShortcut(FolderShortcut)
     case site(ModSite)
+    case diagnostics(CompatibilitySelfTest.Report)
 
     var id: String {
         switch self {
@@ -762,6 +916,8 @@ private enum FilesRootSheet: Identifiable {
             return "edit-\(shortcut.id.uuidString)"
         case .site(let site):
             return "site-\(site.id)"
+        case .diagnostics:
+            return "diagnostics"
         }
     }
 }
@@ -771,6 +927,87 @@ private enum AppBrowserOverlayState: Equatable {
     case empty
     case noResults
     case none
+}
+
+/// In-app compatibility report. Proves which iOS version is running, that it
+/// is accepted, and which physical file-access layers actually work here.
+struct CompatibilityReportView: View {
+    @Environment(\.appLanguage) private var language
+    @Environment(\.dismiss) private var dismiss
+    let report: CompatibilitySelfTest.Report
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundStyle(.green)
+                            Text(language.text("compat.supported_badge"))
+                                .font(.headline)
+                        }
+                        Text(language.text("compat.header_detail", report.version, report.build))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(report.device)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                Section(language.text("compat.layers")) {
+                    ForEach(report.probes) { probe in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: probe.succeeded
+                                  ? "checkmark.circle.fill"
+                                  : "xmark.circle.fill")
+                                .foregroundStyle(probe.succeeded ? .green : .orange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(language.text(probe.titleKey))
+                                    .font(.subheadline.weight(.medium))
+                                Text(probe.detail)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .textSelection(.enabled)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                } footer: {
+                    Text(language.text("compat.footer"))
+                }
+
+                Section {
+                    Button {
+                        UIPasteboard.general.string = plainText
+                    } label: {
+                        Label(language.text("compat.copy"), systemImage: "doc.on.doc")
+                    }
+                }
+            }
+            .navigationTitle(language.text("compat.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(language.text("common.done")) { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var plainText: String {
+        var lines = [
+            "dekpop \(DekpopBrand.version) (\(DekpopBrand.build))",
+            "iOS \(report.version) (\(report.build)) · \(report.device)",
+            "versionAccepted=\(report.versionAccepted)"
+        ]
+        for probe in report.probes {
+            lines.append("\(probe.id): \(probe.succeeded ? "OK" : "FAIL") — \(probe.detail)")
+        }
+        return lines.joined(separator: "\n")
+    }
 }
 
 struct BrowserAppIcon: View {

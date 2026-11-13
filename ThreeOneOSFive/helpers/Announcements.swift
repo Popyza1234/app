@@ -16,7 +16,7 @@ struct DekpopAnnouncement: Identifiable {
 enum AnnouncementStore {
     static let announcements: [DekpopAnnouncement] = [
         DekpopAnnouncement(
-            id: "universal-files-2.0.0",
+            id: "safe-files-2.1.0",
             titleKey: "announcement.200_title",
             bodyKey: "announcement.200_body",
             imageName: "announcement-banner",

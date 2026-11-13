@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 enum ContainerDiscoveryMerger {
     static func canonicalPath(_ rawPath: String) -> String {
@@ -355,5 +356,165 @@ enum ApplicationBundleMetadataReader {
             displayName: displayName,
             version: version
         )
+    }
+}
+
+// MARK: - Compatibility diagnostics
+
+/// One probe result shown in the in-app compatibility report.
+struct CompatibilityProbe: Identifiable, Hashable {
+    let id: String
+    let titleKey: String
+    let detail: String
+    let succeeded: Bool
+}
+
+/// Runs the same access layers the Files browser uses and reports which ones
+/// actually work on this device. This makes an iOS 27.0.1 failure diagnosable
+/// instead of looking like "the version is not supported".
+enum CompatibilitySelfTest {
+    struct Report {
+        let version: String
+        let build: String
+        let device: String
+        let versionAccepted: Bool
+        let probes: [CompatibilityProbe]
+    }
+
+    static func run() -> Report {
+        // A fresh probe must not inherit a paused grant state from an earlier
+        // reload, otherwise it would report "unavailable" wrongly.
+        ContainerAccessPolicy.resetProbing()
+        let fm = FileManager.default
+        var probes: [CompatibilityProbe] = []
+
+        func add(_ id: String, _ key: String, _ ok: Bool, _ detail: String) {
+            probes.append(CompatibilityProbe(id: id, titleKey: key, detail: detail, succeeded: ok))
+        }
+
+        let accepted = ExploitSupportPolicy.accepts(
+            version: AppInfo.osVersion,
+            build: AppInfo.osBuild
+        )
+        add("version", "compat.version", accepted,
+            "iOS \(AppInfo.osVersion) (\(AppInfo.osBuild))")
+
+        // The app's own Documents folder always works — no entitlement or
+        // exploit needed. This is the guaranteed fallback on 27.0.1.
+        let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first
+        let docsReadable = docs.map { (try? fm.contentsOfDirectory(atPath: $0.path)) != nil } ?? false
+        add("documents", "compat.documents", docsReadable,
+            docs?.lastPathComponent ?? "unavailable")
+
+        let root = ContainerStore.appDataRoot
+        do {
+            let names = try fm.contentsOfDirectory(atPath: root)
+            add("direct", "compat.direct", !names.isEmpty, "\(names.count) entries")
+        } catch {
+            add("direct", "compat.direct", false, "unreadable · \(error.localizedDescription)")
+        }
+
+        var lookupError: NSString?
+        let mcmPath = MCMActivateContainerPath(2, "com.apple.mobilesafari", false, &lookupError)
+        // Interpolation avoids relying on how the ObjC NSString* bridge is
+        // imported on each SDK, so this compiles on every Xcode version.
+        let mcmDetail = mcmPath.map { "\($0)" }
+            ?? lookupError.map { "\($0)" }
+            ?? "no path"
+        add("mcm", "compat.mcm", mcmPath != nil, mcmDetail)
+
+        let grant = ContainerStore.grantContainerAccess(root)
+        if grant >= 0 { bad_query_release(grant) }
+        add("grant", "compat.grant", grant >= 0, "handle \(grant)")
+
+        let inodeNames = ContainerStore.enumerateDirectories(path: root)
+        add("inode", "compat.inode", !inodeNames.isEmpty, "\(inodeNames.count) entries")
+
+        let sandbox = KernelExploit.hasSandboxAccess()
+        add("sandbox", "compat.sandbox", sandbox, sandbox ? "active" : "inactive")
+
+        let report = Report(
+            version: AppInfo.osVersion,
+            build: AppInfo.osBuild,
+            device: AppInfo.displayMachineName,
+            versionAccepted: accepted,
+            probes: probes
+        )
+        for probe in report.probes {
+            log("compat[\(probe.id)] \(probe.succeeded ? "OK" : "FAIL") — \(probe.detail)")
+        }
+        return report
+    }
+}
+
+// MARK: - Safe folders (system document picker)
+
+/// A user-granted folder from the Files app. Access is stored as a
+/// security-scoped bookmark, so it works on every iOS version — including
+/// 27.0.1 — without any kernel exploit or private entitlement.
+struct SafeFolder: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let bookmarkData: Data
+}
+
+enum SafeFolderBookmarks {
+    private static let storageKey = "dekpop.safeFolders.v1"
+
+    static func load() -> [SafeFolder] {
+        guard let raw = UserDefaults.standard.array(forKey: storageKey) as? [[String: String]] else {
+            return []
+        }
+        return raw.compactMap { item in
+            guard let id = item["id"],
+                  let name = item["name"],
+                  let base64 = item["bookmark"],
+                  let data = Data(base64Encoded: base64) else { return nil }
+            return SafeFolder(id: id, name: name, bookmarkData: data)
+        }
+    }
+
+    @discardableResult
+    static func add(url: URL) -> Bool {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? url.bookmarkData(
+            options: [],
+            includingResourceValuesForKeys: nil,
+            relativeTo: nil
+        ) else { return false }
+        var folders = load().filter { $0.name != url.lastPathComponent }
+        folders.append(SafeFolder(
+            id: UUID().uuidString,
+            name: url.lastPathComponent,
+            bookmarkData: data
+        ))
+        save(folders)
+        return true
+    }
+
+    /// Resolves the bookmark and keeps the security scope active for the rest
+    /// of this launch so FileBrowserView can read the folder by path.
+    static func resolve(_ folder: SafeFolder) -> URL? {
+        var stale = false
+        guard let url = try? URL(
+            resolvingBookmarkData: folder.bookmarkData,
+            options: [],
+            relativeTo: nil,
+            bookmarkDataIsStale: &stale
+        ) else { return nil }
+        _ = url.startAccessingSecurityScopedResource()
+        return url
+    }
+
+    static func remove(id: String) {
+        save(load().filter { $0.id != id })
+    }
+
+    private static func save(_ folders: [SafeFolder]) {
+        let raw: [[String: String]] = folders.map {
+            ["id": $0.id, "name": $0.name, "bookmark": $0.bookmarkData.base64EncodedString()]
+        }
+        UserDefaults.standard.set(raw, forKey: storageKey)
     }
 }

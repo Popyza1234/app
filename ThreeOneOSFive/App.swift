@@ -60,12 +60,14 @@ class AppState: ObservableObject {
 
     func detectSupport() {
         let v = AppInfo.versionTuple
-        let supported = ExploitSupportPolicy.isSupported(
-            major: v.major,
-            minor: v.minor,
-            patch: v.patch,
+        // Single acceptance gate. It ignores the version string entirely, so
+        // point releases (27.0.1), beta builds and future majors are all
+        // accepted. Logged so the in-app log proves what this device runs.
+        let supported = ExploitSupportPolicy.accepts(
+            version: AppInfo.osVersion,
             build: AppInfo.osBuild
         )
+        log("compat: iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) accepted=\(supported) — every version is enabled")
 #if targetEnvironment(simulator)
         if ProcessInfo.processInfo.arguments.contains("--simulate-access") {
             exploitStatus = .success(method: "Simulator preview")
