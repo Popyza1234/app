@@ -458,6 +458,21 @@ enum CompatibilitySelfTest {
         }
         return report
     }
+
+    /// Shared text form used by the report's copy button and the Files banner,
+    /// so a screenshot is never needed to send diagnostics.
+    static func plainText(for report: Report) -> String {
+        var lines = [
+            "dekpop \(DekpopBrand.version) (\(DekpopBrand.build))",
+            "iOS \(report.version) (\(report.build)) · \(report.device)",
+            "versionAccepted=\(report.versionAccepted)",
+            "exploit=\(KernelExploit.lastRunSummary) [\(KernelExploit.lastRunCode)]"
+        ]
+        for probe in report.probes {
+            lines.append("\(probe.id): \(probe.succeeded ? "OK" : "FAIL") — \(probe.detail)")
+        }
+        return lines.joined(separator: "\n")
+    }
 }
 
 // MARK: - Safe folders (system document picker)

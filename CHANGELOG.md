@@ -2,6 +2,35 @@
 
 All notable user-facing changes are documented in this file.
 
+## [3.0.2] - 2026-11-14 — exploit result is visible and retried
+
+### Why
+
+On iOS 27.0.1 the exploit could be enabled and still leave Files empty with no
+explanation: the status line was a hard-coded `FAILED kexploit (-1)`, the real
+stage was only in the log, and the app list was never rebuilt after the exploit
+finished, so a run that did work still showed "no apps".
+
+### Changed
+
+- **Real failure codes.** `KernelExploit` now records the stage that stopped
+  (`-100` Simulator, `-101` kernel primitive, `-102` `proc_self`,
+  `-103` offset mismatch, `-1…-8` sandbox-escape layout) plus the raw
+  `kexploit_opa334()` return value, and the Settings row shows the summary line.
+- **A banner that says what happened.** Files now shows a red banner when the
+  exploit failed and an orange one when kernel R/W worked but the sandbox
+  escape did not, each with the stage detail, a retry button and a
+  one-tap **Copy diagnostics** button.
+- **The list rebuilds itself.** A finished exploit run (success or failure) now
+  reloads the app list and clears the 20-second empty-folder cache, so a
+  successful escape is visible without relaunching the app.
+- **Offset sanity check is less fragile.** After kernel R/W the app compares
+  both `proc.p_name` and `proc.p_pid`; the escape now proceeds when the pid
+  matches, so a moved `p_name` field on a newer iOS no longer aborts an
+  otherwise correct offset table. `p_pid` is read through a new
+  `proc_get_pid()` helper in `kutils`.
+- Version is now `3.0.2` (build 32).
+
 ## [3.0.1] - 2026-11-14 — iOS 27.0.1 diagnostic build
 
 ### Why

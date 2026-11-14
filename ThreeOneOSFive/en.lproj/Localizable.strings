@@ -839,3 +839,13 @@
 "announcement.301_title" = "dekpop 3.0.1 — safer on iOS 27";
 "announcement.301_body" = "On iOS 27 and later the kernel exploit no longer starts by itself. Files keeps trying every safe access layer, and Settings has an opt-in if you want to test the experimental exploit.";
 "dekpop.status_limited" = "Limited";
+"method.kexploit" = "kernel r/w";
+"method.kexploit_limited" = "kernel r/w only";
+"method.sandbox" = "sandbox access";
+"exploit.failed_title" = "Exploit failed on iOS %@";
+"exploit.failed_message" = "The kernel exploit could not finish on this build. Files keeps trying the safe layers, but other apps' containers stay hidden unless one of them works.";
+"exploit.limited_title" = "Kernel access only, sandbox still closed";
+"exploit.limited_message" = "Kernel read/write succeeded but the sandbox escape did not take, so container reads still depend on the fallback layers.";
+"exploit.retry" = "Try again";
+"exploit.copy_log" = "Copy diagnostics";
+"exploit.log_copied" = "Copied";

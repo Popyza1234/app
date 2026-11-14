@@ -26,6 +26,7 @@ struct AppDataBrowserView: View {
     @State private var showingFolderPicker = false
     @State private var safeFolderNotice: String?
     @State private var showingExploitOptIn = false
+    @State private var diagnosticsCopied = false
     @Binding private var tabSession: FilesTabSession
 
     init(tabSession: Binding<FilesTabSession>) {
@@ -84,6 +85,16 @@ struct AppDataBrowserView: View {
                 safeFolders = SafeFolderBookmarks.load()
                 if !hasLoaded {
                     hasLoaded = true
+                    reload()
+                }
+            }
+            .onChange(of: appState.exploitStatus) { status in
+                // The exploit changes what the filesystem allows, but the list
+                // was built before it finished. Without this rebuild the
+                // "no apps" overlay stays on screen even after a successful
+                // run, which is exactly what made a working exploit look dead.
+                diagnosticsCopied = false
+                if status.isSuccess || status.isFailed {
                     reload()
                 }
             }
@@ -300,19 +311,13 @@ struct AppDataBrowserView: View {
 
         if appState.exploitNeedsOptIn {
             Section {
-                VStack(alignment: .leading, spacing: 6) {
-                    Label(
-                        language.text("exploit.unverified_title", AppInfo.osVersion),
-                        systemImage: "exclamationmark.triangle.fill"
-                    )
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.orange)
-
-                    Text(language.text("exploit.unverified_message"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-
+                exploitBannerContent(
+                    title: language.text("exploit.unverified_title", AppInfo.osVersion),
+                    message: language.text("exploit.unverified_message"),
+                    detail: nil,
+                    tint: .orange,
+                    icon: "exclamationmark.triangle.fill"
+                ) {
                     Button {
                         showingExploitOptIn = true
                     } label: {
@@ -321,7 +326,42 @@ struct AppDataBrowserView: View {
                     }
                     .buttonStyle(.bordered)
                 }
-                .padding(.vertical, 2)
+            }
+        } else if appState.exploitStatus.isFailed {
+            Section {
+                exploitBannerContent(
+                    title: language.text("exploit.failed_title", AppInfo.osVersion),
+                    message: language.text("exploit.failed_message"),
+                    detail: appState.exploitDetail,
+                    tint: .red,
+                    icon: "xmark.octagon.fill"
+                ) {
+                    HStack(spacing: 8) {
+                        Button {
+                            appState.retryKernelExploit()
+                        } label: {
+                            Label(language.text("exploit.retry"), systemImage: "arrow.clockwise")
+                                .font(.caption.weight(.semibold))
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(appState.kernelExploitRunning ||
+                                  (!appState.exploitVerified && !ExploitOptIn.isEnabled))
+
+                        copyDiagnosticsButton
+                    }
+                }
+            }
+        } else if appState.exploitLimited {
+            Section {
+                exploitBannerContent(
+                    title: language.text("exploit.limited_title"),
+                    message: language.text("exploit.limited_message"),
+                    detail: appState.exploitDetail,
+                    tint: .orange,
+                    icon: "exclamationmark.triangle.fill"
+                ) {
+                    copyDiagnosticsButton
+                }
             }
         }
 
@@ -816,6 +856,69 @@ struct AppDataBrowserView: View {
         .padding()
     }
 
+    /// One card shape for every exploit banner, so the reason is always shown
+    /// in the same place instead of only inside Settings.
+    private func exploitBannerContent<Actions: View>(
+        title: String,
+        message: String,
+        detail: String?,
+        tint: Color,
+        icon: String,
+        @ViewBuilder actions: () -> Actions
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label(title, systemImage: icon)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(tint)
+
+            Text(message)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let detail, !detail.isEmpty {
+                Text(detail)
+                    .font(.caption2.monospaced())
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            actions()
+        }
+        .padding(.vertical, 2)
+    }
+
+    private var copyDiagnosticsButton: some View {
+        Button {
+            copyDiagnostics()
+        } label: {
+            Label(
+                diagnosticsCopied
+                    ? language.text("exploit.log_copied")
+                    : language.text("exploit.copy_log"),
+                systemImage: diagnosticsCopied ? "checkmark.circle" : "doc.on.doc"
+            )
+            .font(.caption.weight(.semibold))
+        }
+        .buttonStyle(.bordered)
+    }
+
+    /// Runs the same probes as the compatibility sheet and puts the result on
+    /// the pasteboard, so a user on a broken device can send one message
+    /// instead of transcribing a screen.
+    private func copyDiagnostics() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let report = CompatibilitySelfTest.run()
+            let text = CompatibilitySelfTest.plainText(for: report)
+            DispatchQueue.main.async {
+                UIPasteboard.general.string = text
+                diagnosticsCopied = true
+                log("compat: diagnostics copied to the pasteboard")
+            }
+        }
+    }
+
     private func reload() {
         isLoading = true
         isResolving = true
@@ -1063,15 +1166,7 @@ struct CompatibilityReportView: View {
     }
 
     private var plainText: String {
-        var lines = [
-            "dekpop \(DekpopBrand.version) (\(DekpopBrand.build))",
-            "iOS \(report.version) (\(report.build)) · \(report.device)",
-            "versionAccepted=\(report.versionAccepted)"
-        ]
-        for probe in report.probes {
-            lines.append("\(probe.id): \(probe.succeeded ? "OK" : "FAIL") — \(probe.detail)")
-        }
-        return lines.joined(separator: "\n")
+        CompatibilitySelfTest.plainText(for: report)
     }
 }
 

@@ -840,3 +840,13 @@
 "announcement.301_title" = "dekpop 3.0.1 — ปลอดภัยขึ้นบน iOS 27";
 "announcement.301_body" = "บน iOS 27 ขึ้นไป แอปจะไม่รัน kernel exploit เองแล้ว หน้า Files ยังลองทุกชั้นที่ปลอดภัยให้ และคุณเปิดใช้ exploit ทดลองได้จาก Settings";
 "dekpop.status_limited" = "จำกัด";
+"method.kexploit" = "kernel r/w";
+"method.kexploit_limited" = "kernel r/w เท่านั้น";
+"method.sandbox" = "sandbox access";
+"exploit.failed_title" = "exploit ล้มเหลวบน iOS %@";
+"exploit.failed_message" = "kernel exploit ทำงานไม่สำเร็จบน build นี้ หน้า Files ยังลองชั้นที่ปลอดภัยให้ แต่ container ของแอปอื่นจะยังไม่แสดง ถ้าทุกชั้นถูกปิด";
+"exploit.limited_title" = "ได้แค่ kernel access, sandbox ยังปิดอยู่";
+"exploit.limited_message" = "kernel read/write สำเร็จ แต่ sandbox escape ไม่ผ่าน การอ่าน container จึงยังต้องพึ่งชั้นสำรอง";
+"exploit.retry" = "ลองใหม่";
+"exploit.copy_log" = "คัดลอกข้อมูลวินิจฉัย";
+"exploit.log_copied" = "คัดลอกแล้ว";

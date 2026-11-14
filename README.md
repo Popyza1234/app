@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-3.0.1-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-3.0.2-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -36,6 +36,16 @@
 - **Faster launch.** The kernel exploit runs 0.8 s after the first frame at `.utility` QoS, so the app list and first paint are not blocked. The launch screen is static with one fade-in, and announcements appear once per notice instead of on every launch.
 - **Asset Sets removed.** Models, service and all five screens are deleted. Saved folder shortcuts still work and are migrated automatically to the new `ShortcutStore`.
 - Version is now `3.0.0` (build 30). English/Thai string tables stay at full key parity.
+
+## What's new in 3.0.2 - the exploit result is visible
+
+> Enabling the exploit no longer leaves a silent empty list.
+
+- **Real failure code.** The status row shows the stage that stopped (kernel primitive, `proc_self`, offset mismatch, or a specific sandbox-escape layout) instead of a fixed `-1`.
+- **Banner in Files.** A failed run shows a red banner with the detail, a retry button and one-tap **Copy diagnostics**; kernel R/W without the sandbox escape shows an orange one.
+- **The list rebuilds.** A finished exploit run reloads the app list and clears the empty-folder cache, so a successful escape appears without relaunching.
+- **Fragile check fixed.** The pre-escape sanity check now accepts `proc.p_pid` as well as `proc.p_name`, so a moved name field does not abort a correct offset table.
+- Version is now `3.0.2` (build 32).
 
 ## What's new in 3.0.1 - iOS 27 diagnostics and panic guard
 

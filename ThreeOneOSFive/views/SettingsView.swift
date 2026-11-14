@@ -69,6 +69,13 @@ struct SettingsView: View {
                             .multilineTextAlignment(.trailing)
                     }
 
+                    if !appState.exploitDetail.isEmpty {
+                        Text(appState.exploitDetail)
+                            .font(.caption2.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    }
+
                     if !appState.exploitVerified {
                         Toggle(language.text("settings.exploit_optin"),
                                isOn: $allowUnverifiedExploit)

@@ -78,6 +78,12 @@ class AppState: ObservableObject {
     /// True when the running iOS release is past the verified exploit window
     /// and the user has not opted in to testing it anyway.
     @Published var exploitNeedsOptIn = false
+    /// Human-readable reason for the last exploit run, taken from
+    /// `KernelExploit.lastRunSummary` instead of a fixed "-1".
+    @Published var exploitDetail = ""
+    /// Kernel R/W is live but the sandbox escape did not take, so container
+    /// reads still depend on the fallback layers.
+    @Published var exploitLimited = false
 
     private var autoRunAttempted = false
 
@@ -193,6 +199,8 @@ class AppState: ObservableObject {
            !exploitStatus.isFailed {
             exploitStatus = .success(method: "sandbox")
             exploitNeedsOptIn = false
+            exploitLimited = false
+            exploitDetail = "active sandbox access detected"
             log("app: active sandbox access detected; skipping kernel exploit")
         }
         ContainerAccessPolicy.resetProbing()
@@ -213,15 +221,26 @@ class AppState: ObservableObject {
             let ok = KernelExploit.run()
             DispatchQueue.main.async {
                 self.kernelExploitRunning = false
+                self.exploitDetail = KernelExploit.lastRunSummary
+                // A fresh enumeration is required: everything scanned before
+                // the exploit finished was cached as "empty" and would keep
+                // suppressing the inode walk for another 20 seconds.
+                ContainerStore.resetEmptyEnumerationCache()
                 if ok {
-                    self.exploitStatus = .success(method: "kexploit")
+                    let limited = !KernelExploit.hasSandboxAccess()
+                    self.exploitLimited = limited
+                    self.exploitStatus = .success(method: limited ? "kexploit-limited" : "kexploit")
                     ContainerAccessPolicy.resetProbing()
-                    log("app: kernel exploit success — universal file access active on iOS \(AppInfo.osVersion)")
+                    log("app: kernel exploit success — \(KernelExploit.describeLastRun()) on iOS \(AppInfo.osVersion)")
                 } else {
-                    self.exploitStatus = .failed(method: "kexploit", code: -1)
+                    self.exploitLimited = false
+                    self.exploitStatus = .failed(
+                        method: "kexploit",
+                        code: Int64(KernelExploit.lastRunCode)
+                    )
                     // A kernel exploit failure is no longer a dead end: Files
                     // keeps trying direct, MCM, grant and inode reads.
-                    log("app: kernel exploit failed — file browsing continues with fallback access layers")
+                    log("app: kernel exploit failed at \(KernelExploit.describeLastRun()) — file browsing continues with fallback access layers")
                 }
             }
         }

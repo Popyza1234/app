@@ -435,6 +435,14 @@ enum ContainerStore {
         emptyEnumerations[path] = Date()
     }
 
+    /// Called after the kernel exploit changes the sandbox state. Without it
+    /// the 20-second empty cache keeps hiding containers that just became
+    /// readable.
+    static func resetEmptyEnumerationCache() {
+        emptyEnumerationLock.lock(); defer { emptyEnumerationLock.unlock() }
+        emptyEnumerations.removeAll()
+    }
+
     static func enumerateDirectories(path: String, maxInode: Int64 = 2_000_000) -> [String] {
         let clean = path.hasSuffix("/") ? String(path.dropLast()) : path
         guard clean.hasPrefix("/") else { return [] }
