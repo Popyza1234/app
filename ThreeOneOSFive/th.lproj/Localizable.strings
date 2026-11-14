@@ -796,3 +796,23 @@
 "setup.cert_install_hint" = "Safari จะเปิดขึ้นครั้งเดียวแล้วขึ้น Profile Downloaded — กลับมาที่ Settings → Profile Downloaded → Install (ไม่ต้องโหลดอะไรจากเน็ต)";
 "setup.cert_install_error" = "เปิดหน้าติดตั้งไม่สำเร็จ — ใช้ปุ่มสร้างไฟล์ด้านล่างแทน";
 "setup.cert_file_option" = "หรือสร้างไฟล์ไปติดตั้งเองจากแอป Files";
+
+/* ล็อกด้วยคีย์ */
+"license.title" = "เปิดใช้งาน dekpop";
+"license.subtitle" = "กรอกคีย์ที่คุณซื้อมา หนึ่งคีย์ใช้ได้กับหนึ่งเครื่องเท่านั้น";
+"license.key_label" = "คีย์ของคุณ";
+"license.key_placeholder" = "DKP-XXXX-XXXX-XXXX-XXXX";
+"license.activate" = "เปิดใช้งาน";
+"license.activating" = "กำลังตรวจสอบ…";
+"license.hint" = "ยังไม่มีคีย์? ติดต่อผู้ขายเพื่อขอคีย์";
+"license.device_label" = "เครื่องนี้";
+"license.status_active" = "เปิดใช้งานแล้ว";
+"license.status_active_until" = "ใช้งานได้ถึง %@";
+"license.err_empty" = "กรอกคีย์ก่อน";
+"license.err_network" = "เชื่อมต่อเซิร์ฟเวอร์คีย์ไม่ได้ ตรวจเน็ตแล้วลองใหม่";
+"license.err_key_not_found" = "ไม่พบคีย์นี้ในระบบ";
+"license.err_device_mismatch" = "คีย์นี้ผูกกับเครื่องอื่นแล้ว ติดต่อผู้ขายเพื่อรีเซ็ตเครื่อง";
+"license.err_revoked" = "คีย์นี้ถูกระงับ";
+"license.err_expired" = "คีย์นี้หมดอายุแล้ว";
+"license.err_not_activated" = "คีย์นี้ยังไม่เคยเปิดใช้งาน กรอกเพื่อเปิด";
+"license.err_invalid" = "รูปแบบคีย์ไม่ถูกต้อง";

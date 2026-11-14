@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var announcement: DekpopAnnouncement?
     @State private var showingThemePicker = false
     @StateObject private var theme = ThemeManager.shared
+    @StateObject private var license = LicenseManager.shared
 
     var body: some View {
         ZStack {
@@ -22,13 +23,17 @@ struct ContentView: View {
             }
             .ignoresSafeArea()
 
-            AppDataBrowserView(tabSession: $filesTabs)
-                .tint(AppTheme.accent)
-                .imageScale(.small)
-                .background(Color.clear)
-                // Rebuild the browser when the palette changes so every
-                // theme-dependent colour is resolved again immediately.
-                .id(theme.selection)
+            if license.isLicensed {
+                AppDataBrowserView(tabSession: $filesTabs)
+                    .tint(AppTheme.accent)
+                    .imageScale(.small)
+                    .background(Color.clear)
+                    // Rebuild the browser when the palette changes so every
+                    // theme-dependent colour is resolved again immediately.
+                    .id(theme.selection)
+            } else {
+                LicenseGateView()
+            }
 
             if !launchGone {
                 DekpopLaunchView()
@@ -48,6 +53,9 @@ struct ContentView: View {
         .sheet(isPresented: $showingThemePicker) {
             DekpopThemePicker()
                 .dekpopSheetCorners()
+        }
+        .task {
+            await license.start()
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
