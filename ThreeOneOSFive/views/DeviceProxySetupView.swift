@@ -348,12 +348,14 @@ struct DeviceProxySetupView: View {
             return nil
         }
 
-        let httpsHost = kCFNetworkProxiesHTTPSProxy as String
-        let httpsPort = kCFNetworkProxiesHTTPSPort as String
-        let httpsEnable = kCFNetworkProxiesHTTPSEnable as String
-        let httpHost = kCFNetworkProxiesHTTPProxy as String
-        let httpPort = kCFNetworkProxiesHTTPPort as String
-        let httpEnable = kCFNetworkProxiesHTTPEnable as String
+        // The kCFNetworkProxies… constants are macOS-only, but the dictionary
+        // keys they stand for are the same on iOS, so spell them out here.
+        let httpsHost = "HTTPSProxy"
+        let httpsPort = "HTTPSPort"
+        let httpsEnable = "HTTPSEnable"
+        let httpHost = "HTTPProxy"
+        let httpPort = "HTTPPort"
+        let httpEnable = "HTTPEnable"
 
         if flag(httpsEnable), let host = text(httpsHost), let port = number(httpsPort) {
             return DetectedProxy(host: host, port: port)
