@@ -10,6 +10,11 @@ class AppLog: ObservableObject {
     func append(_ msg: String) {
         DispatchQueue.main.async { self.entries.append(msg) }
     }
+
+    /// Last `count` lines. Call on the main thread — `entries` is published.
+    func tail(_ count: Int) -> [String] {
+        Array(entries.suffix(count))
+    }
 }
 func log(_ msg: String) { AppLog.shared.append("[dekpop] \(msg)") }
 

@@ -471,6 +471,15 @@ enum CompatibilitySelfTest {
         for probe in report.probes {
             lines.append("\(probe.id): \(probe.succeeded ? "OK" : "FAIL") — \(probe.detail)")
         }
+        // The kernel exploit prints its own progress to stdout, which
+        // `setupLogCapture` mirrors into AppLog. Include the tail here so the
+        // copied report alone contains the exact check that failed, instead of
+        // requiring a second trip to a log screen.
+        let tail = AppLog.shared.tail(120)
+        if !tail.isEmpty {
+            lines.append("--- log (last \(tail.count) lines) ---")
+            lines.append(contentsOf: tail)
+        }
         return lines.joined(separator: "\n")
     }
 }

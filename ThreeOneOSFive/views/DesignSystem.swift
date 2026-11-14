@@ -5,8 +5,8 @@ import UIKit
 /// for the product identity shown in the UI.
 enum DekpopBrand {
     static let displayName = "dekpop"
-    static let version = "3.0.2"
-    static let build = "32"
+    static let version = "3.0.3"
+    static let build = "33"
 }
 
 // MARK: - Themes

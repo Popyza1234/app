@@ -2,6 +2,40 @@
 
 All notable user-facing changes are documented in this file.
 
+## [3.0.3] - 2026-11-14 — exploit log travels with the report
+
+### Why
+
+A 27.0.1 (24A446, iPhone17,3) report showed `kexploit_opa334 returned -1`
+with no way to tell which of the exploit's checks failed: every `FAILURE()`
+collapses to code 1, and the exploit's own `printf` output only lived in a log
+screen that was not reachable from Files.
+
+### Changed
+
+- **Failure line in the code.** `FAILURE()` now records `__LINE__` before
+  aborting, so the log says `returned -1 at kexploit_opa334.m:1019` instead of
+  a bare `-1`.
+- **Diagnostics include the log.** The copied report now appends the last 120
+  log lines, which contain the exploit's own progress output (`highestSuccessIdx`,
+  `successReadCount`, kernel-base scan results), so one tap is enough.
+- **Log screen reachable.** The Files overflow menu has a **Log** entry that
+  opens `LogView` with copy and share.
+- Version is now `3.0.3` (build 33).
+
+### Measured result on iOS 27.0.1 (24A446, iPhone17,3)
+
+| Layer | Result |
+|---|---|
+| Own Documents | OK |
+| Direct container read | FAIL — permission denied |
+| MCM activation | FAIL — object carried no sandbox token |
+| Traversal grant | FAIL — handle -3 |
+| Traversal grant matrix (depth 6–12, both classes) | 0 of 14 variants |
+| Inode enumeration (`fsgetpath`) | OK — 243 entries (names only, no open permission) |
+| Kernel exploit | FAIL — stage 1, `kexploit_opa334` returned -1 |
+| Sandbox escape | not attempted (no kernel R/W) |
+
 ## [3.0.2] - 2026-11-14 — exploit result is visible and retried
 
 ### Why

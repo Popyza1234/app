@@ -144,6 +144,8 @@ struct AppDataBrowserView: View {
                 ModBrowserView(site: site)
             case .diagnostics(let report):
                 CompatibilityReportView(report: report)
+            case .logs:
+                LogView()
             case .activateUID:
                 ActivateUIDView()
             }
@@ -252,6 +254,12 @@ struct AppDataBrowserView: View {
                 showDiagnostics()
             } label: {
                 Label(language.text("safe.diagnostics"), systemImage: "stethoscope")
+            }
+
+            Button {
+                activeSheet = .logs
+            } label: {
+                Label(language.text("logs.title"), systemImage: "apple.terminal")
             }
         } label: {
             if isResolving {
@@ -910,9 +918,9 @@ struct AppDataBrowserView: View {
     private func copyDiagnostics() {
         DispatchQueue.global(qos: .userInitiated).async {
             let report = CompatibilitySelfTest.run()
-            let text = CompatibilitySelfTest.plainText(for: report)
+            // `plainText` reads AppLog, which is main-thread state.
             DispatchQueue.main.async {
-                UIPasteboard.general.string = text
+                UIPasteboard.general.string = CompatibilitySelfTest.plainText(for: report)
                 diagnosticsCopied = true
                 log("compat: diagnostics copied to the pasteboard")
             }
@@ -1059,6 +1067,7 @@ private enum FilesRootSheet: Identifiable {
     case editShortcut(FolderShortcut)
     case site(ModSite)
     case diagnostics(CompatibilitySelfTest.Report)
+    case logs
 
     var id: String {
         switch self {
@@ -1072,6 +1081,8 @@ private enum FilesRootSheet: Identifiable {
             return "site-\(site.id)"
         case .diagnostics:
             return "diagnostics"
+        case .logs:
+            return "logs"
         }
     }
 }
