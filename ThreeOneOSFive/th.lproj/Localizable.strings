@@ -779,3 +779,12 @@
 "setup.cert_share" = "แชร์/บันทึกไปที่ Files";
 "setup.cert_trust" = "หลังติดตั้งแล้ว ไปที่ Settings → General → About → Certificate Trust Settings แล้วเปิด mitmproxy (iOS บังคับให้ต้องเปิดขั้นนี้)";
 "setup.cert_error" = "สร้างโปรไฟล์ไม่สำเร็จ";
+
+/* ทดสอบการเชื่อมต่อในแอป */
+"setup.route_title" = "การเชื่อมต่อ";
+"setup.route_body" = "ตรวจว่าเน็ตเครื่องนี้ออกผ่าน proxy จริงหรือไม่ (ดู IP ขาออก)";
+"setup.route_button" = "ทดสอบการเชื่อมต่อ";
+"setup.route_testing" = "กำลังทดสอบ…";
+"setup.route_ok" = "ผ่าน proxy แล้ว — เน็ตออกจาก IP ของ proxy";
+"setup.route_direct" = "ยังไม่ผ่าน proxy — เน็ตออกจาก IP ของคุณเอง";
+"setup.route_fail" = "ทดสอบไม่สำเร็จ — ตรวจ Wi-Fi แล้วลองใหม่";

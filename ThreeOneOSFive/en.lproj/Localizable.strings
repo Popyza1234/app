@@ -778,3 +778,12 @@
 "setup.cert_share" = "Share or save to Files";
 "setup.cert_trust" = "After installing, open Settings → General → About → Certificate Trust Settings and turn on mitmproxy. iOS requires that extra step.";
 "setup.cert_error" = "Could not create the profile.";
+
+/* In-app connection test */
+"setup.route_title" = "CONNECTION";
+"setup.route_body" = "Checks where your traffic really leaves from — the proxy's address or your own.";
+"setup.route_button" = "Test connection";
+"setup.route_testing" = "Testing…";
+"setup.route_ok" = "Traffic goes through the proxy";
+"setup.route_direct" = "Not going through the proxy yet";
+"setup.route_fail" = "Test failed — check your Wi-Fi and try again";

@@ -17,6 +17,8 @@ struct DeviceProxySetupView: View {
     @State private var didCheck = false
     @State private var profileURL: URL?
     @State private var certificateFailed = false
+    @State private var routeResult: ProxyRouteCheck.Result?
+    @State private var isTestingRoute = false
 
     private let client = ActivateClient.shared
 
@@ -34,6 +36,7 @@ struct DeviceProxySetupView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         hero
                         statusCard
+                        routeCard
                         valuesCard
                         certificateCard
                         stepsCard
@@ -169,6 +172,63 @@ struct DeviceProxySetupView: View {
                 }
                 .buttonStyle(DekpopPressStyle())
                 .padding(.top, 12)
+            }
+        }
+    }
+
+    private var routeCard: some View {
+        glassCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(language.text("setup.route_title"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                Text(language.text("setup.route_body"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button {
+                    runRouteCheck()
+                } label: {
+                    HStack(spacing: 8) {
+                        if isTestingRoute {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "antenna.radiowaves.left.and.right")
+                        }
+                        Text(isTestingRoute ? language.text("setup.route_testing") : language.text("setup.route_button"))
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, minHeight: 42)
+                    .background(
+                        LinearGradient(
+                            colors: [.blue, .cyan],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    )
+                }
+                .buttonStyle(DekpopPressStyle())
+                .disabled(isTestingRoute)
+
+                if let routeResult {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label(routeTitle(routeResult), systemImage: routeSymbol(routeResult))
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(routeColor(routeResult))
+
+                        if let detail = routeDetail(routeResult) {
+                            Text(detail)
+                                .font(.system(.caption2, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                        }
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
     }
@@ -374,6 +434,69 @@ struct DeviceProxySetupView: View {
             if copied == target {
                 withAnimation(.easeOut(duration: 0.2)) { copied = nil }
             }
+        }
+    }
+
+    private func runRouteCheck() {
+        guard !isTestingRoute else { return }
+        isTestingRoute = true
+        routeResult = nil
+
+        Task {
+            let result = await ProxyRouteCheck.run(expectedProxyHost: host)
+            await MainActor.run {
+                routeResult = result
+                isTestingRoute = false
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(routeSucceeded(result) ? .success : .warning)
+            }
+        }
+    }
+
+    private func routeSucceeded(_ result: ProxyRouteCheck.Result) -> Bool {
+        if case .throughProxy = result { return true }
+        return false
+    }
+
+    private func routeTitle(_ result: ProxyRouteCheck.Result) -> String {
+        switch result {
+        case .throughProxy:
+            return language.text("setup.route_ok")
+        case .direct:
+            return language.text("setup.route_direct")
+        case .failed:
+            return language.text("setup.route_fail")
+        }
+    }
+
+    private func routeSymbol(_ result: ProxyRouteCheck.Result) -> String {
+        switch result {
+        case .throughProxy:
+            return "checkmark.shield.fill"
+        case .direct:
+            return "exclamationmark.shield.fill"
+        case .failed:
+            return "xmark.octagon.fill"
+        }
+    }
+
+    private func routeColor(_ result: ProxyRouteCheck.Result) -> Color {
+        switch result {
+        case .throughProxy:
+            return .green
+        case .direct:
+            return .orange
+        case .failed:
+            return .red
+        }
+    }
+
+    private func routeDetail(_ result: ProxyRouteCheck.Result) -> String? {
+        switch result {
+        case let .throughProxy(ip, milliseconds), let .direct(ip, milliseconds):
+            return "IP \(ip) · \(milliseconds) ms"
+        case let .failed(reason):
+            return reason
         }
     }
 
