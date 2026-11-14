@@ -75,8 +75,13 @@ class AppState: ObservableObject {
     @Published var exploitStatus: ExploitStatus = .notStarted
     @Published var unsupportedMessage: String?
     @Published var kernelExploitRunning = false
+    /// True when the running iOS release is past the verified exploit window
+    /// and the user has not opted in to testing it anyway.
+    @Published var exploitNeedsOptIn = false
 
     private var autoRunAttempted = false
+
+    var exploitVerified: Bool { ExploitSupportPolicy.currentBuildHasVerifiedExploit }
 
     var kernelExploitApplicable: Bool {
         KernelExploit.isApplicable(
@@ -119,6 +124,11 @@ class AppState: ObservableObject {
         )
         guard applicable else { return }
 
+        exploitNeedsOptIn = !exploitVerified && !ExploitOptIn.isEnabled
+        if exploitNeedsOptIn {
+            log("app: kernel exploit is unverified on iOS \(AppInfo.osVersion) — automatic run disabled until the user opts in")
+        }
+
         refreshKernelExploitStatus()
         maybeAutoRunKernelExploit()
     }
@@ -129,8 +139,45 @@ class AppState: ObservableObject {
               !exploitStatus.isFailed,
               !autoRunAttempted else { return }
         autoRunAttempted = true
+        guard exploitVerified || ExploitOptIn.isEnabled else {
+            // Running the exploit with an offset table from another release
+            // can panic the device. Newer releases keep every safe access
+            // layer and simply skip the kernel stage unless the user asks.
+            exploitNeedsOptIn = true
+            log("app: kernel exploit skipped — iOS \(AppInfo.osVersion) is past the verified window (iOS \(ExploitSupportPolicy.verifiedExploitMaxMajor).x)")
+            return
+        }
         log("app: starting kernel exploit automatically")
         runKernelExploitIfNeeded()
+    }
+
+    /// Manual run from Settings or the Files banner. A previous failure can be
+    /// retried here without relaunching the app.
+    func retryKernelExploit() {
+        guard !kernelExploitRunning else { return }
+        autoRunAttempted = true
+        exploitStatus = .notStarted
+        log("app: manual kernel exploit run requested")
+        runKernelExploitIfNeeded()
+    }
+
+    func optInAndRunKernelExploit() {
+        ExploitOptIn.isEnabled = true
+        exploitNeedsOptIn = false
+        log("app: unverified kernel exploit enabled by the user")
+        retryKernelExploit()
+    }
+
+    func disableUnverifiedExploit() {
+        ExploitOptIn.isEnabled = false
+        exploitNeedsOptIn = !exploitVerified && !exploitStatus.isSuccess
+        log("app: unverified kernel exploit disabled by the user")
+    }
+
+    /// Re-reads the opt-in state after the Settings toggle changes.
+    func refreshOptInState() {
+        exploitNeedsOptIn = !exploitVerified && !ExploitOptIn.isEnabled && !exploitStatus.isSuccess
+        log("app: unverified kernel exploit opt-in=\(ExploitOptIn.isEnabled)")
     }
 
     private func refreshKernelExploitStatus() {
@@ -145,6 +192,7 @@ class AppState: ObservableObject {
            !exploitStatus.isSuccess,
            !exploitStatus.isFailed {
             exploitStatus = .success(method: "sandbox")
+            exploitNeedsOptIn = false
             log("app: active sandbox access detected; skipping kernel exploit")
         }
         ContainerAccessPolicy.resetProbing()

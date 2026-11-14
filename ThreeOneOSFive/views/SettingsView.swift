@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Environment(\.appLanguage) private var language
     @EnvironmentObject private var appState: AppState
     @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.defaultRawValue
+    @AppStorage(ExploitOptIn.storageKey) private var allowUnverifiedExploit = false
 
     var body: some View {
         NavigationStack {
@@ -57,6 +58,40 @@ struct SettingsView: View {
                     Text(language.text("settings.supported_versions"))
                 } footer: {
                     Text(language.text("settings.supported_versions_footer"))
+                }
+
+                Section {
+                    HStack {
+                        Text(language.text("settings.exploit_status"))
+                        Spacer()
+                        Text(appState.exploitStatus.displayText(language: language))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.trailing)
+                    }
+
+                    if !appState.exploitVerified {
+                        Toggle(language.text("settings.exploit_optin"),
+                               isOn: $allowUnverifiedExploit)
+                    }
+                    Button(language.text("settings.run_exploit")) {
+                        appState.retryKernelExploit()
+                    }
+                    .disabled(appState.kernelExploitRunning ||
+                              (!appState.exploitVerified && !allowUnverifiedExploit))
+                } header: {
+                    Text(language.text("settings.exploit_section"))
+                } footer: {
+                    Text(appState.exploitVerified
+                         ? language.text("settings.exploit_footer_verified")
+                         : language.text("settings.exploit_footer_unverified",
+                                         "\(ExploitSupportPolicy.verifiedExploitMaxMajor)"))
+                }
+                .onChange(of: allowUnverifiedExploit) { enabled in
+                    if enabled {
+                        appState.refreshOptInState()
+                    } else {
+                        appState.disableUnverifiedExploit()
+                    }
                 }
 
                 Section(language.text("settings.social_media")) {

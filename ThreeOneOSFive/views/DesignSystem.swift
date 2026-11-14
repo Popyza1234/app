@@ -5,8 +5,8 @@ import UIKit
 /// for the product identity shown in the UI.
 enum DekpopBrand {
     static let displayName = "dekpop"
-    static let version = "3.0.0"
-    static let build = "30"
+    static let version = "3.0.1"
+    static let build = "31"
 }
 
 // MARK: - Themes
@@ -486,7 +486,12 @@ struct DekpopHeroCard: View {
     @EnvironmentObject private var appState: AppState
 
     private var isReady: Bool {
-        appState.isSupported && !appState.kernelExploitRunning
+        appState.isSupported && !appState.kernelExploitRunning && !appState.exploitNeedsOptIn
+    }
+
+    private var statusKey: String {
+        if appState.exploitNeedsOptIn { return "dekpop.status_limited" }
+        return isReady ? "dekpop.status_ready" : "dekpop.status_preparing"
     }
 
     var body: some View {
@@ -541,9 +546,9 @@ struct DekpopHeroCard: View {
     private var statusPill: some View {
         HStack(spacing: 5) {
             Circle()
-                .fill(isReady ? Color.green : Color.white.opacity(0.92))
+                .fill(isReady ? Color.green : (appState.exploitNeedsOptIn ? Color.orange : Color.white.opacity(0.92)))
                 .frame(width: 6, height: 6)
-            Text(language.text(isReady ? "dekpop.status_ready" : "dekpop.status_preparing"))
+            Text(language.text(statusKey))
                 .font(.caption2.weight(.bold))
                 .lineLimit(1)
         }

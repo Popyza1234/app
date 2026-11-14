@@ -430,8 +430,21 @@ enum CompatibilitySelfTest {
         let inodeNames = ContainerStore.enumerateDirectories(path: root)
         add("inode", "compat.inode", !inodeNames.isEmpty, "\(inodeNames.count) entries")
 
+        // Traversal-grant matrix. Tries every `part_domain` depth and both
+        // container classes the app has used, so "iOS 27 denies all of them"
+        // is visible instead of one opaque -3.
+        var matrixDetail = "no report"
+        if let reportPointer = bad_query_diagnose(root) {
+            matrixDetail = String(cString: reportPointer)
+            free(reportPointer)
+        }
+        add("grant_matrix", "compat.grant_matrix",
+            matrixDetail.contains(": OK"), matrixDetail)
+
         let sandbox = KernelExploit.hasSandboxAccess()
         add("sandbox", "compat.sandbox", sandbox, sandbox ? "active" : "inactive")
+        add("exploit_stage", "compat.exploit_stage", sandbox,
+            KernelExploit.lastRunSummary)
 
         let report = Report(
             version: AppInfo.osVersion,

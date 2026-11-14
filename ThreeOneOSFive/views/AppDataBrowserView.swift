@@ -6,6 +6,7 @@ struct AppDataBrowserView: View {
     @Environment(\.appLanguage) private var language
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @EnvironmentObject private var appState: AppState
     // Observing the palette lets a theme change redraw this screen in place.
     // The old build re-created the whole browser via `.id`, which re-ran the
     // container scan (and reset the scroll position) just to change colours.
@@ -24,6 +25,7 @@ struct AppDataBrowserView: View {
     @State private var safeFolders: [SafeFolder] = []
     @State private var showingFolderPicker = false
     @State private var safeFolderNotice: String?
+    @State private var showingExploitOptIn = false
     @Binding private var tabSession: FilesTabSession
 
     init(tabSession: Binding<FilesTabSession>) {
@@ -190,6 +192,14 @@ struct AppDataBrowserView: View {
         .frame(maxWidth: 760)
         .frame(maxWidth: .infinity)
         .background(Color.clear)
+        .alert(language.text("exploit.confirm_title"), isPresented: $showingExploitOptIn) {
+            Button(language.text("common.cancel"), role: .cancel) {}
+            Button(language.text("exploit.confirm_action"), role: .destructive) {
+                appState.optInAndRunKernelExploit()
+            }
+        } message: {
+            Text(language.text("exploit.confirm_message", AppInfo.osVersion))
+        }
     }
 
     private var categoryPicker: some View {
@@ -286,6 +296,33 @@ struct AppDataBrowserView: View {
                 .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 4, trailing: 16))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+        }
+
+        if appState.exploitNeedsOptIn {
+            Section {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label(
+                        language.text("exploit.unverified_title", AppInfo.osVersion),
+                        systemImage: "exclamationmark.triangle.fill"
+                    )
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.orange)
+
+                    Text(language.text("exploit.unverified_message"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Button {
+                        showingExploitOptIn = true
+                    } label: {
+                        Label(language.text("exploit.enable"), systemImage: "bolt.horizontal.circle")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(.vertical, 2)
+            }
         }
 
         if let workspaceURL {
@@ -956,8 +993,11 @@ struct CompatibilityReportView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
-                            Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.green)
+                            Image(systemName: ExploitSupportPolicy.currentBuildHasVerifiedExploit
+                                  ? "checkmark.seal.fill"
+                                  : "exclamationmark.triangle.fill")
+                                .foregroundStyle(ExploitSupportPolicy.currentBuildHasVerifiedExploit
+                                                 ? Color.green : Color.orange)
                             Text(language.text("compat.supported_badge"))
                                 .font(.headline)
                         }
@@ -967,6 +1007,12 @@ struct CompatibilityReportView: View {
                         Text(report.device)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
+                        if !ExploitSupportPolicy.currentBuildHasVerifiedExploit {
+                            Text(language.text("compat.unverified_runtime", report.version))
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
                     .padding(.vertical, 4)
                 }

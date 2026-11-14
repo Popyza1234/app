@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="เวอร์ชัน" src="https://img.shields.io/badge/version-3.0.0-6C4CF1?style=flat-square">
+  <img alt="เวอร์ชัน" src="https://img.shields.io/badge/version-3.0.1-6C4CF1?style=flat-square">
   <img alt="ภาษา" src="https://img.shields.io/badge/ภาษา-English%20%7C%20ไทย-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-ทุกเวอร์ชัน%2016.0%2B-222222?style=flat-square">
   <img alt="รุ่น" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -35,6 +35,16 @@
 - **เปิดแอปเร็วขึ้น** — kernel exploit เริ่มหลังเฟรมแรก 0.8 วินาทีที่ QoS `.utility` การสแกนครั้งแรกและเฟรมแรกจึงไม่ถูกบล็อก หน้าเปิดแอปเป็นภาพนิ่งพร้อมเฟดเข้าครั้งเดียว และประกาศแสดงเพียงครั้งเดียวต่อประกาศ ไม่ใช่ทุกครั้งที่เปิดแอป
 - **นำ Asset Sets ออกแล้ว** — ลบโมเดล service และหน้าจอทั้ง 5 หน้าออก แต่ทางลัดโฟลเดอร์ที่บันทึกไว้ยังใช้ได้และย้ายไป `ShortcutStore` ใหม่อัตโนมัติ
 - เวอร์ชันปัจจุบัน `3.0.0` (build 30) ตารางข้อความอังกฤษ/ไทยยังมีคีย์ครบเท่ากัน
+
+## อัปเดต 3.0.1 - วินิจฉัย iOS 27 และกันเครื่องพัง
+
+> การเข้าถึงไฟล์ลึกต้องมี exploit ที่ใช้ได้ บน iOS 27 ขึ้นไป แอปจะหยุดก่อนที่จะไปเขียน kernel ผิดที่
+
+- **ช่วงที่ exploit ตรวจสอบแล้ว** - `kexploit/offsets.m` ตรวจสอบถึง iOS 26.x เท่านั้น เวอร์ชันใหม่กว่าจะไม่รัน exploit อัตโนมัติ แต่ Files ยังลองอ่านตรง, MCM, traversal grant และ inode walk ตามปกติ
+- **เปิดใช้เองพร้อมคำเตือน** - แบนเนอร์สีส้มในหน้า Files และสวิตช์ใน Settings ให้คุณรัน exploit ที่ยังไม่ยืนยันได้เอง หลังยืนยันแล้วว่าจะรับความเสี่ยงเครื่องรีสตาร์ท
+- **ตรวจ offset ก่อนแก้ sandbox** - หลังได้ kernel R/W แอปจะอ่านชื่อโปรเซสของตัวเองจาก kernel ถ้าไม่ตรงกับ `dekpop` จะข้าม sandbox escape แทนที่จะไปเขียนหน่วยความจำอื่น
+- **วินิจฉัยละเอียดขึ้น** - หน้ารายงานความเข้ากันได้แสดงขั้นสุดท้ายของ exploit และตารางลอง traversal grant (depth 6-12 x 2 คลาส) ถ้า Apple ปิด จะเห็นเป็น "ถูกปฏิเสธทุก variant"
+- เวอร์ชันใหม่คือ `3.0.1` (build 31)
 
 ## มีอะไรใหม่ใน 2.1.0 — รองรับ 27.0.1 + โฟลเดอร์ที่เปิดได้เสมอ
 

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-3.0.0-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-3.0.1-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -37,6 +37,16 @@
 - **Asset Sets removed.** Models, service and all five screens are deleted. Saved folder shortcuts still work and are migrated automatically to the new `ShortcutStore`.
 - Version is now `3.0.0` (build 30). English/Thai string tables stay at full key parity.
 
+## What's new in 3.0.1 - iOS 27 diagnostics and panic guard
+
+> Deep access needs a working exploit. On iOS 27 and later the app now stops before it can corrupt the kernel.
+
+- **Exploit safety window.** `kexploit/offsets.m` is verified through iOS 26.x. Past that window the exploit no longer starts automatically; Files still tries direct reads, MCM activation, traversal grants and the inode walk.
+- **Opt-in with a warning.** An orange banner in Files and a toggle in Settings let you run the unverified exploit deliberately, after a confirmation that explains the restart risk.
+- **Offset sanity check.** After kernel R/W, the app reads the kernel name of its own process; if it is not `dekpop`, the sandbox escape is skipped instead of patching unrelated memory.
+- **Diagnostics.** The compatibility sheet now reports the last exploit stage and a traversal-grant matrix (depth 6-12 x two container classes), so an Apple patch appears as "all variants denied".
+- Version is now `3.0.1` (build 31).
+
 ## What's new in 2.1.0 — 27.0.1 compatibility & safe folders
 
 > iOS **27.0.1** is explicitly accepted, and Files now works there even when app-container access is blocked.
@@ -52,9 +62,9 @@
 
 ## What's new in 2.0.0 — Universal Files access
 
-> Major update. **iOS 27 and later can now browse files exactly like older iOS versions.**
+> Major update. **Every iOS version shares one capability-based access chain** — a failing layer no longer disables the rest. Reading other apps' containers still needs a working exploit or entitlement.
 
-- **Root cause fixed.** A hidden `majorVersion >= 26` split forced iOS 26+ through `bad_query` grants and declared the app failed whenever the optional sandbox escape did not succeed. On iOS 27 that escape cannot be applied yet, so Files came up empty. Older releases kept working via direct reads — hence the version-dependent behaviour.
+- **Root cause fixed.** A hidden `majorVersion >= 26` split forced iOS 26+ through `bad_query` grants and declared the app failed whenever the optional sandbox escape did not succeed. That is why iOS 27 came up empty instead of showing the layers that still work. Older releases kept working via direct reads — hence the version-dependent behaviour.
 - **One capability-based chain on every iOS version** — direct `FileManager` read → MCM activation → `bad_query` traversal grant → inode walk / raw MCM metadata plist. Layers are probed at runtime; a failing layer never disables the others. No version number is consulted anywhere in the file access path.
 - **Sandbox escape is now optional.** `KernelExploit.run()` succeeds as soon as kernel R/W is established, on any release. If the escape fails, direct/MCM/grant/inode fallbacks stay active instead of marking Files as failed.
 - **Folder listing has a fallback.** `listFiles(at:)` now falls back to the inode walk, so a folder that `FileManager` refuses on a newer kernel is no longer shown as empty. Grant probing is capability-based and re-tried on each reload.

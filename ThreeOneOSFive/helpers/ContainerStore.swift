@@ -413,6 +413,28 @@ enum ContainerStore {
 
     // MARK: Filesystem discovery
 
+    /// Remembers paths whose inode walk just came back empty. On a release
+    /// where `fsgetpath` cannot expose containers, every folder open would
+    /// otherwise repeat a multi-second scan and look frozen.
+    private static let emptyEnumerationLock = NSLock()
+    private static var emptyEnumerations: [String: Date] = [:]
+    private static let emptyEnumerationTTL: TimeInterval = 20
+
+    private static func recentlyEmpty(_ path: String) -> Bool {
+        emptyEnumerationLock.lock(); defer { emptyEnumerationLock.unlock() }
+        guard let date = emptyEnumerations[path] else { return false }
+        if Date().timeIntervalSince(date) > emptyEnumerationTTL {
+            emptyEnumerations.removeValue(forKey: path)
+            return false
+        }
+        return true
+    }
+
+    private static func recordEmptyEnumeration(_ path: String) {
+        emptyEnumerationLock.lock(); defer { emptyEnumerationLock.unlock() }
+        emptyEnumerations[path] = Date()
+    }
+
     static func enumerateDirectories(path: String, maxInode: Int64 = 2_000_000) -> [String] {
         let clean = path.hasSuffix("/") ? String(path.dropLast()) : path
         guard clean.hasPrefix("/") else { return [] }
@@ -421,9 +443,15 @@ enum ContainerStore {
             return names.map { (clean as NSString).appendingPathComponent($0) }
         }
 
+        if recentlyEmpty(clean) {
+            log("enumerate: skipping inode walk for \(clean) (recently empty)")
+            return []
+        }
+
         var pathC = clean.utf8CString.map { Int8($0) }
         guard let result = bad_query_list(&pathC, maxInode) else {
             log("enumerate: NULL for \(clean)")
+            recordEmptyEnumeration(clean)
             return []
         }
         defer { free(result) }
@@ -432,6 +460,7 @@ enum ContainerStore {
             log("enumerate: inode fallback for \(clean) -> \(list.count) entries")
         } else {
             log("enumerate: FileManager+inode unavailable for \(clean)")
+            recordEmptyEnumeration(clean)
         }
         return list
     }

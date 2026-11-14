@@ -2,6 +2,43 @@
 
 All notable user-facing changes are documented in this file.
 
+## [3.0.1] - 2026-11-14 — iOS 27.0.1 diagnostic build
+
+### Why
+
+Deep file access works on iOS 26 and earlier but not on iOS 27.0.1. The kernel
+exploit's offset table is only verified through iOS 26.x, and starting it with
+mismatched offsets can corrupt kernel memory instead of failing cleanly.
+
+### Changed
+
+- **Exploit safety window.** The kernel exploit no longer starts automatically
+  on an iOS release past the verified window (iOS ≤ 26). File access still
+  attempts every safe layer (direct read, MCM activation, traversal grant,
+  inode walk), so nothing that works today is disabled.
+- **Explicit opt-in.** An orange banner in Files and a toggle in Settings let
+  the user run the unverified exploit deliberately, with a confirmation alert
+  that explains the restart risk.
+- **Automatic offset sanity check.** After kernel R/W is established the app
+  reads the kernel name of its own process. If it does not match `dekpop`, the
+  sandbox escape is skipped instead of patching unrelated memory.
+- **Stage-level diagnostics.** `sandbox_escape()` now returns a distinct code
+  for every layout assumption it makes, and the compatibility report shows the
+  last exploit stage plus a traversal-grant matrix (depth 6–12 × two container
+  classes) so an Apple patch shows up as "all variants denied".
+- **Report honesty.** The compatibility screen marks iOS 27+ as "past the
+  verified exploit window" instead of showing a green all-clear.
+- **Bounded inode fallback.** The `fsgetpath` walk stops after 1.5 s and caches
+  empty folders for 20 s, so a release where the walk cannot see containers no
+  longer looks frozen when a folder is opened.
+
+### Notes
+
+- Browsing other apps' containers on a stock, non-jailbroken iOS 27.0.1 device
+  still requires a working exploit, an Apple-issued entitlement, or a jailbreak.
+  Folders chosen through the document picker and the app's own Documents keep
+  working on every version.
+
 ## [3.0.0] - 2026-11-14 — performance and UI rebuild
 
 ### What was reported

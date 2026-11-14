@@ -32,4 +32,33 @@ enum ExploitSupportPolicy {
     static func isSupported(major: Int, minor: Int, patch: Int, build: String) -> Bool {
         accepts(version: "\(major).\(minor).\(patch)", build: build)
     }
+
+    // MARK: - Kernel exploit safety window
+
+    /// The kernel exploit ships offsets verified up to this major release
+    /// (`kexploit/offsets.m`, `kexploit/sandbox_escape.m`). File access itself
+    /// is still attempted on newer releases through the safe layers, but the
+    /// exploit is not started automatically because a mismatched offset table
+    /// corrupts kernel memory — a panic/restart instead of a clean failure.
+    static let verifiedExploitMaxMajor = 26
+
+    static func isExploitVerified(major: Int, minor: Int, patch: Int) -> Bool {
+        major >= 16 && major <= verifiedExploitMaxMajor
+    }
+
+    static var currentBuildHasVerifiedExploit: Bool {
+        let v = AppInfo.versionTuple
+        return isExploitVerified(major: v.major, minor: v.minor, patch: v.patch)
+    }
+}
+
+/// User opt-in for running the kernel exploit on an iOS release whose offsets
+/// are not verified yet (currently iOS 27 and later).
+enum ExploitOptIn {
+    static let storageKey = "dekpop.kexploit.allowUnverified"
+
+    static var isEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: storageKey) }
+        set { UserDefaults.standard.set(newValue, forKey: storageKey) }
+    }
 }
