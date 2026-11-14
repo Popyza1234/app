@@ -39,6 +39,9 @@ enum ZIPArchiveExtractor {
     private static let centralHeaderSignature: UInt32 = 0x0201_4b50
     private static let endSignature: UInt32 = 0x0605_4b50
     private static let diskReserveBytes: Int64 = 64 * 1_024 * 1_024
+    /// Longest entry path we will extract; keeps hostile archives from
+    /// building absurdly deep component lists.
+    private static let maximumEntryPathBytes = 4_096
 
     static func extract(
         archiveURL: URL,
@@ -268,7 +271,7 @@ enum ZIPArchiveExtractor {
               !rawName.hasPrefix("/"),
               !rawName.contains("\\"),
               !rawName.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains),
-              rawName.utf8.count <= PatchPackageLimits.maximumPathBytes else {
+              rawName.utf8.count <= maximumEntryPathBytes else {
             throw ZIPArchiveExtractorError.invalidArchive
         }
         var components = rawName.split(

@@ -84,6 +84,12 @@ final class LicenseManager: ObservableObject {
             status = .locked
             return
         }
+        // Open with the entitlement already verified on this device instead of
+        // waiting for the network. A 15 second server timeout used to hold the
+        // gate (and the whole browser) closed on a slow connection.
+        if let cached = cachedStatus() {
+            status = cached
+        }
         await refresh()
     }
 

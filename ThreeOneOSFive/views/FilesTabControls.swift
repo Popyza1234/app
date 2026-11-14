@@ -78,6 +78,7 @@ struct FilesTabStrip: View {
                 )
                 .font(.caption.weight(isSelected ? .semibold : .regular))
                 .lineLimit(1)
+                .frame(maxWidth: 150, alignment: .leading)
                 .padding(.leading, 8)
                 .padding(.vertical, 6)
             }

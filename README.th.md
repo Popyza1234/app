@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="เวอร์ชัน" src="https://img.shields.io/badge/version-3.0.3-6C4CF1?style=flat-square">
+  <img alt="เวอร์ชัน" src="https://img.shields.io/badge/version-4.0.0-6C4CF1?style=flat-square">
   <img alt="ภาษา" src="https://img.shields.io/badge/ภาษา-English%20%7C%20ไทย-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-ทุกเวอร์ชัน%2016.0%2B-222222?style=flat-square">
   <img alt="รุ่น" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -22,6 +22,17 @@
 
 > [!WARNING]
 > dekpop เป็นซอฟต์แวร์วิจัยสำหรับจัดการอุปกรณ์ของคุณเอง ควรสำรองข้อมูลก่อนใช้งาน และใช้เฉพาะกับอุปกรณ์และข้อมูลที่คุณเป็นเจ้าของ เพราะแอปสามารถแก้ไขไฟล์ภายในคอนเทนเนอร์ของแอปได้
+
+## มีอะไรใหม่ใน 4.0.0 — เอา exploit ออก เบาและลื่น
+
+> ระบบ kernel exploit ถูกนำออกทั้งหมดแล้ว ไม่มีอาการค้างตอนเปิด ไม่มี watchdog และเครื่องไม่รีสตาร์ท
+
+- **ลบ exploit ทั้งชุด** — `kexploit/`, `KernelExploit.swift`, แบนเนอร์สถานะ exploit, หน้าขออนุญาต และการรันตอนเปิดแอป ถูกลบออกหมด การเข้าถึงโฟลเดอร์ที่อ่านได้ใช้เฉพาะชั้นที่ปลอดภัย ได้แก่ อ่านโดยตรง, เปิดใช้งาน MCM container, traversal grant และการเดิน inode
+- **ลบของแอบแฝง** — ลิงก์ attribution ที่ถูกเข้ารหัสไว้, การเรียก attestation ปลอมใน `AppInfo` และท่าทางซ่อนในหน้าต่าง รวมถึงการ override `fork()` เพื่อหลบการตรวจ jailbreak ถูกลบออก
+- **เปิดแอปไม่สะดุด** — คิวสแกนเดียวแบบอนุกรม, แคช metadata และ LaunchServices 10 นาที, แสดงรายการแรกก่อนเดินไฟล์ซิสเต็ม, อัปเดตความคืบหน้าไม่เกินทุก 0.5 วินาที
+- **UI พอดีจอ** — แถบเครื่องมือหน้าไฟล์เป็นไอคอนล้วน แถบเลือก/วางจำกัดข้อความ ป้ายแท็บจำกัดความกว้าง และทุกอย่างอยู่ในระยะขอบที่ปรับตามจอ
+- **ไฟล์เล็กลง** — ลบโค้ด patch, cleaner, wallpaper, onboarding, settings และชุดไฟล์ประมาณ 40 ไฟล์ บันทึกในแอปถูกจำกัดที่ 800 บรรทัด
+- เวอร์ชันปัจจุบัน `4.0.0` (build 34)
 
 ## มีอะไรใหม่ใน 3.0.0 — เบาขึ้น เร็วขึ้น ลื่นขึ้น
 

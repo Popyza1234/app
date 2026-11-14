@@ -86,9 +86,9 @@ enum ContainerAccessPolicy {
         return !grantsPaused
     }
 
-    /// Re-enable grant probing at the start of every browser reload and after
-    /// the kernel exploit succeeds, so a capability that appears later in the
-    /// process lifetime is picked up instead of being cached as unavailable.
+    /// Re-enable grant probing at the start of every browser reload so a
+    /// capability that appears later in the process lifetime is picked up
+    /// instead of being cached as unavailable.
     static func resetProbing() {
         lock.lock(); defer { lock.unlock() }
         consecutiveGrantFailures = 0
@@ -392,7 +392,7 @@ enum CompatibilitySelfTest {
             probes.append(CompatibilityProbe(id: id, titleKey: key, detail: detail, succeeded: ok))
         }
 
-        let accepted = ExploitSupportPolicy.accepts(
+        let accepted = AppSupportPolicy.accepts(
             version: AppInfo.osVersion,
             build: AppInfo.osBuild
         )
@@ -400,7 +400,7 @@ enum CompatibilitySelfTest {
             "iOS \(AppInfo.osVersion) (\(AppInfo.osBuild))")
 
         // The app's own Documents folder always works — no entitlement or
-        // exploit needed. This is the guaranteed fallback on 27.0.1.
+        // exploit needed. This is the guaranteed fallback on every iOS build.
         let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first
         let docsReadable = docs.map { (try? fm.contentsOfDirectory(atPath: $0.path)) != nil } ?? false
         add("documents", "compat.documents", docsReadable,
@@ -441,11 +441,6 @@ enum CompatibilitySelfTest {
         add("grant_matrix", "compat.grant_matrix",
             matrixDetail.contains(": OK"), matrixDetail)
 
-        let sandbox = KernelExploit.hasSandboxAccess()
-        add("sandbox", "compat.sandbox", sandbox, sandbox ? "active" : "inactive")
-        add("exploit_stage", "compat.exploit_stage", sandbox,
-            KernelExploit.lastRunSummary)
-
         let report = Report(
             version: AppInfo.osVersion,
             build: AppInfo.osBuild,
@@ -465,13 +460,12 @@ enum CompatibilitySelfTest {
         var lines = [
             "dekpop \(DekpopBrand.version) (\(DekpopBrand.build))",
             "iOS \(report.version) (\(report.build)) · \(report.device)",
-            "versionAccepted=\(report.versionAccepted)",
-            "exploit=\(KernelExploit.lastRunSummary) [\(KernelExploit.lastRunCode)]"
+            "versionAccepted=\(report.versionAccepted)"
         ]
         for probe in report.probes {
             lines.append("\(probe.id): \(probe.succeeded ? "OK" : "FAIL") — \(probe.detail)")
         }
-        // The kernel exploit prints its own progress to stdout, which
+        // The access-layer probes print their own progress to stdout, which
         // `setupLogCapture` mirrors into AppLog. Include the tail here so the
         // copied report alone contains the exact check that failed, instead of
         // requiring a second trip to a log screen.
@@ -487,8 +481,8 @@ enum CompatibilitySelfTest {
 // MARK: - Safe folders (system document picker)
 
 /// A user-granted folder from the Files app. Access is stored as a
-/// security-scoped bookmark, so it works on every iOS version — including
-/// 27.0.1 — without any kernel exploit or private entitlement.
+/// security-scoped bookmark, so it works on every iOS version without any
+/// private entitlement.
 struct SafeFolder: Identifiable, Hashable {
     let id: String
     let name: String

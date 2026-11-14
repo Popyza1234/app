@@ -64,51 +64,6 @@ enum ContainerStore {
         "com.apple.compass", "com.apple.Magnifier", "com.apple.DocumentsApp"
     ]
 
-    static func resolveAppContainerPath(bundleID: String) -> String? {
-        guard (try? PatchPathValidator.canonicalBundleIdentifier(bundleID)) == bundleID else {
-            return nil
-        }
-        var lookupError: NSString?
-        if let path = MCMActivateContainerPath(2, bundleID, false, &lookupError),
-           isApplicationContainerPath(path) {
-            log("patch: MHA-C2 resolved \(bundleID)")
-            return path
-        }
-        let detail = lookupError.map(String.init) ?? "unavailable"
-        log("patch: MHA-C2 could not resolve \(bundleID), detail=\(detail)")
-
-        // Fallback for iOS builds where MCM refuses to hand out sandbox
-        // tokens (e.g. iOS 18.1.x): scan the app-data root with the inode
-        // walk and read each container's MCM metadata plist directly. The
-        // raw reads only succeed when the sandbox escape is active.
-        if let scanned = resolveAppContainerPathByMetadataScan(bundleID: bundleID) {
-            log("patch: filesystem metadata scan resolved \(bundleID)")
-            return scanned
-        }
-        return nil
-    }
-
-    static func resolveAppContainerPathByMetadataScan(bundleID: String) -> String? {
-        // Universal: never skip this fallback because of the OS version. Raw
-        // metadata reads succeed whenever any access layer is active, and cost
-        // nothing when they do not. Previously iOS 26+ bailed out here unless
-        // a full sandbox escape had succeeded.
-        let dirs = enumerateDirectories(path: appDataRoot)
-        guard !dirs.isEmpty else {
-            log("patch: metadata scan unavailable — no containers enumerated")
-            return nil
-        }
-        for dir in dirs {
-            guard UUID(uuidString: (dir as NSString).lastPathComponent) != nil else { continue }
-            guard let metadata = readContainerMetadata(containerPath: dir),
-                  metadata.bundleID == bundleID else { continue }
-            let canonical = ContainerDiscoveryMerger.canonicalPath(dir)
-            guard isApplicationContainerPath(canonical) else { continue }
-            return canonical
-        }
-        return nil
-    }
-
     // MARK: Primary — MobileInstallation / LSApplicationWorkspace
 
     static func installedAppsFromAPI() -> [InstalledApp] {
@@ -140,13 +95,35 @@ enum ContainerStore {
         return apps
     }
 
-    static func applicationBundleMetadataCatalog() -> [String: ApplicationBundleMetadata] {
+    private static let discoveryCacheLock = NSLock()
+    private static var cachedBundleMetadata: (date: Date, catalog: [String: ApplicationBundleMetadata])?
+    private static var cachedLaunchServicesIdentifiers: (date: Date, identifiers: [String])?
+    /// Bundle metadata and LaunchServices identifiers change only when an app
+    /// is installed, removed or updated. Ten minutes keeps them fresh enough
+    /// while removing hundreds of Info.plist reads from every reload.
+    private static let discoveryCacheTTL: TimeInterval = 600
+
+    static func applicationBundleMetadataCatalog(forceRefresh: Bool = false) -> [String: ApplicationBundleMetadata] {
+        discoveryCacheLock.lock()
+        if !forceRefresh,
+           let cached = cachedBundleMetadata,
+           Date().timeIntervalSince(cached.date) < discoveryCacheTTL {
+            let catalog = cached.catalog
+            discoveryCacheLock.unlock()
+            log("browser: app-bundle metadata cached (\(catalog.count) names)")
+            return catalog
+        }
+        discoveryCacheLock.unlock()
+
         var catalog: [String: ApplicationBundleMetadata] = [:]
         for root in applicationBundleRoots {
             for metadata in applicationBundleMetadata(at: root.path, nested: root.nested) {
                 catalog[metadata.bundleID] = metadata
             }
         }
+        discoveryCacheLock.lock()
+        cachedBundleMetadata = (Date(), catalog)
+        discoveryCacheLock.unlock()
         log("browser: app-bundle metadata resolved \(catalog.count) names")
         return catalog
     }
@@ -313,7 +290,18 @@ enum ContainerStore {
         }
     }
 
-    static func launchServicesStoreIdentifiers() -> [String] {
+    static func launchServicesStoreIdentifiers(forceRefresh: Bool = false) -> [String] {
+        discoveryCacheLock.lock()
+        if !forceRefresh,
+           let cached = cachedLaunchServicesIdentifiers,
+           Date().timeIntervalSince(cached.date) < discoveryCacheTTL {
+            let identifiers = cached.identifiers
+            discoveryCacheLock.unlock()
+            log("browser: LaunchServices identifiers cached (\(identifiers.count))")
+            return identifiers
+        }
+        discoveryCacheLock.unlock()
+
         var cachePaths: [String] = []
         var seenCachePaths = Set<String>()
 
@@ -401,6 +389,9 @@ enum ContainerStore {
         }
 
         log("browser: LaunchServices store total candidates=\(identifiers.count)")
+        discoveryCacheLock.lock()
+        cachedLaunchServicesIdentifiers = (Date(), identifiers)
+        discoveryCacheLock.unlock()
         return identifiers
     }
 
@@ -435,9 +426,8 @@ enum ContainerStore {
         emptyEnumerations[path] = Date()
     }
 
-    /// Called after the kernel exploit changes the sandbox state. Without it
-    /// the 20-second empty cache keeps hiding containers that just became
-    /// readable.
+    /// Clears the short-lived empty-enumeration cache so a folder that just
+    /// became readable is not hidden for the next 20 seconds.
     static func resetEmptyEnumerationCache() {
         emptyEnumerationLock.lock(); defer { emptyEnumerationLock.unlock() }
         emptyEnumerations.removeAll()

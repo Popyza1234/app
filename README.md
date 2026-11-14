@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-3.0.3-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-4.0.0-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -24,6 +24,17 @@
 
 > [!WARNING]
 > dekpop is research software for personal device management. Keep a backup and use it only on devices and data you own. It can modify files inside app containers.
+
+## What's new in 4.0.0 — exploit-free, lean and smooth
+
+> The kernel exploit is gone. No launch freeze, no watchdog hang, no reboot.
+
+- **Exploit chain deleted.** `kexploit/`, `KernelExploit.swift`, the exploit status banner, the opt-in prompt and the launch-time run are removed. Files reaches every readable folder through the safe layers: direct read, MCM activation, traversal grant and the inode walk.
+- **Hidden extras removed.** An obfuscated attribution URL, a fake `AppInfo` attestation call and a disguised window gesture are gone, together with a `fork()` override used to dodge jailbreak detection.
+- **Launch stays responsive.** One serial discovery queue, 10-minute caches for bundle metadata and LaunchServices, preliminary list published before the filesystem walk, progressive updates throttled to 0.5 s.
+- **UI that fits.** Icon-only Files toolbar, clamped selection/paste bars, capped tab chips, and every list kept inside the responsive inset and 760 pt clamp.
+- **Smaller binary.** Patch, cleaner, wallpaper, onboarding, settings and asset-set code (about 40 files) deleted; the in-app log is capped at 800 entries.
+- Version is now `4.0.0` (build 34).
 
 ## What's new in 3.0.0 — lighter, faster, smoother
 

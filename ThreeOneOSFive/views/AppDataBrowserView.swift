@@ -6,7 +6,6 @@ struct AppDataBrowserView: View {
     @Environment(\.appLanguage) private var language
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @EnvironmentObject private var appState: AppState
     // Observing the palette lets a theme change redraw this screen in place.
     // The old build re-created the whole browser via `.id`, which re-ran the
     // container scan (and reset the scroll position) just to change colours.
@@ -25,8 +24,6 @@ struct AppDataBrowserView: View {
     @State private var safeFolders: [SafeFolder] = []
     @State private var showingFolderPicker = false
     @State private var safeFolderNotice: String?
-    @State private var showingExploitOptIn = false
-    @State private var diagnosticsCopied = false
     @Binding private var tabSession: FilesTabSession
 
     init(tabSession: Binding<FilesTabSession>) {
@@ -85,16 +82,6 @@ struct AppDataBrowserView: View {
                 safeFolders = SafeFolderBookmarks.load()
                 if !hasLoaded {
                     hasLoaded = true
-                    reload()
-                }
-            }
-            .onChange(of: appState.exploitStatus) { status in
-                // The exploit changes what the filesystem allows, but the list
-                // was built before it finished. Without this rebuild the
-                // "no apps" overlay stays on screen even after a successful
-                // run, which is exactly what made a working exploit look dead.
-                diagnosticsCopied = false
-                if status.isSuccess || status.isFailed {
                     reload()
                 }
             }
@@ -205,14 +192,6 @@ struct AppDataBrowserView: View {
         .frame(maxWidth: 760)
         .frame(maxWidth: .infinity)
         .background(Color.clear)
-        .alert(language.text("exploit.confirm_title"), isPresented: $showingExploitOptIn) {
-            Button(language.text("common.cancel"), role: .cancel) {}
-            Button(language.text("exploit.confirm_action"), role: .destructive) {
-                appState.optInAndRunKernelExploit()
-            }
-        } message: {
-            Text(language.text("exploit.confirm_message", AppInfo.osVersion))
-        }
     }
 
     private var categoryPicker: some View {
@@ -236,7 +215,7 @@ struct AppDataBrowserView: View {
     private var rootMenu: some View {
         Menu {
             Button {
-                reload()
+                reload(forceRefresh: true)
             } label: {
                 Label(language.text("browser.retry"), systemImage: "arrow.clockwise")
             }
@@ -315,62 +294,6 @@ struct AppDataBrowserView: View {
                 .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 4, trailing: 16))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
-        }
-
-        if appState.exploitNeedsOptIn {
-            Section {
-                exploitBannerContent(
-                    title: language.text("exploit.unverified_title", AppInfo.osVersion),
-                    message: language.text("exploit.unverified_message"),
-                    detail: nil,
-                    tint: .orange,
-                    icon: "exclamationmark.triangle.fill"
-                ) {
-                    Button {
-                        showingExploitOptIn = true
-                    } label: {
-                        Label(language.text("exploit.enable"), systemImage: "bolt.horizontal.circle")
-                            .font(.caption.weight(.semibold))
-                    }
-                    .buttonStyle(.bordered)
-                }
-            }
-        } else if appState.exploitStatus.isFailed {
-            Section {
-                exploitBannerContent(
-                    title: language.text("exploit.failed_title", AppInfo.osVersion),
-                    message: language.text("exploit.failed_message"),
-                    detail: appState.exploitDetail,
-                    tint: .red,
-                    icon: "xmark.octagon.fill"
-                ) {
-                    HStack(spacing: 8) {
-                        Button {
-                            appState.retryKernelExploit()
-                        } label: {
-                            Label(language.text("exploit.retry"), systemImage: "arrow.clockwise")
-                                .font(.caption.weight(.semibold))
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(appState.kernelExploitRunning ||
-                                  (!appState.exploitVerified && !ExploitOptIn.isEnabled))
-
-                        copyDiagnosticsButton
-                    }
-                }
-            }
-        } else if appState.exploitLimited {
-            Section {
-                exploitBannerContent(
-                    title: language.text("exploit.limited_title"),
-                    message: language.text("exploit.limited_message"),
-                    detail: appState.exploitDetail,
-                    tint: .orange,
-                    icon: "exclamationmark.triangle.fill"
-                ) {
-                    copyDiagnosticsButton
-                }
-            }
         }
 
         if let workspaceURL {
@@ -691,7 +614,7 @@ struct AppDataBrowserView: View {
         ShortcutStore.saveShortcuts(updated)
     }
 
-    // MARK: - Safe access (works on iOS 27.0.1 without any exploit)
+    // MARK: - Safe access (system document picker; works on every iOS build)
 
     @ViewBuilder
     private var safeAccessSection: some View {
@@ -842,7 +765,7 @@ struct AppDataBrowserView: View {
             }
             .buttonStyle(.bordered)
 
-            Button(language.text("browser.retry")) { reload() }
+            Button(language.text("browser.retry")) { reload(forceRefresh: true) }
                 .font(.footnote)
         }
         .padding()
@@ -864,79 +787,29 @@ struct AppDataBrowserView: View {
         .padding()
     }
 
-    /// One card shape for every exploit banner, so the reason is always shown
-    /// in the same place instead of only inside Settings.
-    private func exploitBannerContent<Actions: View>(
-        title: String,
-        message: String,
-        detail: String?,
-        tint: Color,
-        icon: String,
-        @ViewBuilder actions: () -> Actions
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Label(title, systemImage: icon)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(tint)
+    /// One scan at a time. Two overlapping scans used to re-scan every bundle
+    /// and container at once and were a large part of the launch hitch on
+    /// low-spec devices.
+    private static let catalogScanQueue = DispatchQueue(
+        label: "dekpop.catalog-scan",
+        qos: .userInitiated
+    )
 
-            Text(message)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            if let detail, !detail.isEmpty {
-                Text(detail)
-                    .font(.caption2.monospaced())
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            actions()
-        }
-        .padding(.vertical, 2)
-    }
-
-    private var copyDiagnosticsButton: some View {
-        Button {
-            copyDiagnostics()
-        } label: {
-            Label(
-                diagnosticsCopied
-                    ? language.text("exploit.log_copied")
-                    : language.text("exploit.copy_log"),
-                systemImage: diagnosticsCopied ? "checkmark.circle" : "doc.on.doc"
-            )
-            .font(.caption.weight(.semibold))
-        }
-        .buttonStyle(.bordered)
-    }
-
-    /// Runs the same probes as the compatibility sheet and puts the result on
-    /// the pasteboard, so a user on a broken device can send one message
-    /// instead of transcribing a screen.
-    private func copyDiagnostics() {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let report = CompatibilitySelfTest.run()
-            // `plainText` reads AppLog, which is main-thread state.
-            DispatchQueue.main.async {
-                UIPasteboard.general.string = CompatibilitySelfTest.plainText(for: report)
-                diagnosticsCopied = true
-                log("compat: diagnostics copied to the pasteboard")
-            }
-        }
-    }
-
-    private func reload() {
+    private func reload(forceRefresh: Bool = false) {
         isLoading = true
         isResolving = true
         errorMessage = nil
-        // Re-probe every access layer on each reload. Capabilities can appear
-        // after the kernel exploit finishes, so nothing is cached across loads.
+        // Re-probe every access layer on each reload. Capabilities depend on
+        // what the current process is allowed to touch, so nothing is cached.
         ContainerAccessPolicy.resetProbing()
+        if forceRefresh {
+            ContainerStore.resetEmptyEnumerationCache()
+        }
         let emptyMessage = language.text("browser.empty")
-        DispatchQueue.global(qos: .userInitiated).async {
-            let bundleMetadata = ContainerStore.applicationBundleMetadataCatalog()
+        Self.catalogScanQueue.async {
+            let bundleMetadata = ContainerStore.applicationBundleMetadataCatalog(
+                forceRefresh: forceRefresh
+            )
             let apiApps = ContainerStore.applyingBundleMetadata(
                 to: ContainerStore.installedAppsFromAPI(),
                 catalog: bundleMetadata
@@ -949,8 +822,20 @@ struct AppDataBrowserView: View {
                 identifiers: dynamicIdentifiers,
                 bundleMetadata: bundleMetadata
             )
-            let filesystemApps = ContainerStore.containersFromFilesystem()
+            let filesystemApps: [InstalledApp]
             let baseIdentifiedApps = mcmApps + apiApps
+            // Show the API/MCM results immediately. The filesystem walk can
+            // take a few hundred milliseconds on a full device and no longer
+            // holds the first screen hostage.
+            let preliminary = baseIdentifiedApps
+                .filter { ContainerPresentationPolicy.shouldShow(bundleID: $0.bundleID) }
+                .sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
+            DispatchQueue.main.async {
+                apps = preliminary
+                isLoading = false
+            }
+
+            filesystemApps = ContainerStore.containersFromFilesystem()
             var result = ContainerDiscoveryMerger.merge(
                 enumerated: filesystemApps,
                 identified: baseIdentifiedApps,
@@ -959,15 +844,19 @@ struct AppDataBrowserView: View {
             log("browser: merged api=\(apiApps.count), MCM=\(mcmApps.count), filesystem=\(filesystemApps.count) -> \(result.count)")
             result.sort { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
 
-            let preliminary = result.filter {
+            let filesystemMerged = result.filter {
                 ContainerPresentationPolicy.shouldShow(bundleID: $0.bundleID)
             }
-            DispatchQueue.main.async {
-                apps = preliminary
-                isLoading = false
+            if filesystemMerged.count != preliminary.count {
+                DispatchQueue.main.async {
+                    apps = filesystemMerged
+                    isLoading = false
+                }
             }
 
-            let launchServicesIdentifiers = ContainerStore.launchServicesStoreIdentifiers()
+            let launchServicesIdentifiers = ContainerStore.launchServicesStoreIdentifiers(
+                forceRefresh: forceRefresh
+            )
             let mhaIdentifiers = MHAIdentifierCatalog.identifiers(
                 dynamic: dynamicIdentifiers,
                 installed: apiApps.map(\.bundleID),
@@ -981,16 +870,18 @@ struct AppDataBrowserView: View {
                 "LaunchServices=\(launchServicesIdentifiers.count) -> \(mhaIdentifiers.count) candidates"
             )
             var lastProgressCount = 0
+            var lastPublish = Date.distantPast
             let mhaApps = ContainerStore.installedAppsFromMHACandidates(
                 identifiers: mhaIdentifiers,
                 bundleMetadata: bundleMetadata
             ) { discoveredApps in
-                // The resolver reports progress every eight apps. Re-merging
-                // and re-sorting the entire catalogue on every report was an
-                // O(n²) main-thread storm on phones with hundreds of apps.
-                // Publish at most once per 24 new entries instead.
-                guard discoveredApps.count - lastProgressCount >= 24 else { return }
+                // Re-merging and re-sorting the entire catalogue on every
+                // resolver report was an O(n²) main-thread storm. Publish at
+                // most twice a second instead.
+                guard discoveredApps.count > lastProgressCount,
+                      Date().timeIntervalSince(lastPublish) >= 0.5 else { return }
                 lastProgressCount = discoveredApps.count
+                lastPublish = Date()
                 var progressiveResult = AppDataCatalogMerger.merge(
                     identified: discoveredApps + baseIdentifiedApps,
                     fallback: [],
@@ -1107,11 +998,8 @@ struct CompatibilityReportView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
-                            Image(systemName: ExploitSupportPolicy.currentBuildHasVerifiedExploit
-                                  ? "checkmark.seal.fill"
-                                  : "exclamationmark.triangle.fill")
-                                .foregroundStyle(ExploitSupportPolicy.currentBuildHasVerifiedExploit
-                                                 ? Color.green : Color.orange)
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundStyle(Color.green)
                             Text(language.text("compat.supported_badge"))
                                 .font(.headline)
                         }
@@ -1121,12 +1009,6 @@ struct CompatibilityReportView: View {
                         Text(report.device)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
-                        if !ExploitSupportPolicy.currentBuildHasVerifiedExploit {
-                            Text(language.text("compat.unverified_runtime", report.version))
-                                .font(.caption)
-                                .foregroundStyle(.orange)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
                     }
                     .padding(.vertical, 4)
                 }

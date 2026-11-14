@@ -18,6 +18,13 @@ enum AnnouncementStore {
 
     static let announcements: [DekpopAnnouncement] = [
         DekpopAnnouncement(
+            id: "clean-speed-4.0.0",
+            titleKey: "announcement.400_title",
+            bodyKey: "announcement.400_body",
+            imageName: "announcement-banner",
+            link: nil
+        ),
+        DekpopAnnouncement(
             id: "ios27-safety-3.0.1",
             titleKey: "announcement.301_title",
             bodyKey: "announcement.301_body",

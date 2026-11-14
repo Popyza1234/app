@@ -839,6 +839,8 @@
 "compat.unverified_runtime" = "iOS %@ อยู่นอกช่วงที่ exploit ตรวจสอบแล้ว การเข้าถึง container แบบลึกอาจใช้ไม่ได้";
 "announcement.301_title" = "dekpop 3.0.1 — ปลอดภัยขึ้นบน iOS 27";
 "announcement.301_body" = "บน iOS 27 ขึ้นไป แอปจะไม่รัน kernel exploit เองแล้ว หน้า Files ยังลองทุกชั้นที่ปลอดภัยให้ และคุณเปิดใช้ exploit ทดลองได้จาก Settings";
+"announcement.400_title" = "dekpop 4.0 — เอา exploit ออกแล้ว ไฟล์ลื่นขึ้น";
+"announcement.400_body" = "ระบบ kernel exploit ถูกนำออกทั้งหมดแล้ว แอปจึงไม่ค้างตอนเปิดและเครื่องไม่รีสตาร์ทอีก การเข้าถึง container จะใช้เฉพาะชั้นที่ปลอดภัย ได้แก่ อ่านโดยตรง, เปิดใช้งาน container, traversal grant และการเดิน inode การสแกนตอนเปิดแอปถูกแคชและทำทีละงาน และแถบเครื่องมือกับแถบเลือกไฟล์ถูกจัดวางไม่ให้ล้นออกนอกจอ";
 "dekpop.status_limited" = "จำกัด";
 "method.kexploit" = "kernel r/w";
 "method.kexploit_limited" = "kernel r/w เท่านั้น";

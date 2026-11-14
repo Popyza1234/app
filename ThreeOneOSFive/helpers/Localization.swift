@@ -66,31 +66,3 @@ extension EnvironmentValues {
         set { self[AppLanguageEnvironmentKey.self] = newValue }
     }
 }
-
-extension ExploitStatus {
-    func displayText(language: AppLanguage) -> String {
-        switch self {
-        case .notStarted:
-            return language.text("status.not_attempted")
-        case .success(let method):
-            let localizedMethod: String
-            switch method {
-            case "Simulator preview":
-                localizedMethod = language.text("method.simulator_preview")
-            case "kexploit-limited":
-                localizedMethod = language.text("method.kexploit_limited")
-            case "kexploit":
-                localizedMethod = language.text("method.kexploit")
-            case "sandbox":
-                localizedMethod = language.text("method.sandbox")
-            default:
-                localizedMethod = method
-            }
-            return language.text("status.ok_via", localizedMethod)
-        case .failed(let method, let code):
-            return language.text("status.failed_via", method, code)
-        case .unsupported(let message):
-            return language.text("status.unsupported_reason", message)
-        }
-    }
-}

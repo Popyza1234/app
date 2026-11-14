@@ -11,7 +11,6 @@ import SwiftUI
 struct DekpopLaunchView: View {
     @Environment(\.appLanguage) private var language
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @EnvironmentObject private var appState: AppState
 
     @State private var started = false
 
@@ -108,9 +107,6 @@ struct DekpopLaunchView: View {
     }
 
     private var statusText: String {
-        if !appState.kernelExploitRunning {
-            return language.text("dekpop.status_ready")
-        }
-        return language.text("launch.status_loading")
+        language.text("dekpop.status_ready")
     }
 }

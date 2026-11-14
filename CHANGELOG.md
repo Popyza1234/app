@@ -2,6 +2,57 @@
 
 All notable user-facing changes are documented in this file.
 
+## [4.0.0] - 2026-11-15 — exploit-free, lean and smooth
+
+### Why
+
+The kernel exploit started automatically at launch. On devices where its
+offsets did not match the running kernel it froze the process long enough for
+the iOS watchdog to report a hang of up to 1200 ms and, on some phones, reboot
+the device. The exploit never needed to run: every folder the app can actually
+open is reached through the safe layers that were already there.
+
+### Removed
+
+- **The whole kernel exploit chain.** `kexploit/` (offsets, krw, kutils, vnode,
+  sandbox escape), `KernelExploit.swift`, the exploit status model, the opt-in
+  banner, the debug toggles and the launch-time run are deleted. The app no
+  longer touches kernel memory at any point.
+- **Disguised attribution shim.** `DisplayIdentity.m` / `.h` and
+  `DisplayIdentityAttribution.swift` carried an obfuscated URL, a fake
+  "attestation" call inside `AppInfo` and a hidden 5 s window gesture. All of
+  it is gone.
+- **Anti-detection fork shim.** `AntiDetection.m` overrode `fork()` to hide the
+  process from jailbreak checks; deleted.
+- **Unused feature surface.** Patch, cleaner, wallpaper lab, onboarding and
+  settings screens and their helpers (about 40 files) are deleted; the asset-set
+  feature stays removed from 3.0.0.
+
+### Changed — launch and scrolling
+
+- **No launch hitch.** Container discovery runs on one serial
+  `.userInitiated` queue; bundle metadata and LaunchServices identifiers are
+  cached for 10 minutes; the API/MCM list is published before the filesystem
+  walk; progressive results publish at most every 0.5 s instead of on every
+  callback.
+- **License never blocks the UI.** The last verified entitlement is applied
+  immediately and refreshed in the background instead of waiting up to 15 s for
+  the network.
+- **Lighter log.** The in-app log is capped at 800 entries and written from one
+  place, so a noisy access layer cannot grow memory during a session.
+- **Shorter launch overlay.** 0.45 s minimum, static content, single fade-out.
+
+### Changed — UI fits the screen
+
+- Files toolbar is icon-only (select, select-all, tabs, overflow) so the title
+  is never crowded on a 375 pt phone.
+- Selection action bar and paste bar clamp their labels and keep buttons at
+  intrinsic width, so Thai/English text cannot push them past the bezel.
+- Tab chips cap their title width inside the horizontal strip.
+- Hero card, search field, category control, rows and lists stay inside the
+  responsive inset and 760 pt content clamp.
+- Version is now `4.0.0` (build 34).
+
 ## [3.0.3] - 2026-11-14 — exploit log travels with the report
 
 ### Why

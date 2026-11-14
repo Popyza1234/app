@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// dekpop ships with a single feature: Files.
-/// There is no tab bar, dashboard, patches, cleaner, wallpaper lab,
-/// onboarding or update prompt — the Files browser *is* the app.
+/// dekpop is a Files app with three home sections: Apps, Shortcuts and Mods.
+/// Container browsing is the core; there is no patch, cleaner, wallpaper lab,
+/// onboarding or update prompt.
 struct ContentView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var filesTabs = FilesTabSession()
@@ -54,11 +54,11 @@ struct ContentView: View {
             await license.start()
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.22)) {
                     launchGone = true
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0 : 0.25)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0 : 0.22)) {
                     announcement = AnnouncementStore.current
                 }
             }

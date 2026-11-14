@@ -838,6 +838,8 @@
 "compat.unverified_runtime" = "iOS %@ is past the verified exploit window, so deep container access may be unavailable.";
 "announcement.301_title" = "dekpop 3.0.1 — safer on iOS 27";
 "announcement.301_body" = "On iOS 27 and later the kernel exploit no longer starts by itself. Files keeps trying every safe access layer, and Settings has an opt-in if you want to test the experimental exploit.";
+"announcement.400_title" = "dekpop 4.0 — the exploit is gone, Files is smooth";
+"announcement.400_body" = "The kernel exploit has been removed completely, so launch no longer freezes the app or restarts the phone. Container access now always goes through the safe layers: direct read, container activation, traversal grant and the inode walk. Launch scans are cached and run one at a time, and the toolbar and selection bars are laid out so nothing runs off the screen.";
 "dekpop.status_limited" = "Limited";
 "method.kexploit" = "kernel r/w";
 "method.kexploit_limited" = "kernel r/w only";

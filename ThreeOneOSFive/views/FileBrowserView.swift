@@ -136,17 +136,21 @@ struct FileBrowserView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(isSelecting
-                       ? language.text("common.cancel")
-                       : language.text("browser.select")) {
-                    toggleSelectionMode()
+                Button(action: toggleSelectionMode) {
+                    Image(systemName: isSelecting ? "xmark.circle" : "checkmark.circle")
                 }
                 .disabled(activityText != nil || importSession != nil)
+                .accessibilityLabel(
+                    language.text(isSelecting ? "common.cancel" : "browser.select")
+                )
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 if isSelecting {
-                    Button(selectionActionTitle, action: toggleAllSelection)
-                        .disabled(entries.isEmpty)
+                    Button(action: toggleAllSelection) {
+                        Image(systemName: allVisibleSelected ? "circle.slash" : "checklist")
+                    }
+                    .disabled(entries.isEmpty)
+                    .accessibilityLabel(selectionActionTitle)
                 } else {
                     Menu {
                         if let payload = fileOperationCoordinator.payload {
@@ -620,9 +624,13 @@ struct FileBrowserView: View {
         return language.text("browser.delete_multiple_message", Int64(deleteTargets.count))
     }
 
-    private var selectionActionTitle: String {
+    private var allVisibleSelected: Bool {
         let visibleIDs = Set(filteredEntries.map(\.id))
         return !visibleIDs.isEmpty && visibleIDs.isSubset(of: selectedEntryIDs)
+    }
+
+    private var selectionActionTitle: String {
+        allVisibleSelected
             ? language.text("patch.deselect_all")
             : language.text("patch.select_all")
     }
@@ -1573,6 +1581,7 @@ private struct FileSelectionActionBar: View {
                 Text(language.text(key))
                     .font(.caption2)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity, minHeight: 34)
         }
@@ -1600,15 +1609,23 @@ private struct FilePasteBar: View {
                     ? "browser.copy_ready"
                     : "browser.move_ready"))
                     .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Text(language.text("browser.selected_count", Int64(itemCount)))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             Spacer(minLength: 8)
             Button(language.text("common.cancel"), action: onCancel)
                 .buttonStyle(.borderless)
+                .lineLimit(1)
+                .fixedSize()
             Button(language.text("browser.paste"), action: onPaste)
                 .buttonStyle(.borderedProminent)
+                .lineLimit(1)
+                .fixedSize()
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 9)

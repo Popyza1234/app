@@ -3,11 +3,8 @@ import UIKit
 
 @main
 struct DekpopApp: App {
-    @StateObject private var appState = AppState()
-    @StateObject private var patchDraftCoordinator = PatchDraftCoordinator()
     @StateObject private var fileOperationCoordinator = FileOperationCoordinator()
     @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.defaultRawValue
-    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         setupLogCapture()
@@ -51,8 +48,6 @@ struct DekpopApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(appState)
-                .environmentObject(patchDraftCoordinator)
                 .environmentObject(fileOperationCoordinator)
                 .environment(\.appLanguage, language)
                 .environment(\.locale, language.locale)
@@ -61,188 +56,7 @@ struct DekpopApp: App {
                     if AppLanguage(rawValue: languageCode) == nil {
                         languageCode = AppLanguage.english.rawValue
                     }
-                    appState.detectSupport()
                 }
-                .onChange(of: scenePhase) { phase in
-                    guard phase == .active else { return }
-                    appState.detectSupport()
-                }
-        }
-    }
-}
-
-class AppState: ObservableObject {
-    @Published var exploitStatus: ExploitStatus = .notStarted
-    @Published var unsupportedMessage: String?
-    @Published var kernelExploitRunning = false
-    /// True when the running iOS release is past the verified exploit window
-    /// and the user has not opted in to testing it anyway.
-    @Published var exploitNeedsOptIn = false
-    /// Human-readable reason for the last exploit run, taken from
-    /// `KernelExploit.lastRunSummary` instead of a fixed "-1".
-    @Published var exploitDetail = ""
-    /// Kernel R/W is live but the sandbox escape did not take, so container
-    /// reads still depend on the fallback layers.
-    @Published var exploitLimited = false
-
-    private var autoRunAttempted = false
-
-    var exploitVerified: Bool { ExploitSupportPolicy.currentBuildHasVerifiedExploit }
-
-    var kernelExploitApplicable: Bool {
-        KernelExploit.isApplicable(
-            major: AppInfo.versionTuple.major,
-            minor: AppInfo.versionTuple.minor,
-            patch: AppInfo.versionTuple.patch,
-            build: AppInfo.osBuild
-        )
-    }
-
-    var isSupported: Bool { unsupportedMessage == nil }
-
-    func detectSupport() {
-        let v = AppInfo.versionTuple
-        // Single acceptance gate. It ignores the version string entirely, so
-        // point releases (27.0.1), beta builds and future majors are all
-        // accepted. Logged so the in-app log proves what this device runs.
-        let supported = ExploitSupportPolicy.accepts(
-            version: AppInfo.osVersion,
-            build: AppInfo.osBuild
-        )
-        log("compat: iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) accepted=\(supported) — every version is enabled")
-#if targetEnvironment(simulator)
-        if ProcessInfo.processInfo.arguments.contains("--simulate-access") {
-            exploitStatus = .success(method: "Simulator preview")
-        }
-#endif
-
-        unsupportedMessage = supported ? nil : "iOS \(AppInfo.osVersion) (\(AppInfo.osBuild))"
-        if let unsupportedMessage {
-            exploitStatus = .unsupported(unsupportedMessage)
-            return
-        }
-
-        let applicable = KernelExploit.isApplicable(
-            major: v.major,
-            minor: v.minor,
-            patch: v.patch,
-            build: AppInfo.osBuild
-        )
-        guard applicable else { return }
-
-        exploitNeedsOptIn = !exploitVerified && !ExploitOptIn.isEnabled
-        if exploitNeedsOptIn {
-            log("app: kernel exploit is unverified on iOS \(AppInfo.osVersion) — automatic run disabled until the user opts in")
-        }
-
-        refreshKernelExploitStatus()
-        maybeAutoRunKernelExploit()
-    }
-
-    private func maybeAutoRunKernelExploit() {
-        guard !kernelExploitRunning,
-              !exploitStatus.isSuccess,
-              !exploitStatus.isFailed,
-              !autoRunAttempted else { return }
-        autoRunAttempted = true
-        guard exploitVerified || ExploitOptIn.isEnabled else {
-            // Running the exploit with an offset table from another release
-            // can panic the device. Newer releases keep every safe access
-            // layer and simply skip the kernel stage unless the user asks.
-            exploitNeedsOptIn = true
-            log("app: kernel exploit skipped — iOS \(AppInfo.osVersion) is past the verified window (iOS \(ExploitSupportPolicy.verifiedExploitMaxMajor).x)")
-            return
-        }
-        log("app: starting kernel exploit automatically")
-        runKernelExploitIfNeeded()
-    }
-
-    /// Manual run from Settings or the Files banner. A previous failure can be
-    /// retried here without relaunching the app.
-    func retryKernelExploit() {
-        guard !kernelExploitRunning else { return }
-        autoRunAttempted = true
-        exploitStatus = .notStarted
-        log("app: manual kernel exploit run requested")
-        runKernelExploitIfNeeded()
-    }
-
-    func optInAndRunKernelExploit() {
-        ExploitOptIn.isEnabled = true
-        exploitNeedsOptIn = false
-        log("app: unverified kernel exploit enabled by the user")
-        retryKernelExploit()
-    }
-
-    func disableUnverifiedExploit() {
-        ExploitOptIn.isEnabled = false
-        exploitNeedsOptIn = !exploitVerified && !exploitStatus.isSuccess
-        log("app: unverified kernel exploit disabled by the user")
-    }
-
-    /// Re-reads the opt-in state after the Settings toggle changes.
-    func refreshOptInState() {
-        exploitNeedsOptIn = !exploitVerified && !ExploitOptIn.isEnabled && !exploitStatus.isSuccess
-        log("app: unverified kernel exploit opt-in=\(ExploitOptIn.isEnabled)")
-    }
-
-    private func refreshKernelExploitStatus() {
-        guard !kernelExploitRunning else { return }
-
-        // Universal: sandbox access is an optional enhancement on every iOS
-        // version. If a live escape is already present, skip the kernel
-        // exploit entirely. A success is never downgraded back to .notStarted
-        // — kernel R/W persists for the lifetime of this process, and forcing
-        // a re-run when the optional escape disappeared is what broke iOS 27+.
-        if KernelExploit.hasSandboxAccess(),
-           !exploitStatus.isSuccess,
-           !exploitStatus.isFailed {
-            exploitStatus = .success(method: "sandbox")
-            exploitNeedsOptIn = false
-            exploitLimited = false
-            exploitDetail = "active sandbox access detected"
-            log("app: active sandbox access detected; skipping kernel exploit")
-        }
-        ContainerAccessPolicy.resetProbing()
-    }
-
-    func runKernelExploitIfNeeded() {
-        refreshKernelExploitStatus()
-        guard !kernelExploitRunning,
-              !exploitStatus.isSuccess,
-              !exploitStatus.isFailed else { return }
-        kernelExploitRunning = true
-        exploitStatus = .notStarted
-        log("app: running kernel exploit on background...")
-        // Let the first frame and the app-list scan start before the kernel
-        // exploit begins. Starting both at once on the main thread was a large
-        // part of the 1200 ms launch hang reported on low-spec devices.
-        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 0.8) {
-            let ok = KernelExploit.run()
-            DispatchQueue.main.async {
-                self.kernelExploitRunning = false
-                self.exploitDetail = KernelExploit.lastRunSummary
-                // A fresh enumeration is required: everything scanned before
-                // the exploit finished was cached as "empty" and would keep
-                // suppressing the inode walk for another 20 seconds.
-                ContainerStore.resetEmptyEnumerationCache()
-                if ok {
-                    let limited = !KernelExploit.hasSandboxAccess()
-                    self.exploitLimited = limited
-                    self.exploitStatus = .success(method: limited ? "kexploit-limited" : "kexploit")
-                    ContainerAccessPolicy.resetProbing()
-                    log("app: kernel exploit success — \(KernelExploit.describeLastRun()) on iOS \(AppInfo.osVersion)")
-                } else {
-                    self.exploitLimited = false
-                    self.exploitStatus = .failed(
-                        method: "kexploit",
-                        code: Int64(KernelExploit.lastRunCode)
-                    )
-                    // A kernel exploit failure is no longer a dead end: Files
-                    // keeps trying direct, MCM, grant and inode reads.
-                    log("app: kernel exploit failed at \(KernelExploit.describeLastRun()) — file browsing continues with fallback access layers")
-                }
-            }
         }
     }
 }
