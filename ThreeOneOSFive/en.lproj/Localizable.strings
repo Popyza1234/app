@@ -657,6 +657,9 @@
 "announcement.badge" = "Announcement";
 "announcement.got_it" = "Got it";
 "announcement.open_link" = "Open link";
+"announcement.version" = "Version %@";
+"announcement.401_title" = "dekpop 4.0.1 — a cleaner release notice";
+"announcement.401_body" = "The release notice now has a branded header, one clear action and a shorter fade, so it opens instantly and cannot stutter the app. The 1 MB banner image is gone, which also makes the download smaller.";
 "announcement.300_title" = "dekpop 3.0 - lighter, faster, smoother";
 "announcement.300_body" = "This update rebuilds every screen for older iPhones. Animated backgrounds are now static, Files uses one lightweight palette backdrop, toolbars are compact and menus can no longer run off the edge of the screen. The unused Asset Sets feature is gone, and saved folder shortcuts were moved automatically.";
 "theme.title" = "Theme";

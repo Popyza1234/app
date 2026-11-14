@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-4.0.0-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-4.0.1-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -24,6 +24,15 @@
 
 > [!WARNING]
 > dekpop is research software for personal device management. Keep a backup and use it only on devices and data you own. It can modify files inside app containers.
+
+## What's new in 4.0.1 — a cleaner release notice
+
+> Same release card, restyled to look official and cost nothing to display.
+
+- **Official card.** The notice now uses a branded gradient header with the dekpop wordmark, the release version and a single close control, followed by a quiet eyebrow, the title, the body and one clear primary action.
+- **Zero photo cost.** The 1 MB JPEG banner and its imageset are deleted. A photo no longer has to be decoded, so the card appears instantly even on an iPhone with little free memory.
+- **Shorter motion.** Entrance and exit are 0.18 s fades with a 0.97 scale, honoring Reduce Motion; the card keeps one small shadow, no blur and no repeating animation.
+- Version is now `4.0.1` (build 35).
 
 ## What's new in 4.0.0 — exploit-free, lean and smooth
 

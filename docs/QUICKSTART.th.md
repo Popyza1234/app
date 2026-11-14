@@ -128,8 +128,8 @@ C:\Users\Administrator\Desktop\3105-1.1.1\scripts\push-now.cmd
 - **รุ่น 3105 เดิม (ก่อนรีแบรนด์):** Actions run [#43250078558](https://github.com/Popyza1234/app/actions/runs/43250078558) **success ทุก step** — Checkout, Show toolchain, Build unsigned IPA, Verify IPA layout, Upload artifact
   - artifact `3105-unsigned-ipa` = 3,268,242 bytes → ไฟล์ `3105-unsigned.ipa` 3,277,941 bytes
   - เวอร์ชัน `1.1.1 (7)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
-- **รุ่น dekpop 4.0.0 (ปัจจุบัน):** ทุกครั้งที่ push ขึ้น `main` workflow จะ build ใหม่ → artifact **`dekpop-unsigned-ipa`** → ไฟล์ **`dekpop-unsigned.ipa`**
-  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `4.0.0 (34)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
+- **รุ่น dekpop 4.0.1 (ปัจจุบัน):** ทุกครั้งที่ push ขึ้น `main` workflow จะ build ใหม่ → artifact **`dekpop-unsigned-ipa`** → ไฟล์ **`dekpop-unsigned.ipa`**
+  - `Payload/dekpop.app/` | แสดงชื่อ `dekpop` | เวอร์ชัน `4.0.1 (35)` | `MinimumOSVersion 16.0` | **ยังไม่ได้เซ็น**
   - Bundle ID ยังเป็น `com.apple.mobile.MobileHouseArrest` (จำเป็นสำหรับ MHA-C2 / ฟีเจอร์ Files)
 - การที่ CI ขึ้นเขียวแปลว่าโค้ดที่แก้ **ถูก compile จริงบน Xcode ของ GitHub** ไม่ใช่แค่แก้ไฟล์ในเครื่อง
 - **รุ่น 3.0.0 — เบาขึ้น เร็วขึ้น ลื่นขึ้น:** พื้นหลังทั้งหมดเป็นภาพนิ่ง ไม่มี Canvas 30 fps, อนุภาค, mesh เบลอ หรือ `repeatForever` อีกต่อไป ตัวเลือกหมวดในหน้า Files เป็นคอนโทรลใหม่ที่ล้นจอไม่ได้ ช่องค้นหาเป็นแคปซูลเบา ลิสต์จำกัดความกว้าง 760 pt และจัดกึ่งกลาง แถบเครื่องมือรวมเหลือเมนูเดียว ปุ่มแท็บ และเมนูเพิ่มเติม ไอคอนแอปโหลดผ่านคิวเดียว แถวไฟล์สูง 52 pt การค้นหาแอปอัปเดตไม่เกินหนึ่งครั้งต่อ 24 แอปใหม่ และ kernel exploit เริ่มหลังเฟรมแรก 0.8 วินาที ประกาศแสดงครั้งเดียวต่อประกาศ และนำฟีเจอร์ Asset Sets ออกแล้วโดยทางลัดโฟลเดอร์ยังอยู่

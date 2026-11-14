@@ -2,6 +2,33 @@
 
 All notable user-facing changes are documented in this file.
 
+## [4.0.1] - 2026-11-15 — a cleaner release notice
+
+### Why
+
+The post-launch notice was the last place in the app that still decoded a
+photo: a 1 MB JPEG banner that had to be loaded and scaled every time the card
+appeared. It also entered with a springy 0.45 s scale and sat on a large
+shadow, which is exactly the kind of work that shows up as jank on an older
+phone.
+
+### Changed
+
+- **Official card layout.** A branded gradient header carries the dekpop
+  wordmark, the release version and one close control. Below it: a quiet
+  eyebrow, the title, the body in a height-capped scroll view, a divider and a
+  single flat primary action.
+- **No photo.** The `announcement-banner` imageset and its 1 MB JPEG are
+  deleted, and the announcement model no longer carries an image name. The
+  card is pure vector chrome, so it appears immediately.
+- **Shorter motion.** Entrance and exit are 0.18 s / 0.16 s fades with a 0.97
+  scale, skipped entirely when Reduce Motion is on. One small shadow, no blur,
+  no repeating animation.
+- **New notice.** A `4.0.1` entry announces the redesigned card, so it is
+  shown once even to devices that already dismissed the 4.0.0 notice.
+- `announcement.version` is localized in English and Thai.
+- Version is now `4.0.1` (build 35).
+
 ## [4.0.0] - 2026-11-15 — exploit-free, lean and smooth
 
 ### Why
