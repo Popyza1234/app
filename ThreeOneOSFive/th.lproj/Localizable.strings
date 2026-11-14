@@ -666,6 +666,8 @@
 "theme.sunset" = "ซันเซ็ต";
 "theme.sakura" = "ซากุระ";
 "theme.forest" = "ฟอเรสต์";
+"theme.aurora" = "ออโรรา";
+"theme.plasma" = "พลาสมา";
 "theme.mono" = "กราไฟต์";
 
 "announcement.200_title" = "dekpop 2.1 — รองรับ iOS 27.0.1";

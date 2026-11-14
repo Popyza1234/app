@@ -13,8 +13,14 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Animated brand backdrop for the whole app.
-            DekpopAuroraBackground()
+            // Layered brand backdrop for the whole app: the moving aurora plus
+            // the palette mesh that gives every surface something to sit on.
+            ZStack {
+                DekpopAuroraBackground()
+                DekpopMeshBackdrop()
+                    .opacity(0.85)
+            }
+            .ignoresSafeArea()
 
             AppDataBrowserView(tabSession: $filesTabs)
                 .tint(AppTheme.accent)
@@ -41,6 +47,7 @@ struct ContentView: View {
         .environment(\.dekpopOpenThemePicker, { showingThemePicker = true })
         .sheet(isPresented: $showingThemePicker) {
             DekpopThemePicker()
+                .dekpopSheetCorners()
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {

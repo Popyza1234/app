@@ -665,6 +665,8 @@
 "theme.sunset" = "Sunset";
 "theme.sakura" = "Sakura";
 "theme.forest" = "Forest";
+"theme.aurora" = "Aurora";
+"theme.plasma" = "Plasma";
 "theme.mono" = "Graphite";
 
 "announcement.200_title" = "dekpop 2.1 — iOS 27.0.1 supported";

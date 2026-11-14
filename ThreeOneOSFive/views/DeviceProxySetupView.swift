@@ -444,16 +444,9 @@ struct DeviceProxySetupView: View {
     }
 
     private func glassCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        content()
-            .padding(14)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(.ultraThinMaterial)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(Color.white.opacity(colorScheme == .dark ? 0.10 : 0.45), lineWidth: 0.8)
-            )
+        DekpopGlassCard(padding: 15, cornerRadius: DekpopRadius.medium) {
+            content()
+        }
     }
 
     private func copy(_ value: String, target: String) {

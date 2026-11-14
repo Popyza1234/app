@@ -473,20 +473,9 @@ struct ActivateUIDView: View {
     // MARK: - Helpers
 
     private func glassCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        content()
-            .padding(14)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(.ultraThinMaterial)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(Color.white.opacity(colorScheme == .dark ? 0.10 : 0.45), lineWidth: 0.8)
-            )
-            .shadow(
-                color: Color.black.opacity(colorScheme == .dark ? 0.30 : 0.08),
-                radius: 18, x: 0, y: 10
-            )
+        DekpopGlassCard(padding: 15, cornerRadius: DekpopRadius.medium) {
+            content()
+        }
     }
 
     private static let timeFormatter: DateFormatter = {

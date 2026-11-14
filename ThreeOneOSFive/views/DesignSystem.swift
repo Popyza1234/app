@@ -19,6 +19,8 @@ enum DekpopPaletteID: String, CaseIterable, Identifiable {
     case sunset
     case sakura
     case forest
+    case aurora
+    case plasma
     case mono
 
     var id: String { rawValue }
@@ -110,6 +112,28 @@ struct DekpopPalette: Identifiable {
                 brandMiddle: rgb(0.04, 0.48, 0.34),
                 brandEnd: rgb(0.62, 0.86, 0.36)
             )
+        case .aurora:
+            return DekpopPalette(
+                id: .aurora,
+                lightAccent: rgb(0.09, 0.47, 0.94),
+                darkAccent: rgb(0.42, 0.86, 1.00),
+                lightSecondary: rgb(0.48, 0.30, 0.95),
+                darkSecondary: rgb(0.66, 0.64, 1.00),
+                brandStart: rgb(0.02, 0.09, 0.26),
+                brandMiddle: rgb(0.08, 0.44, 0.90),
+                brandEnd: rgb(0.36, 0.93, 0.85)
+            )
+        case .plasma:
+            return DekpopPalette(
+                id: .plasma,
+                lightAccent: rgb(0.86, 0.13, 0.55),
+                darkAccent: rgb(1.00, 0.45, 0.76),
+                lightSecondary: rgb(0.98, 0.45, 0.16),
+                darkSecondary: rgb(1.00, 0.72, 0.38),
+                brandStart: rgb(0.20, 0.02, 0.16),
+                brandMiddle: rgb(0.74, 0.14, 0.52),
+                brandEnd: rgb(1.00, 0.55, 0.20)
+            )
         case .mono:
             return DekpopPalette(
                 id: .mono,
@@ -141,7 +165,7 @@ final class ThemeManager: ObservableObject {
 
     init() {
         let stored = UserDefaults.standard.string(forKey: Self.storageKey) ?? ""
-        selection = DekpopPaletteID(rawValue: stored) ?? .violet
+        selection = DekpopPaletteID(rawValue: stored) ?? .aurora
     }
 }
 
