@@ -59,8 +59,7 @@ struct ActivateUIDView: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 2)
                     }
-                    .dekpopClampWidth()
-                    .padding(.horizontal, DekpopLayout.inset(for: screenWidth))
+                    .dekpopContentWidth(inset: DekpopLayout.inset(for: screenWidth))
                     .padding(.top, 10)
                     .padding(.bottom, 30)
                 }

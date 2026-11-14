@@ -816,3 +816,8 @@
 "license.err_expired" = "คีย์นี้หมดอายุแล้ว";
 "license.err_not_activated" = "คีย์นี้ยังไม่เคยเปิดใช้งาน กรอกเพื่อเปิด";
 "license.err_invalid" = "รูปแบบคีย์ไม่ถูกต้อง";
+"license.steps_title" = "วิธีเปิดใช้งาน";
+"license.step1" = "ซื้อคีย์จากผู้ขาย";
+"license.step2" = "กรอกคีย์ด้านบน";
+"license.step3" = "กดเปิดใช้งาน — ใช้ได้ทันที";
+"license.retry" = "ตรวจสอบใหม่";

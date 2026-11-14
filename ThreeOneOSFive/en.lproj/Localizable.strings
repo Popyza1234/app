@@ -815,3 +815,8 @@
 "license.err_expired" = "This key has expired.";
 "license.err_not_activated" = "This key was never activated. Enter it to activate.";
 "license.err_invalid" = "That key format looks wrong.";
+"license.steps_title" = "HOW IT WORKS";
+"license.step1" = "Buy a key from the seller.";
+"license.step2" = "Type the key above.";
+"license.step3" = "Tap Activate — the app unlocks right away.";
+"license.retry" = "Check again";

@@ -13,6 +13,7 @@ struct LicenseGateView: View {
 
     @State private var keyInput = ""
     @State private var message: String?
+    @State private var screenWidth = DekpopLayout.defaultWidth
 
     var body: some View {
         ScrollView {
@@ -26,19 +27,29 @@ struct LicenseGateView: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                if showsGuide {
+                    stepsCard
+                }
                 hintCard
             }
-            .dekpopClampWidth()
-            .padding(.horizontal, DekpopLayout.inset(for: DekpopLayout.defaultWidth))
-            .padding(.top, 26)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .dekpopContentWidth(inset: DekpopLayout.inset(for: screenWidth))
+            .padding(.top, 22)
             .padding(.bottom, 40)
         }
+        .dekpopMeasureWidth { screenWidth = $0 }
         .scrollDismissesKeyboard(.interactively)
         .onAppear {
             if keyInput.isEmpty, !license.storedKey.isEmpty {
                 keyInput = license.storedKey
             }
         }
+    }
+
+    /// The guide is pointless once a key is already stored and only failing
+    /// validation, so it only appears before the first activation.
+    private var showsGuide: Bool {
+        license.storedKey.isEmpty && !license.isBusy
     }
 
     // MARK: - Pieces
@@ -60,6 +71,7 @@ struct LicenseGateView: View {
                 Image(systemName: "key.fill")
                     .font(.system(size: 30, weight: .semibold))
                     .foregroundStyle(.white)
+                    .accessibilityHidden(true)
             }
 
             Text(language.text("license.title"))
@@ -111,11 +123,23 @@ struct LicenseGateView: View {
                         }
                         Text(license.isBusy ? language.text("license.activating") : language.text("license.activate"))
                     }
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(DekpopGradientButtonStyle())
                 .disabled(license.isBusy)
 
                 statusLine
+
+                if !license.storedKey.isEmpty {
+                    Button {
+                        Task { await license.refresh() }
+                    } label: {
+                        Label(language.text("license.retry"), systemImage: "arrow.clockwise")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(license.isBusy)
+                }
             }
         }
     }
@@ -129,12 +153,10 @@ struct LicenseGateView: View {
                 .foregroundStyle(.secondary)
 
         case .active(let expiresAt), .offlineGrace(let expiresAt):
-            Label(
-                expiresText(expiresAt),
-                systemImage: "checkmark.seal.fill"
-            )
-            .font(.caption2)
-            .foregroundStyle(.green)
+            Label(expiresText(expiresAt), systemImage: "checkmark.seal.fill")
+                .font(.caption2)
+                .foregroundStyle(.green)
+                .fixedSize(horizontal: false, vertical: true)
 
         case .blocked(let reason):
             Label(reasonText(reason), systemImage: "exclamationmark.triangle.fill")
@@ -147,19 +169,53 @@ struct LicenseGateView: View {
         }
     }
 
+    private var stepsCard: some View {
+        DekpopGlassCard(padding: 16, cornerRadius: DekpopRadius.medium) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(language.text("license.steps_title"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                stepRow(1, language.text("license.step1"))
+                stepRow(2, language.text("license.step2"))
+                stepRow(3, language.text("license.step3"))
+            }
+        }
+    }
+
+    private func stepRow(_ number: Int, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text("\(number)")
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .foregroundStyle(AppTheme.accent)
+                .frame(width: 22, height: 22)
+                .background(Circle().fill(AppTheme.accent.opacity(0.15)))
+
+            Text(text)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
     private var hintCard: some View {
         VStack(spacing: 6) {
             Text(language.text("license.hint"))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
 
             Text("\(language.text("license.device_label")) \(shortDeviceId)")
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
                 .foregroundStyle(.tertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 6)
+        .padding(.top, 4)
+        .padding(.horizontal, 4)
     }
 
     // MARK: - Actions

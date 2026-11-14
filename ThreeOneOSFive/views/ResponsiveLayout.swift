@@ -50,10 +50,14 @@ extension View {
         .onPreferenceChange(DekpopWidthKey.self, perform: onChange)
     }
 
-    /// Clamps a scrollable body to a comfortable line length and centres it.
-    /// Combine with `DekpopLayout.inset(for:)` for the horizontal padding.
-    func dekpopClampWidth() -> some View {
-        frame(maxWidth: DekpopLayout.maxContentWidth, alignment: .leading)
+    /// Keeps a scrollable body clear of the screen edges, clamps it to a
+    /// comfortable line length and centres it on wide layouts.
+    ///
+    /// The inset has to be applied *before* the flexible frame, otherwise the
+    /// body claims the full width and the padding pushes it past the bezel.
+    func dekpopContentWidth(inset: CGFloat) -> some View {
+        padding(.horizontal, inset)
+            .frame(maxWidth: DekpopLayout.maxContentWidth, alignment: .leading)
             .frame(maxWidth: .infinity)
     }
 }

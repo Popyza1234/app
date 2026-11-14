@@ -44,8 +44,7 @@ struct DeviceProxySetupView: View {
                         stepsCard
                         noteCard
                     }
-                    .dekpopClampWidth()
-                    .padding(.horizontal, DekpopLayout.inset(for: screenWidth))
+                    .dekpopContentWidth(inset: DekpopLayout.inset(for: screenWidth))
                     .padding(.top, 10)
                     .padding(.bottom, 30)
                 }
