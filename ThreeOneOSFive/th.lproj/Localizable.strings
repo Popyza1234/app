@@ -740,3 +740,33 @@
 "activate.error_offline" = "เครื่องออฟไลน์อยู่ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่";
 "activate.error_transport" = "เชื่อมต่อเซิร์ฟเวอร์ activate ไม่ได้ กรุณาลองใหม่";
 "activate.error_clipboard" = "คลิปบอร์ดว่างอยู่";
+
+/* ตั้งค่า proxy ในเครื่อง (ไม่ต้องใช้แอพ) */
+"setup.open" = "ตั้งค่าในเครื่อง";
+"setup.title" = "ตั้งค่าในเครื่อง";
+"setup.heading" = "ไม่ต้องใช้แอพ proxy";
+"setup.subtitle" = "iOS ส่งทราฟฟิก Wi-Fi ผ่าน proxy นี้ได้เอง ตั้งครั้งเดียวใน Settings ไม่ต้องใช้ Proxy Pin";
+"setup.status_title" = "PROXY ที่เครื่องใช้อยู่";
+"setup.status_matched" = "เครื่องนี้ใช้ proxy ของเราอยู่แล้ว";
+"setup.status_other" = "มีการตั้ง proxy อื่นไว้";
+"setup.status_none" = "ยังไม่ได้ตั้ง proxy ในเครื่อง";
+"setup.status_none_detail" = "ทำตามขั้นตอนด้านล่างเพื่อเพิ่ม";
+"setup.status_unknown" = "กำลังตรวจสอบ…";
+"setup.refresh" = "ตรวจใหม่";
+"setup.values_title" = "ค่าที่ต้องใส่";
+"setup.server" = "เซิร์ฟเวอร์";
+"setup.port" = "พอร์ต";
+"setup.type" = "ชนิด";
+"setup.auth" = "ยืนยันตัวตน";
+"setup.none" = "ไม่มี";
+"setup.copy_all" = "คัดลอกเซิร์ฟเวอร์และพอร์ต";
+"setup.copied" = "คัดลอกแล้ว";
+"setup.steps_title" = "วิธีตั้งค่า";
+"setup.step_1" = "ต่อ Wi-Fi แล้วไปที่ Settings → Wi-Fi แตะ (i) ข้างชื่อเครือข่าย";
+"setup.step_2" = "เลือก Configure Proxy → Manual";
+"setup.step_3" = "Server 82.26.104.242 · Port 8080 · Authentication ปิด แล้วกด Save";
+"setup.step_4" = "ติดตั้งใบรับรอง mitmproxy CA: เปิดไฟล์ใบรับรอง → Settings → Profile Downloaded → Install แล้วไป General → About → Certificate Trust Settings เปิด full trust";
+"setup.step_5" = "กลับมาที่นี่ กด Activate UID แล้วเข้าเกมได้เลย";
+"setup.open_settings" = "เปิดการตั้งค่า";
+"setup.note_title" = "ใช้ได้กับ Wi-Fi เท่านั้น";
+"setup.note_body" = "proxy ในตัวนี้ครอบคลุมเฉพาะ Wi-Fi ถ้าใช้เน็ตมือถือ iOS ไม่มีช่องตั้ง proxy ต้องใช้แอพอย่าง Proxy Pin หรือโปรไฟล์บนเครื่อง supervised";

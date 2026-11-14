@@ -19,6 +19,7 @@ struct ActivateUIDView: View {
     @State private var activatedAt: Date?
     @State private var copied: CopiedTarget?
     @State private var pulse = false
+    @State private var showingSetup = false
 
     private let client = ActivateClient.shared
 
@@ -74,6 +75,9 @@ struct ActivateUIDView: View {
         }
         .tint(AppTheme.accent)
         .onAppear(perform: restoreLastActivation)
+        .sheet(isPresented: $showingSetup) {
+            DeviceProxySetupView()
+        }
     }
 
     // MARK: - Hero
@@ -434,8 +438,19 @@ struct ActivateUIDView: View {
     private var stepsCard: some View {
         glassCard {
             VStack(alignment: .leading, spacing: 12) {
-                Text(language.text("activate.steps_title"))
-                    .font(.subheadline.weight(.semibold))
+                HStack {
+                    Text(language.text("activate.steps_title"))
+                        .font(.subheadline.weight(.semibold))
+
+                    Spacer()
+
+                    Button { showingSetup = true } label: {
+                        Label(language.text("setup.open"), systemImage: "gearshape")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(AppTheme.accent)
+                }
 
                 ForEach(1...4, id: \.self) { index in
                     HStack(alignment: .top, spacing: 10) {

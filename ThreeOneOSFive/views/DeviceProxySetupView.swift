@@ -1,0 +1,366 @@
+import SwiftUI
+import UIKit
+import CFNetwork
+
+/// On-device proxy setup, so no separate proxy/VPN app is required.
+///
+/// iOS can send Wi-Fi traffic through an HTTP proxy from the system settings.
+/// This screen shows the exact values, checks whether the device is already
+/// pointed at our proxy, and walks through installing the mitmproxy CA.
+struct DeviceProxySetupView: View {
+    @Environment(\.appLanguage) private var language
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
+    @State private var copied: String?
+    @State private var detected: DetectedProxy?
+    @State private var didCheck = false
+
+    private let client = ActivateClient.shared
+
+    private struct DetectedProxy: Equatable {
+        let host: String
+        let port: Int
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                DekpopAuroraBackground()
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        hero
+                        statusCard
+                        valuesCard
+                        stepsCard
+                        noteCard
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                    .padding(.bottom, 30)
+                }
+            }
+            .navigationTitle(language.text("setup.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(language.text("common.close")) { dismiss() }
+                        .font(.subheadline.weight(.semibold))
+                }
+            }
+        }
+        .tint(AppTheme.accent)
+        .onAppear(perform: refreshProxy)
+    }
+
+    // MARK: - Sections
+
+    private var hero: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Image(systemName: "wifi.router.fill")
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.purple, .pink],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                Text(language.text("setup.heading"))
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+
+                Spacer(minLength: 0)
+            }
+
+            Text(language.text("setup.subtitle"))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 2)
+    }
+
+    private var statusCard: some View {
+        glassCard {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text(language.text("setup.status_title"))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button {
+                        refreshProxy()
+                    } label: {
+                        Label(language.text("setup.refresh"), systemImage: "arrow.clockwise")
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(AppTheme.accent)
+                }
+
+                HStack(spacing: 10) {
+                    Circle()
+                        .fill(statusColor)
+                        .frame(width: 9, height: 9)
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(statusTitle)
+                            .font(.subheadline.weight(.semibold))
+
+                        if let detail = statusDetail {
+                            Text(detail)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+
+                    Spacer(minLength: 0)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+
+    private var valuesCard: some View {
+        glassCard {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(language.text("setup.values_title"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 8)
+
+                valueRow(language.text("setup.server"), value: host, copyKey: "host")
+                Divider().opacity(0.4)
+                valueRow(language.text("setup.port"), value: portText, copyKey: "port")
+                Divider().opacity(0.4)
+                valueRow(language.text("setup.type"), value: "HTTP", copyKey: nil)
+                Divider().opacity(0.4)
+                valueRow(language.text("setup.auth"), value: language.text("setup.none"), copyKey: nil)
+
+                Button {
+                    copy("\(host):\(portText)", target: "all")
+                } label: {
+                    Label(
+                        copied == "all"
+                            ? language.text("setup.copied")
+                            : language.text("setup.copy_all"),
+                        systemImage: copied == "all" ? "checkmark" : "doc.on.doc"
+                    )
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, minHeight: 42)
+                    .background(
+                        LinearGradient(
+                            colors: [.purple, .pink],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    )
+                }
+                .buttonStyle(DekpopPressStyle())
+                .padding(.top, 12)
+            }
+        }
+    }
+
+    private var stepsCard: some View {
+        glassCard {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(language.text("setup.steps_title"))
+                    .font(.subheadline.weight(.semibold))
+
+                ForEach(1...5, id: \.self) { index in
+                    HStack(alignment: .top, spacing: 10) {
+                        Text("\(index)")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 20, height: 20)
+                            .background(Circle().fill(Color.purple.opacity(0.75)))
+
+                        Text(language.text("setup.step_\(index)"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                Button {
+                    openSettingsApp()
+                } label: {
+                    Label(language.text("setup.open_settings"), systemImage: "gearshape")
+                        .font(.caption.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 40)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.primary)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color(.tertiarySystemFill))
+                )
+                .padding(.top, 4)
+            }
+        }
+    }
+
+    private var noteCard: some View {
+        glassCard {
+            VStack(alignment: .leading, spacing: 6) {
+                Label(language.text("setup.note_title"), systemImage: "exclamationmark.triangle")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.orange)
+
+                Text(language.text("setup.note_body"))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func valueRow(_ title: String, value: String, copyKey: String?) -> some View {
+        HStack(spacing: 10) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Spacer(minLength: 8)
+
+            Text(value)
+                .font(.system(.footnote, design: .monospaced))
+                .textSelection(.enabled)
+
+            if let copyKey {
+                Button {
+                    copy(value, target: copyKey)
+                } label: {
+                    Image(systemName: copied == copyKey ? "checkmark" : "doc.on.doc")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(copied == copyKey ? .green : AppTheme.accent)
+            }
+        }
+        .padding(.vertical, 9)
+    }
+
+    // MARK: - Helpers
+
+    private var host: String {
+        client.proxyAddress.split(separator: ":").first.map(String.init) ?? client.proxyAddress
+    }
+
+    private var portText: String {
+        client.proxyAddress.split(separator: ":").last.map(String.init) ?? "8080"
+    }
+
+    private var expectedPort: Int {
+        Int(portText) ?? 8080
+    }
+
+    private var isMatched: Bool {
+        guard let detected else { return false }
+        return detected.host == host && detected.port == expectedPort
+    }
+
+    private var statusColor: Color {
+        guard didCheck else { return .gray }
+        guard let detected else { return .orange }
+        return isMatched ? .green : .orange
+    }
+
+    private var statusTitle: String {
+        guard didCheck else { return language.text("setup.status_unknown") }
+        guard let detected else { return language.text("setup.status_none") }
+        return isMatched ? language.text("setup.status_matched") : language.text("setup.status_other")
+    }
+
+    private var statusDetail: String? {
+        guard didCheck else { return nil }
+        guard let detected else { return language.text("setup.status_none_detail") }
+        return "\(detected.host):\(detected.port)"
+    }
+
+    private func glassCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(.ultraThinMaterial)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(Color.white.opacity(colorScheme == .dark ? 0.10 : 0.45), lineWidth: 0.8)
+            )
+    }
+
+    private func copy(_ value: String, target: String) {
+        UIPasteboard.general.string = value
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+
+        withAnimation(.easeOut(duration: 0.2)) { copied = target }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+            if copied == target {
+                withAnimation(.easeOut(duration: 0.2)) { copied = nil }
+            }
+        }
+    }
+
+    private func openSettingsApp() {
+        for candidate in ["App-Prefs:root=WIFI", UIApplication.openSettingsURLString] {
+            guard let url = URL(string: candidate) else { continue }
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+                return
+            }
+        }
+    }
+
+    /// Reads the proxy the system is currently configured to use.
+    private func refreshProxy() {
+        detected = Self.readSystemProxy()
+        didCheck = true
+    }
+
+    private static func readSystemProxy() -> DetectedProxy? {
+        guard let raw = CFNetworkCopySystemProxySettings()?.takeRetainedValue(),
+              let settings = raw as? [String: Any] else {
+            return nil
+        }
+
+        func flag(_ key: String) -> Bool {
+            (settings[key] as? NSNumber)?.boolValue ?? false
+        }
+        func text(_ key: String) -> String? {
+            if let value = settings[key] as? String, !value.isEmpty { return value }
+            return nil
+        }
+        func number(_ key: String) -> Int? {
+            if let value = settings[key] as? NSNumber { return value.intValue }
+            if let value = settings[key] as? String { return Int(value) }
+            return nil
+        }
+
+        let httpsHost = kCFNetworkProxiesHTTPSProxy as String
+        let httpsPort = kCFNetworkProxiesHTTPSPort as String
+        let httpsEnable = kCFNetworkProxiesHTTPSEnable as String
+        let httpHost = kCFNetworkProxiesHTTPProxy as String
+        let httpPort = kCFNetworkProxiesHTTPPort as String
+        let httpEnable = kCFNetworkProxiesHTTPEnable as String
+
+        if flag(httpsEnable), let host = text(httpsHost), let port = number(httpsPort) {
+            return DetectedProxy(host: host, port: port)
+        }
+        if flag(httpEnable), let host = text(httpHost), let port = number(httpPort) {
+            return DetectedProxy(host: host, port: port)
+        }
+        return nil
+    }
+}
