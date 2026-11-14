@@ -17,6 +17,7 @@ struct DeviceProxySetupView: View {
     @State private var didCheck = false
     @State private var profileURL: URL?
     @State private var certificateFailed = false
+    @State private var installFailed = false
     @State private var routeResult: ProxyRouteCheck.Result?
     @State private var isTestingRoute = false
 
@@ -246,9 +247,9 @@ struct DeviceProxySetupView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 Button {
-                    createCertificateProfile()
+                    installProfileDirectly()
                 } label: {
-                    Label(language.text("setup.cert_button"), systemImage: "checkmark.shield")
+                    Label(language.text("setup.cert_install"), systemImage: "arrow.down.circle.fill")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, minHeight: 42)
@@ -262,6 +263,37 @@ struct DeviceProxySetupView: View {
                         )
                 }
                 .buttonStyle(DekpopPressStyle())
+
+                Text(language.text("setup.cert_install_hint"))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if installFailed {
+                    Label(language.text("setup.cert_install_error"), systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Text(language.text("setup.cert_file_option"))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 2)
+
+                Button {
+                    createCertificateProfile()
+                } label: {
+                    Label(language.text("setup.cert_button"), systemImage: "checkmark.shield")
+                        .font(.caption.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 38)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.primary)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color(.tertiarySystemFill))
+                )
 
                 if certificateFailed {
                     Label(language.text("setup.cert_error"), systemImage: "exclamationmark.triangle.fill")
@@ -497,6 +529,34 @@ struct DeviceProxySetupView: View {
             return "IP \(ip) · \(milliseconds) ms"
         case let .failed(reason):
             return reason
+        }
+    }
+
+    /// Hands the profile to iOS without any download: a loopback server serves
+    /// it, Safari picks it up, and Settings shows the install sheet.
+    private func installProfileDirectly() {
+        do {
+            let data = try CertificateInstaller.makeProfile()
+            installFailed = false
+
+            Task {
+                do {
+                    let url = try await LocalProfileServer.shared.start(
+                        data: data,
+                        fileName: CertificateInstaller.profileFileName
+                    )
+                    await MainActor.run {
+                        UIApplication.shared.open(url)
+                        let generator = UINotificationFeedbackGenerator()
+                        generator.notificationOccurred(.success)
+                    }
+                } catch {
+                    LocalProfileServer.shared.stop()
+                    await MainActor.run { installFailed = true }
+                }
+            }
+        } catch {
+            installFailed = true
         }
     }
 

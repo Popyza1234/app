@@ -787,3 +787,9 @@
 "setup.route_ok" = "Traffic goes through the proxy";
 "setup.route_direct" = "Not going through the proxy yet";
 "setup.route_fail" = "Test failed — check your Wi-Fi and try again";
+
+/* One-tap certificate install from inside the app */
+"setup.cert_install" = "Install the certificate now";
+"setup.cert_install_hint" = "Safari opens once and shows Profile Downloaded — come back to Settings → Profile Downloaded → Install. Nothing is downloaded from the internet.";
+"setup.cert_install_error" = "Could not open the install page — use the button below instead.";
+"setup.cert_file_option" = "Or create the file and install it from the Files app";

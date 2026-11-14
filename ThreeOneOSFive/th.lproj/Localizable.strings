@@ -788,3 +788,9 @@
 "setup.route_ok" = "ผ่าน proxy แล้ว — เน็ตออกจาก IP ของ proxy";
 "setup.route_direct" = "ยังไม่ผ่าน proxy — เน็ตออกจาก IP ของคุณเอง";
 "setup.route_fail" = "ทดสอบไม่สำเร็จ — ตรวจ Wi-Fi แล้วลองใหม่";
+
+/* ติดตั้งใบรับรองจากในแอปเลย */
+"setup.cert_install" = "ติดตั้งใบรับรองเลย";
+"setup.cert_install_hint" = "Safari จะเปิดขึ้นครั้งเดียวแล้วขึ้น Profile Downloaded — กลับมาที่ Settings → Profile Downloaded → Install (ไม่ต้องโหลดอะไรจากเน็ต)";
+"setup.cert_install_error" = "เปิดหน้าติดตั้งไม่สำเร็จ — ใช้ปุ่มสร้างไฟล์ด้านล่างแทน";
+"setup.cert_file_option" = "หรือสร้างไฟล์ไปติดตั้งเองจากแอป Files";
