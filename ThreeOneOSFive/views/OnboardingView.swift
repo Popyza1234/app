@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 private enum OnboardingStep: Int, CaseIterable {
     case language = 0, welcome, versions, install
@@ -332,7 +333,7 @@ struct OnboardingView: View {
             }
         }
         .padding(.vertical, 16)
-        .background(.bar)
+        .background(Color(uiColor: .secondarySystemBackground))
     }
 }
 

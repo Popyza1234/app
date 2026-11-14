@@ -1,108 +1,75 @@
 import SwiftUI
 
-/// Brand-wide animated backdrop: slowly drifting aurora gradients plus a light
-/// particle field.
+/// Brand-wide backdrop.
 ///
-/// Everything is drawn inside a single `Canvas` driven by a `TimelineView`, so
-/// the effect costs one drawing pass per frame instead of dozens of animating
-/// views — it stays smooth while the Files browser scrolls on top of it.
+/// Performance contract: this view is completely static. It draws a base fill,
+/// one vertical gradient and three radial highlights, all of which the GPU can
+/// cache after the first frame. There is no `TimelineView`, no `Canvas`, no
+/// `blur(radius:)`, no `repeatForever` animation and no blend mode.
 ///
-/// - Note: honours Reduce Motion by freezing on a tasteful static frame.
+/// The old implementation redrew four full-screen radial gradients at 30 fps
+/// plus a 28-particle canvas on top of a second animated blurred-layer stack.
+/// That combination is what made the Files list stutter and eventually trip the
+/// watchdog on lower-spec phones.
 struct DekpopAuroraBackground: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ObservedObject private var theme = ThemeManager.shared
     @Environment(\.colorScheme) private var colorScheme
 
+    private var palette: DekpopPalette { theme.palette }
+
+    private var isDark: Bool { colorScheme == .dark }
+
     var body: some View {
-        GeometryReader { proxy in
-            let size = proxy.size
+        ZStack {
+            Color(uiColor: .systemGroupedBackground)
 
-            ZStack {
-                AppTheme.pageBackground
+            LinearGradient(
+                colors: [
+                    Color(uiColor: palette.brandStart).opacity(isDark ? 0.55 : 0.16),
+                    Color.clear,
+                    Color(uiColor: palette.brandEnd).opacity(isDark ? 0.14 : 0.08)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
 
-                if reduceMotion {
-                    aurora(size: size, time: 0)
-                    particleField(size: size, time: 0)
-                } else {
-                    TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-                        let time = timeline.date.timeIntervalSinceReferenceDate
-                        ZStack {
-                            aurora(size: size, time: time)
-                            particleField(size: size, time: time)
-                        }
-                    }
-                }
+            radial(
+                color: palette.accent,
+                opacity: isDark ? 0.28 : 0.20,
+                center: UnitPoint(x: 0.08, y: 0.04),
+                radius: 430
+            )
 
-                // Keeps the navigation bar and status bar legible.
-                LinearGradient(
-                    colors: [
-                        Color.black.opacity(colorScheme == .dark ? 0.28 : 0.0),
-                        Color.clear
-                    ],
-                    startPoint: .top,
-                    endPoint: .center
-                )
-            }
-            .ignoresSafeArea()
+            radial(
+                color: palette.accentSecondary,
+                opacity: isDark ? 0.16 : 0.12,
+                center: UnitPoint(x: 0.96, y: 0.48),
+                radius: 360
+            )
+
+            radial(
+                color: Color(uiColor: palette.brandMiddle),
+                opacity: isDark ? 0.18 : 0.10,
+                center: UnitPoint(x: 0.30, y: 1.02),
+                radius: 420
+            )
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
-    // MARK: - Layers
-
-    private func aurora(size: CGSize, time: Double) -> some View {
-        Canvas { context, canvasSize in
-            let palette: [Color] = [.purple, .pink, .indigo, .cyan]
-            let base = min(canvasSize.width, canvasSize.height)
-            let full = Path(CGRect(origin: .zero, size: canvasSize))
-
-            for (index, color) in palette.enumerated() {
-                let phase = Double(index) * 1.9
-                let speed = 0.09 + Double(index) * 0.035
-                let radius = base * (0.40 + 0.06 * sin(time * speed + phase))
-                let center = CGPoint(
-                    x: canvasSize.width * (0.5 + 0.32 * sin(time * speed * 0.9 + phase)),
-                    y: canvasSize.height * (0.45 + 0.30 * cos(time * speed * 0.75 + phase * 1.4))
-                )
-
-                let shading = GraphicsContext.Shading.radialGradient(
-                    Gradient(colors: [color.opacity(0.42), color.opacity(0.02), color.opacity(0)]),
-                    center: center,
-                    startRadius: 0,
-                    endRadius: radius
-                )
-                context.fill(full, with: shading)
-            }
-        }
-        .opacity(colorScheme == .dark ? 1 : 0.75)
-        .blendMode(colorScheme == .dark ? .plusLighter : .normal)
-    }
-
-    private func particleField(size: CGSize, time: Double) -> some View {
-        Canvas { context, canvasSize in
-            let count = 28
-            for index in 0..<count {
-                let x = random(index, 1.7) * canvasSize.width
-                let speed = 7 + random(index, 2.3) * 16
-                let travel = canvasSize.height + 90
-                let offset = random(index, 3.1) * travel
-                let y = canvasSize.height + 45 - ((time * speed + offset).truncatingRemainder(dividingBy: travel))
-
-                let radius = 1.1 + random(index, 4.4) * 1.9
-                let twinkle = 0.5 + 0.5 * sin(time * 0.9 + Double(index))
-                let opacity = 0.07 + 0.13 * twinkle
-
-                let rect = CGRect(x: x, y: y, width: radius * 2, height: radius * 2)
-                context.fill(Path(ellipseIn: rect), with: .color(.white.opacity(opacity)))
-            }
-        }
-        .opacity(colorScheme == .dark ? 1 : 0.5)
-    }
-
-    /// Deterministic pseudo-random in 0..<1 so particles stay put between frames.
-    private func random(_ index: Int, _ salt: Double) -> Double {
-        let raw = sin(Double(index) * 12.9898 + salt * 78.233) * 43758.5453
-        return raw - floor(raw)
+    private func radial(
+        color: Color,
+        opacity: Double,
+        center: UnitPoint,
+        radius: CGFloat
+    ) -> some View {
+        RadialGradient(
+            colors: [color.opacity(opacity), color.opacity(0)],
+            center: center,
+            startRadius: 0,
+            endRadius: radius
+        )
     }
 }
-

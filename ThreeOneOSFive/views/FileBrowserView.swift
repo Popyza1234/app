@@ -7,6 +7,7 @@ struct FileBrowserView: View {
     @Environment(\.appLanguage) private var language
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @ObservedObject private var theme = ThemeManager.shared
     @EnvironmentObject private var fileOperationCoordinator: FileOperationCoordinator
     let containerPath: String
     let title: String
@@ -91,6 +92,8 @@ struct FileBrowserView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.clear)
             .environment(\.defaultMinListRowHeight, AppTheme.fileRowHeight)
             .scrollDismissesKeyboard(.interactively)
             .overlay {
@@ -108,9 +111,10 @@ struct FileBrowserView: View {
                     }
                 }
                 .transition(.opacity)
-                .animation(interfaceAnimation, value: overlayState)
             }
         }
+        .frame(maxWidth: 760)
+        .frame(maxWidth: .infinity)
         .navigationTitle(currentPath == containerPath ? title : (currentPath as NSString).lastPathComponent)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: FileBrowserDestination.self) { destination in
@@ -124,10 +128,7 @@ struct FileBrowserView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                DekpopLanguageMenu()
-            }
-            ToolbarItem(placement: .navigationBarLeading) {
-                DekpopThemeToolbarButton()
+                DekpopOptionsMenu()
             }
             if let filesTabSession {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -270,7 +271,10 @@ struct FileBrowserView: View {
                             .ignoresSafeArea()
                         ProgressView(activityText)
                             .padding()
-                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                            .background(
+                                Color(uiColor: .secondarySystemBackground),
+                                in: RoundedRectangle(cornerRadius: 12)
+                            )
                     }
                     .transition(.opacity)
                 }
@@ -512,7 +516,7 @@ struct FileBrowserView: View {
     }
 
     private func addShortcut(name: String, startPath: String) {
-        var shortcuts = AssetSetService.loadShortcuts()
+        var shortcuts = ShortcutStore.loadShortcuts()
         guard !shortcuts.contains(where: { $0.startPath == startPath }) else {
             operationNotice = FileReplacementNotice(
                 title: language.text("browser.shortcut_exists_title"),
@@ -532,7 +536,7 @@ struct FileBrowserView: View {
             createdAt: Date()
         )
         shortcuts.insert(shortcut, at: 0)
-        AssetSetService.saveShortcuts(shortcuts)
+        ShortcutStore.saveShortcuts(shortcuts)
         operationNotice = FileReplacementNotice(
             title: language.text("browser.shortcut_saved_title"),
             message: language.text("browser.shortcut_saved_message", shortcut.name)
@@ -1551,7 +1555,7 @@ private struct FileSelectionActionBar: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 7)
-        .background(.bar)
+        .background(Color(uiColor: .secondarySystemBackground))
         .overlay(alignment: .top) { Divider() }
         .disabled(selectedCount == 0)
     }
@@ -1608,7 +1612,7 @@ private struct FilePasteBar: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
-        .background(.bar)
+        .background(Color(uiColor: .secondarySystemBackground))
         .overlay(alignment: .top) { Divider() }
     }
 }

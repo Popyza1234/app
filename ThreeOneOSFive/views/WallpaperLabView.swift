@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
 
 private enum WallpaperPickerPolicy {
@@ -240,7 +241,10 @@ struct WallpaperLabView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 18)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .background(
+                    Color(uiColor: .secondarySystemBackground),
+                    in: RoundedRectangle(cornerRadius: 16)
+                )
             }
         }
     }

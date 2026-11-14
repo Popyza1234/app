@@ -158,7 +158,10 @@ class AppState: ObservableObject {
         kernelExploitRunning = true
         exploitStatus = .notStarted
         log("app: running kernel exploit on background...")
-        DispatchQueue.global(qos: .userInitiated).async {
+        // Let the first frame and the app-list scan start before the kernel
+        // exploit begins. Starting both at once on the main thread was a large
+        // part of the 1200 ms launch hang reported on low-spec devices.
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 0.8) {
             let ok = KernelExploit.run()
             DispatchQueue.main.async {
                 self.kernelExploitRunning = false

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-2.1.0-6C4CF1?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-3.0.0-6C4CF1?style=flat-square">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-All%20versions%2016.0%2B-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Edition" src="https://img.shields.io/badge/edition-Files%20only-FF4F8B?style=flat-square">
@@ -24,6 +24,18 @@
 
 > [!WARNING]
 > dekpop is research software for personal device management. Keep a backup and use it only on devices and data you own. It can modify files inside app containers.
+
+## What's new in 3.0.0 — lighter, faster, smoother
+
+> Rebuilt for older iPhones: no more frozen frames, no UI past the bezel, and no unused Asset Sets.
+
+- **Static design layer.** The whole app paints one base fill and a few static gradients. The 30 fps `Canvas` aurora, 28 particles, animated 4× blur mesh and the third animated blurred list background are gone, along with every `repeatForever`, `plusLighter` and `.ultraThinMaterial` on a visible screen.
+- **UI that fits.** The Files category picker is a custom equal-width control that cannot overflow, search is a lightweight capsule, and lists/secondary screens are clamped to 760 pt and centred with responsive insets. Nothing runs under the right bezel on an iPhone SE.
+- **Calmer chrome.** Language and theme plus four folder actions collapsed into one options menu, the tabs button and one overflow menu, so the navigation bar has room for the title.
+- **Faster lists.** File rows are 52 pt, app icons load through one serial utility queue, and progressive container discovery publishes at most once per 24 new apps instead of re-sorting the whole catalogue on every callback.
+- **Faster launch.** The kernel exploit runs 0.8 s after the first frame at `.utility` QoS, so the app list and first paint are not blocked. The launch screen is static with one fade-in, and announcements appear once per notice instead of on every launch.
+- **Asset Sets removed.** Models, service and all five screens are deleted. Saved folder shortcuts still work and are migrated automatically to the new `ShortcutStore`.
+- Version is now `3.0.0` (build 30). English/Thai string tables stay at full key parity.
 
 ## What's new in 2.1.0 — 27.0.1 compatibility & safe folders
 

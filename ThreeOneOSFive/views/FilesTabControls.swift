@@ -45,7 +45,7 @@ struct FilesTabStrip: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
         }
-        .background(.bar)
+        .background(Color(uiColor: .secondarySystemBackground))
         .overlay(alignment: .bottom) { Divider() }
         .alert(
             language.text("browser.rename_tab"),

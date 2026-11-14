@@ -5,8 +5,11 @@ import UniformTypeIdentifiers
 struct AppDataBrowserView: View {
     @Environment(\.appLanguage) private var language
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    // Observing the palette lets a theme change redraw this screen in place.
+    // The old build re-created the whole browser via `.id`, which re-ran the
+    // container scan (and reset the scroll position) just to change colours.
+    @ObservedObject private var theme = ThemeManager.shared
     @State private var apps: [InstalledApp] = []
     @State private var shortcuts: [FolderShortcut] = []
     @State private var isLoading = false
@@ -50,10 +53,6 @@ struct AppDataBrowserView: View {
         return .none
     }
 
-    private var interfaceAnimation: Animation? {
-        reduceMotion ? nil : .easeOut(duration: 0.20)
-    }
-
     var body: some View {
         NavigationStack(path: activeNavigationPath) {
             appList
@@ -61,39 +60,13 @@ struct AppDataBrowserView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    DekpopLanguageMenu()
-                }
-                ToolbarItem(placement: .navigationBarLeading) {
-                    DekpopThemeToolbarButton()
-                }
-                ToolbarItem(placement: .principal) {
-                    DekpopWordmark(compact: true)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { activeSheet = .activateUID } label: {
-                        Image(systemName: "bolt.horizontal.circle")
-                    }
-                    .accessibilityLabel(language.text("activate.title"))
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { activeSheet = .assetSets } label: {
-                        Image(systemName: "cube.box")
-                    }
-                    .accessibilityLabel(language.text("asset.sets_title"))
+                    DekpopOptionsMenu()
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     FilesTabToolbarButton(session: $tabSession)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { reload() } label: {
-                        if isResolving {
-                            ProgressView()
-                        } else {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                    }
-                    .disabled(isResolving)
-                    .accessibilityLabel(language.text("browser.retry"))
+                    rootMenu
                 }
             }
             .onAppear {
@@ -138,8 +111,6 @@ struct AppDataBrowserView: View {
         }
         .sheet(item: $activeSheet, onDismiss: loadShortcuts) { sheet in
             switch sheet {
-            case .assetSets:
-                AssetSetsView(apps: apps)
             case .newShortcut:
                 ShortcutEditorView(
                     apps: apps,
@@ -211,26 +182,65 @@ struct AppDataBrowserView: View {
                     clearLabel: language.text("common.clear")
                 )
             }
-            Divider()
+            Divider().opacity(0.5)
             homeRows
         }
-        .background(DekpopAnimatedBackground().ignoresSafeArea())
+        // Keeps the browser centred on iPad and prevents a wide list from
+        // stretching rows into unreadable lines.
+        .frame(maxWidth: 760)
+        .frame(maxWidth: .infinity)
+        .background(Color.clear)
     }
 
     private var categoryPicker: some View {
-        Picker(language.text("home.category"), selection: $selectedCategory) {
-            ForEach(HomeCategory.allCases) { category in
-                Text(language.text(category.titleKey)).tag(category)
-            }
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
+        DekpopSegmentedControl(
+            segments: HomeCategory.allCases.map {
+                DekpopSegment(id: $0.rawValue, title: language.text($0.titleKey))
+            },
+            selection: Binding(
+                get: { selectedCategory.rawValue },
+                set: { value in
+                    guard let category = HomeCategory(rawValue: value) else { return }
+                    selectedCategory = category
+                    searchText = ""
+                }
+            )
+        )
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(Color.clear)
-        .onChange(of: selectedCategory) { _ in
-            searchText = ""
+    }
+
+    private var rootMenu: some View {
+        Menu {
+            Button {
+                reload()
+            } label: {
+                Label(language.text("browser.retry"), systemImage: "arrow.clockwise")
+            }
+            .disabled(isResolving)
+
+            Divider()
+
+            Button {
+                activeSheet = .activateUID
+            } label: {
+                Label(language.text("activate.title"), systemImage: "bolt.horizontal.circle")
+            }
+
+            Button {
+                showDiagnostics()
+            } label: {
+                Label(language.text("safe.diagnostics"), systemImage: "stethoscope")
+            }
+        } label: {
+            if isResolving {
+                ProgressView()
+                    .controlSize(.small)
+            } else {
+                Image(systemName: "ellipsis.circle")
+            }
         }
+        .accessibilityLabel(language.text("browser.retry"))
     }
 
     @ViewBuilder
@@ -247,7 +257,7 @@ struct AppDataBrowserView: View {
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
-        .environment(\.defaultMinListRowHeight, 48)
+        .environment(\.defaultMinListRowHeight, 44)
         .scrollDismissesKeyboard(.interactively)
         .overlay {
             if selectedCategory == .apps {
@@ -265,7 +275,6 @@ struct AppDataBrowserView: View {
                     }
                 }
                 .transition(.opacity)
-                .animation(interfaceAnimation, value: overlayState)
             }
         }
     }
@@ -274,19 +283,9 @@ struct AppDataBrowserView: View {
     private var appsContent: some View {
         Section {
             DekpopHeroCard()
-                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 6, trailing: 16))
+                .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 4, trailing: 16))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
-        }
-
-        Section {
-            DekpopLanguagePicker()
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                .listRowBackground(Color.clear)
-        } header: {
-            Text(language.text("dekpop.language"))
-        } footer: {
-            Text(language.text("dekpop.language_hint"))
         }
 
         if let workspaceURL {
@@ -555,7 +554,7 @@ struct AppDataBrowserView: View {
             }
         }
         .padding(.vertical, 2)
-        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 12))
+        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
     }
 
     private func openInNewTabButton(_ destination: FileBrowserDestination) -> some View {
@@ -580,7 +579,7 @@ struct AppDataBrowserView: View {
     }
 
     private func loadShortcuts() {
-        shortcuts = AssetSetService.loadShortcuts()
+        shortcuts = ShortcutStore.loadShortcuts()
             .sorted { $0.createdAt > $1.createdAt }
     }
 
@@ -589,7 +588,7 @@ struct AppDataBrowserView: View {
         var updated = shortcuts
         updated.insert(shortcut, at: 0)
         shortcuts = updated
-        AssetSetService.saveShortcuts(updated)
+        ShortcutStore.saveShortcuts(updated)
     }
 
     private func updateShortcut(_ shortcut: FolderShortcut) {
@@ -597,14 +596,14 @@ struct AppDataBrowserView: View {
         var updated = shortcuts
         updated[index] = shortcut
         shortcuts = updated
-        AssetSetService.saveShortcuts(updated)
+        ShortcutStore.saveShortcuts(updated)
     }
 
     private func deleteShortcut(_ shortcut: FolderShortcut) {
         var updated = shortcuts
         updated.removeAll { $0.id == shortcut.id }
         shortcuts = updated
-        AssetSetService.saveShortcuts(updated)
+        ShortcutStore.saveShortcuts(updated)
     }
 
     // MARK: - Safe access (works on iOS 27.0.1 without any exploit)
@@ -833,10 +832,17 @@ struct AppDataBrowserView: View {
                 "installed=\(apiApps.count), research=\(ContainerStore.researchAppIdentifiers.count), " +
                 "LaunchServices=\(launchServicesIdentifiers.count) -> \(mhaIdentifiers.count) candidates"
             )
+            var lastProgressCount = 0
             let mhaApps = ContainerStore.installedAppsFromMHACandidates(
                 identifiers: mhaIdentifiers,
                 bundleMetadata: bundleMetadata
             ) { discoveredApps in
+                // The resolver reports progress every eight apps. Re-merging
+                // and re-sorting the entire catalogue on every report was an
+                // O(n²) main-thread storm on phones with hundreds of apps.
+                // Publish at most once per 24 new entries instead.
+                guard discoveredApps.count - lastProgressCount >= 24 else { return }
+                lastProgressCount = discoveredApps.count
                 var progressiveResult = AppDataCatalogMerger.merge(
                     identified: discoveredApps + baseIdentifiedApps,
                     fallback: [],
@@ -909,7 +915,6 @@ private enum HomeCategory: String, CaseIterable, Identifiable {
 
 private enum FilesRootSheet: Identifiable {
     case activateUID
-    case assetSets
     case newShortcut
     case editShortcut(FolderShortcut)
     case site(ModSite)
@@ -919,8 +924,6 @@ private enum FilesRootSheet: Identifiable {
         switch self {
         case .activateUID:
             return "activateUID"
-        case .assetSets:
-            return "assetSets"
         case .newShortcut:
             return "newShortcut"
         case .editShortcut(let shortcut):
@@ -1027,6 +1030,11 @@ struct CompatibilityReportView: View {
 }
 
 struct BrowserAppIcon: View {
+    /// Serialises icon extraction. Before this queue existed every visible row
+    /// spawned its own concurrent task, which turned a fast scroll into an I/O
+    /// storm on older devices.
+    private static let iconQueue = DispatchQueue(label: "dekpop.app-icon", qos: .utility)
+
     let app: InstalledApp
     @State private var resolvedIcon: UIImage?
     @State private var didRequestIcon = false
@@ -1055,7 +1063,7 @@ struct BrowserAppIcon: View {
             guard resolvedIcon == nil, !didRequestIcon else { return }
             didRequestIcon = true
             let bundleID = app.bundleID
-            DispatchQueue.global(qos: .utility).async {
+            Self.iconQueue.async {
                 let icon = iconForBundleID(bundleID)
                 DispatchQueue.main.async {
                     resolvedIcon = icon

@@ -120,7 +120,7 @@ struct ModBrowserView: View {
         }
         .padding(.horizontal, 8)
         .frame(height: 50)
-        .background(.bar)
+        .background(Color(uiColor: .secondarySystemBackground))
         .overlay(alignment: .top) {
             Divider()
         }

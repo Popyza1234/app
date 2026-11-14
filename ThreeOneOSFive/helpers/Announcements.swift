@@ -1,8 +1,8 @@
 import Foundation
 
-/// An in-app announcement shown every time the app opens.
+/// An in-app announcement shown once after an update.
 /// Add a new entry at the top of `announcements` to publish a new notice;
-/// the first entry is the one displayed, on every launch.
+/// the first entry is the one displayed, and only until it is dismissed.
 struct DekpopAnnouncement: Identifiable {
     let id: String
     /// Localization keys — the app ships exactly English and Thai, so the
@@ -14,7 +14,16 @@ struct DekpopAnnouncement: Identifiable {
 }
 
 enum AnnouncementStore {
+    static let seenKey = "dekpop.announcement.seen"
+
     static let announcements: [DekpopAnnouncement] = [
+        DekpopAnnouncement(
+            id: "smooth-files-3.0.0",
+            titleKey: "announcement.300_title",
+            bodyKey: "announcement.300_body",
+            imageName: "announcement-banner",
+            link: nil
+        ),
         DekpopAnnouncement(
             id: "safe-files-2.1.0",
             titleKey: "announcement.200_title",
@@ -24,9 +33,15 @@ enum AnnouncementStore {
         )
     ]
 
-    /// The notice shown after the launch screen — always the newest one,
-    /// every single launch.
+    /// The newest notice that has not been dismissed yet. It is shown after
+    /// the launch screen exactly once, then remembered in `UserDefaults`.
     static var current: DekpopAnnouncement? {
-        announcements.first
+        guard let latest = announcements.first else { return nil }
+        let seen = UserDefaults.standard.string(forKey: seenKey)
+        return seen == latest.id ? nil : latest
+    }
+
+    static func markSeen(_ announcement: DekpopAnnouncement) {
+        UserDefaults.standard.set(announcement.id, forKey: seenKey)
     }
 }

@@ -58,25 +58,31 @@ struct DekpopGlassCard<Content: View>: View {
             .padding(padding)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(colorScheme == .dark ? 0.16 : 0.65),
-                                Color.white.opacity(colorScheme == .dark ? 0.04 : 0.16),
-                                glow.opacity(colorScheme == .dark ? 0.22 : 0.12)
+                                Color.white.opacity(colorScheme == .dark ? 0.14 : 0.55),
+                                glow.opacity(colorScheme == .dark ? 0.18 : 0.10)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        lineWidth: 0.9
+                        lineWidth: 0.8
                     )
             )
-            .shadow(color: .black.opacity(colorScheme == .dark ? 0.34 : 0.07), radius: 18, x: 0, y: 10)
-            .shadow(color: (accent ?? AppTheme.brandMiddle).opacity(colorScheme == .dark ? 0.16 : 0.10), radius: 26, x: 0, y: 14)
+            // One cheap shadow instead of two large, offset shadows. Large
+            // multi-layer shadows force an offscreen pass for every card while
+            // the list scrolls.
+            .shadow(
+                color: .black.opacity(colorScheme == .dark ? 0.28 : 0.06),
+                radius: 12,
+                x: 0,
+                y: 5
+            )
     }
 }
 
@@ -190,58 +196,92 @@ struct DekpopQuietButtonStyle: ButtonStyle {
     }
 }
 
+// MARK: - Controls
+
+/// One option in `DekpopSegmentedControl`.
+struct DekpopSegment: Identifiable, Equatable {
+    let id: String
+    let title: String
+}
+
+/// Lightweight segmented control built from plain SwiftUI buttons.
+///
+/// Why not `Picker(.segmented)`: a UIKit segmented control measures itself at
+/// its intrinsic width. With long Thai labels it can become wider than the
+/// phone, which used to push the whole Files screen past the right bezel.
+/// This control divides the available width equally, shrinks text, and can
+/// never overflow its parent.
+struct DekpopSegmentedControl: View {
+    let segments: [DekpopSegment]
+    @Binding var selection: String
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(segments) { segment in
+                let isSelected = segment.id == selection
+
+                Button {
+                    guard !isSelected else { return }
+                    DekpopHaptics.select()
+                    withAnimation(DekpopMotion.tap) {
+                        selection = segment.id
+                    }
+                } label: {
+                    Text(segment.title)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .padding(.horizontal, 6)
+                        .frame(maxWidth: .infinity, minHeight: 32)
+                        .foregroundStyle(isSelected ? Color.primary : Color.secondary)
+                        .background {
+                            if isSelected {
+                                Capsule(style: .continuous)
+                                    .fill(AppTheme.accent.opacity(0.18))
+                            }
+                        }
+                        .contentShape(Capsule(style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(segment.title)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+            }
+        }
+        .padding(3)
+        .background(Capsule(style: .continuous).fill(Color.primary.opacity(0.06)))
+        .overlay(
+            Capsule(style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.8)
+        )
+    }
+}
+
 // MARK: - Backdrop
 
-/// Layered mesh of palette light. Sits behind every screen, drifts slowly, and
-/// stops dead when the user asks for reduced motion.
+/// Static palette wash used as part of the root backdrop.
+///
+/// Kept for source compatibility with older call sites, but deliberately
+/// static: the previous implementation animated four 250–430 pt circles with
+/// 90–110 pt blurs forever, which is one of the most expensive things SwiftUI
+/// can do on a low-end GPU.
 struct DekpopMeshBackdrop: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ObservedObject private var theme = ThemeManager.shared
-
-    @State private var phase: CGFloat = 0
 
     private var palette: DekpopPalette { theme.palette }
 
     var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(uiColor: palette.brandStart).opacity(0.55),
-                    Color.clear,
-                    Color(uiColor: palette.brandEnd).opacity(0.10)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
-            blob(palette.accent.opacity(0.32), size: 430, blur: 96)
-                .offset(x: -140 + phase * 46, y: -280 + phase * 34)
-
-            blob(palette.accentSecondary.opacity(0.24), size: 350, blur: 104)
-                .offset(x: 160 - phase * 40, y: 250 - phase * 46)
-
-            blob(Color(uiColor: palette.brandMiddle).opacity(0.20), size: 300, blur: 110)
-                .offset(x: 24 + phase * 22, y: -40 + phase * 58)
-
-            blob(Color(uiColor: palette.brandEnd).opacity(0.14), size: 250, blur: 90)
-                .offset(x: -170 - phase * 28, y: 150 + phase * 30)
-        }
+        LinearGradient(
+            colors: [
+                Color(uiColor: palette.brandStart).opacity(0.24),
+                Color.clear,
+                Color(uiColor: palette.brandEnd).opacity(0.10)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .accessibilityHidden(true)
-        .onAppear {
-            guard !reduceMotion, phase == 0 else { return }
-            withAnimation(DekpopMotion.drift.repeatForever(autoreverses: true)) {
-                phase = 1
-            }
-        }
-    }
-
-    private func blob(_ color: Color, size: CGFloat, blur: CGFloat) -> some View {
-        Circle()
-            .fill(color)
-            .frame(width: size, height: size)
-            .blur(radius: blur)
     }
 }
 

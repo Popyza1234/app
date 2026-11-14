@@ -27,7 +27,7 @@ struct ShortcutEditorView: View {
         self.onSave = onSave
 
         let candidates = apps.filter { !$0.containerPath.isEmpty }
-        let workspacePath = AssetSetService.workspaceURL?.path
+        let workspacePath = ShortcutStore.workspaceURL?.path
         let initialContainer = shortcut?.containerPath
             ?? workspacePath
             ?? candidates.first?.containerPath
@@ -42,7 +42,7 @@ struct ShortcutEditorView: View {
     }
 
     private var workspacePath: String? {
-        AssetSetService.workspaceURL?.path
+        ShortcutStore.workspaceURL?.path
     }
 
     private var bundleID: String? {

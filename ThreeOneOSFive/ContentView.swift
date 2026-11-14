@@ -9,28 +9,23 @@ struct ContentView: View {
     @State private var launchGone = false
     @State private var announcement: DekpopAnnouncement?
     @State private var showingThemePicker = false
+    // Subscribing here refreshes the top-level tint when the palette changes;
+    // individual screens observe the same singleton and redraw in place.
     @StateObject private var theme = ThemeManager.shared
     @StateObject private var license = LicenseManager.shared
 
     var body: some View {
         ZStack {
-            // Layered brand backdrop for the whole app: the moving aurora plus
-            // the palette mesh that gives every surface something to sit on.
-            ZStack {
-                DekpopAuroraBackground()
-                DekpopMeshBackdrop()
-                    .opacity(0.85)
-            }
-            .ignoresSafeArea()
+            // One static brand backdrop for the whole app. The old version
+            // stacked an animated 30 fps Canvas, an animated four-blur mesh and
+            // a third animated blurred background on the list itself.
+            DekpopAuroraBackground()
 
             if license.isLicensed {
                 AppDataBrowserView(tabSession: $filesTabs)
-                    .tint(AppTheme.accent)
+                    .tint(theme.palette.accent)
                     .imageScale(.small)
                     .background(Color.clear)
-                    // Rebuild the browser when the palette changes so every
-                    // theme-dependent colour is resolved again immediately.
-                    .id(theme.selection)
             } else {
                 LicenseGateView()
             }
@@ -43,6 +38,7 @@ struct ContentView: View {
 
             if let announcement {
                 AnnouncementView(announcement: announcement) {
+                    AnnouncementStore.markSeen(announcement)
                     self.announcement = nil
                 }
                 .transition(.opacity)
@@ -58,11 +54,11 @@ struct ContentView: View {
             await license.start()
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
-                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.35)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
                     launchGone = true
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0 : 0.35)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0 : 0.25)) {
                     announcement = AnnouncementStore.current
                 }
             }

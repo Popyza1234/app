@@ -5,8 +5,8 @@ import UIKit
 /// for the product identity shown in the UI.
 enum DekpopBrand {
     static let displayName = "dekpop"
-    static let version = "2.1.0"
-    static let build = "21"
+    static let version = "3.0.0"
+    static let build = "30"
 }
 
 // MARK: - Themes
@@ -218,46 +218,61 @@ enum AppTheme {
     static let rowIconFrame: CGFloat = 28
     static let fileRowIconSize: CGFloat = 17
     static let fileRowIconFrame: CGFloat = 30
-    static let fileRowHeight: CGFloat = 60
+    static let fileRowHeight: CGFloat = 52
     static let appIconSize: CGFloat = 32
     static let emptyIconSize: CGFloat = 30
     static let selectionIconSize: CGFloat = 18
 }
 
-/// Soft, slowly drifting palette-coloured light behind the Files list.
+/// Static, palette-tinted wash behind secondary screens (theme picker,
+/// activation, proxy setup).
+///
+/// This used to animate three blurred circles forever. It now paints the same
+/// three highlights once with radial gradients, so opening a sheet no longer
+/// starts a permanent 60 fps offscreen-blur loop.
 struct DekpopAnimatedBackground: View {
     var palette: DekpopPalette = ThemeManager.shared.palette
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var drifting = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var isDark: Bool { colorScheme == .dark }
 
     var body: some View {
         ZStack {
             Color(uiColor: .systemGroupedBackground)
 
-            glow(palette.accent.opacity(0.22), size: 340, blur: 70)
-                .offset(x: drifting ? -120 : -50, y: drifting ? -250 : -170)
+            RadialGradient(
+                colors: [
+                    palette.accent.opacity(isDark ? 0.24 : 0.16),
+                    palette.accent.opacity(0)
+                ],
+                center: UnitPoint(x: 0.10, y: 0.06),
+                startRadius: 0,
+                endRadius: 380
+            )
 
-            glow(palette.accentSecondary.opacity(0.18), size: 300, blur: 80)
-                .offset(x: drifting ? 140 : 70, y: drifting ? 280 : 210)
+            RadialGradient(
+                colors: [
+                    palette.accentSecondary.opacity(isDark ? 0.16 : 0.10),
+                    palette.accentSecondary.opacity(0)
+                ],
+                center: UnitPoint(x: 0.94, y: 0.90),
+                startRadius: 0,
+                endRadius: 360
+            )
 
-            glow(Color(uiColor: palette.brandMiddle).opacity(0.14), size: 260, blur: 90)
-                .offset(x: drifting ? -40 : 10, y: drifting ? 60 : 100)
+            RadialGradient(
+                colors: [
+                    Color(uiColor: palette.brandMiddle).opacity(isDark ? 0.16 : 0.08),
+                    Color(uiColor: palette.brandMiddle).opacity(0)
+                ],
+                center: UnitPoint(x: 0.50, y: 0.55),
+                startRadius: 0,
+                endRadius: 320
+            )
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
-        .onAppear {
-            guard !reduceMotion, !drifting else { return }
-            withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
-                drifting = true
-            }
-        }
-    }
-
-    private func glow(_ color: Color, size: CGFloat, blur: CGFloat) -> some View {
-        Circle()
-            .fill(color)
-            .frame(width: size, height: size)
-            .blur(radius: blur)
+        .accessibilityHidden(true)
     }
 }
 
@@ -460,116 +475,67 @@ struct DekpopWordmark: View {
     }
 }
 
-/// Branded hero card at the top of the Files browser. Shows the product
-/// identity, device, iOS version and whether container access is ready.
+/// Slim branded summary card at the top of the Files browser.
+///
+/// The previous card animated two drifting circles and a `plusLighter` sheen on
+/// top of three large shadows. It is now a single static gradient surface with
+/// one shadow, and every text line is width-clamped so it cannot push the rest
+/// of the layout off-screen on an iPhone SE.
 struct DekpopHeroCard: View {
     @Environment(\.appLanguage) private var language
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var appState: AppState
 
-    @State private var drift = false
-    @State private var sweep: CGFloat = -1.2
-
-    /// Universal access: the browser keeps working through direct/MCM/grant/
-    /// inode fallbacks even when the optional kernel exploit fails, so a
-    /// failed exploit must not label iOS 27+ as "preparing" forever.
     private var isReady: Bool {
         appState.isSupported && !appState.kernelExploitRunning
     }
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            AppTheme.brandGradient
-
-            Circle()
-                .fill(Color.white.opacity(0.10))
-                .frame(width: 180, height: 180)
-                .offset(x: drift ? 46 : 62, y: drift ? -56 : -72)
-            Circle()
-                .fill(Color.white.opacity(0.07))
-                .frame(width: 130, height: 130)
-                .offset(x: drift ? -134 : -150, y: drift ? 106 : 92)
-
-            sheen
-
-            VStack(alignment: .leading, spacing: 13) {
-                HStack(spacing: 8) {
-                    DekpopWordmark(onBrand: true)
-                    Spacer(minLength: 4)
-                    statusPill
-                }
-
-                Text(language.text("dekpop.tagline"))
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Color.white.opacity(0.9))
-
-                HStack(spacing: 8) {
-                    infoChip(icon: "iphone", value: AppInfo.displayMachineName)
-                    infoChip(icon: "checkmark.circle", value: "iOS \(AppInfo.osVersion)")
-                }
-
-                // Reachable indicator of the 2.0.0 universal access engine.
-                // SettingsView has no call site in this Files-only build, so
-                // this is where users see that no version split is applied.
-                Label(language.text("dekpop.access_engine_line"), systemImage: "arrow.triangle.branch")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Color.white.opacity(0.9))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-
-                // Explicit proof that this exact version string — including
-                // point releases like 27.0.1 — is accepted.
-                Label(language.text("compat.version_badge", AppInfo.osVersion), systemImage: "checkmark.seal.fill")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Color.white.opacity(0.9))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                DekpopWordmark(compact: true, onBrand: true)
+                    .layoutPriority(1)
+                Spacer(minLength: 4)
+                statusPill
             }
-            .padding(16)
+
+            Text(language.text("dekpop.tagline"))
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(Color.white.opacity(0.92))
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 6) {
+                infoChip(icon: "iphone", value: AppInfo.displayMachineName)
+                infoChip(icon: "checkmark.circle", value: "iOS \(AppInfo.osVersion)")
+                Spacer(minLength: 0)
+            }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            ZStack {
+                AppTheme.brandGradient
+                LinearGradient(
+                    colors: [Color.white.opacity(0.12), Color.clear],
+                    startPoint: .topLeading,
+                    endPoint: .center
+                )
+            }
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .strokeBorder(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.38), Color.white.opacity(0.04)],
+                        colors: [Color.white.opacity(0.34), Color.white.opacity(0.04)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    lineWidth: 1
+                    lineWidth: 0.8
                 )
         )
-        .shadow(color: AppTheme.brandMiddle.opacity(0.28), radius: 16, x: 0, y: 7)
+        .shadow(color: AppTheme.brandMiddle.opacity(0.22), radius: 10, x: 0, y: 5)
         .accessibilityElement(children: .combine)
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 6.5).repeatForever(autoreverses: true)) {
-                drift = true
-            }
-            withAnimation(.linear(duration: 3.2).repeatForever(autoreverses: false)) {
-                sweep = 1.4
-            }
-        }
-    }
-
-    private var sheen: some View {
-        GeometryReader { proxy in
-            LinearGradient(
-                colors: [
-                    Color.white.opacity(0),
-                    Color.white.opacity(0.20),
-                    Color.white.opacity(0)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(width: 96)
-            .rotationEffect(.degrees(16))
-            .offset(x: sweep * proxy.size.width)
-            .blendMode(.plusLighter)
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 
     private var statusPill: some View {
@@ -582,22 +548,24 @@ struct DekpopHeroCard: View {
                 .lineLimit(1)
         }
         .foregroundStyle(.white)
-        .padding(.horizontal, 9)
-        .padding(.vertical, 5)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
         .background(Capsule().fill(Color.white.opacity(0.18)))
+        .fixedSize()
     }
 
     private func infoChip(icon: String, value: String) -> some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.caption2.weight(.semibold))
+                .font(.system(size: 9, weight: .semibold))
             Text(value)
-                .font(.caption2.weight(.semibold))
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
         .foregroundStyle(.white)
-        .padding(.horizontal, 9)
-        .padding(.vertical, 5)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 4)
         .background(Capsule().fill(Color.white.opacity(0.16)))
     }
 }
@@ -643,6 +611,52 @@ struct DekpopLanguageMenu: View {
             }
         } label: {
             Image(systemName: "globe")
+        }
+        .accessibilityLabel(language.text("dekpop.language"))
+    }
+}
+
+/// Single toolbar entry point for language and theme.
+///
+/// The old toolbar stacked a globe button and a palette button on the leading
+/// edge plus four actions on the trailing edge. That is eight glyphs on a
+/// 375 pt-wide phone and is why the navigation bar looked clipped. One compact
+/// menu replaces the two leading buttons and leaves room for the title.
+struct DekpopOptionsMenu: View {
+    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.defaultRawValue
+    @Environment(\.appLanguage) private var language
+    @Environment(\.dekpopOpenThemePicker) private var openThemePicker
+
+    var body: some View {
+        Menu {
+            Section(language.text("dekpop.language")) {
+                ForEach(AppLanguage.allCases) { option in
+                    Button {
+                        guard languageCode != option.rawValue else { return }
+                        withAnimation(DekpopMotion.tap) {
+                            languageCode = option.rawValue
+                        }
+                    } label: {
+                        if languageCode == option.rawValue {
+                            Label(option.displayName, systemImage: "checkmark")
+                        } else {
+                            Text(option.displayName)
+                        }
+                    }
+                }
+            }
+
+            Section {
+                Button {
+                    DekpopHaptics.tap()
+                    openThemePicker()
+                } label: {
+                    Label(language.text("theme.title"), systemImage: "paintpalette")
+                }
+            }
+        } label: {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 15, weight: .semibold))
         }
         .accessibilityLabel(language.text("dekpop.language"))
     }
@@ -729,15 +743,16 @@ struct AppSearchField: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(AppTheme.accent)
                 .accessibilityHidden(true)
 
             TextField(prompt, text: $text)
-                .font(.body)
+                .font(.system(size: 15, weight: .regular, design: .rounded))
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .submitLabel(.search)
+                .lineLimit(1)
 
             if !text.isEmpty {
                 Button {
@@ -752,18 +767,17 @@ struct AppSearchField: View {
             }
         }
         .padding(.horizontal, 12)
-        .frame(minHeight: 40)
+        .frame(maxWidth: .infinity, minHeight: 38)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(AppTheme.cardBackground)
+            Capsule(style: .continuous)
+                .fill(Color(uiColor: .secondarySystemGroupedBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(AppTheme.accent.opacity(0.16), lineWidth: 1)
+            Capsule(style: .continuous)
+                .strokeBorder(AppTheme.accent.opacity(0.14), lineWidth: 0.8)
         )
-        .padding(.horizontal, AppTheme.pageInset)
-        .padding(.vertical, 9)
-        .background(.bar)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 7)
     }
 }
 

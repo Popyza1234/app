@@ -18,7 +18,6 @@ struct ActivateUIDView: View {
     @State private var activeUID = ""
     @State private var activatedAt: Date?
     @State private var copied: CopiedTarget?
-    @State private var pulse = false
     @State private var showingSetup = false
     @State private var screenWidth = DekpopLayout.defaultWidth
 
@@ -96,10 +95,10 @@ struct ActivateUIDView: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                    .scaleEffect(pulse && phase == .working ? 1.10 : 1)
+                    .scaleEffect(phase == .working ? 1.06 : 1)
                     .animation(
-                        reduceMotion ? nil : .easeInOut(duration: 1.1).repeatForever(autoreverses: true),
-                        value: pulse
+                        reduceMotion ? nil : .easeOut(duration: 0.22),
+                        value: phase
                     )
 
                 Text(language.text("activate.heading"))
@@ -230,7 +229,7 @@ struct ActivateUIDView: View {
                 .foregroundStyle(.primary)
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(Color(uiColor: .secondarySystemGroupedBackground))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -636,7 +635,6 @@ struct ActivateUIDView: View {
     }
 
     private func restoreLastActivation() {
-        pulse = true
         guard let uid = ActivationMemory.lastUID else { return }
         activeUID = uid
         activatedAt = ActivationMemory.lastDate

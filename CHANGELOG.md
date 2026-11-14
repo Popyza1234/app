@@ -2,6 +2,54 @@
 
 All notable user-facing changes are documented in this file.
 
+## [3.0.0] - 2026-11-14 — performance and UI rebuild
+
+### What was reported
+
+The app could freeze for around **1200 ms** where it should take **200 ms**, and
+several screens pushed their content past the right edge of the phone (the Files
+segmented control and search field were the clearest examples). The Asset Sets
+feature was never used.
+
+### Changed
+
+- **Static design layer.** The root backdrop is now a base fill plus three static
+  radial gradients. The 30 fps `Canvas` aurora, 28 particles, animated 4× blur
+  mesh and the third animated blurred list background are gone. No
+  `TimelineView`, `Canvas`, `blur(radius:)`, `repeatForever`, `plusLighter` or
+  `.ultraThinMaterial` remains on any screen the app actually shows.
+- **Lightweight surfaces.** `DekpopGlassCard` is a solid grouped surface with a
+  single small shadow instead of a material plus two large shadows.
+- **Compact, non-overflowing Files UI.** The UIKit segmented picker was replaced
+  with an equal-width SwiftUI `DekpopSegmentedControl` that cannot exceed its
+  parent. Search is a lightweight capsule. Lists and secondary screens clamp to
+  760 pt, centre, and use responsive insets on narrow phones.
+- **Calmer toolbars.** Two leading buttons (language + theme) and four trailing
+  actions were consolidated into one options menu, the tabs button and one
+  overflow menu.
+- **Shorter lists.** File rows are 52 pt, row insets are tighter, and app icons
+  load through one serial utility queue instead of one concurrent task per row.
+- **Progressive app discovery** publishes to the UI at most once per 24 new
+  containers instead of re-merging and re-sorting the whole catalogue on every
+  progress callback.
+- **Launch.** The kernel exploit starts 0.8 s after the first frame at `.utility`
+  QoS, so the initial scan and first paint are not blocked. The launch screen is
+  static with one fade-in.
+- **Announcements** are shown once per notice instead of on every cold launch.
+
+### Removed
+
+- **Asset Sets** in full: models, service, list, detail, editor and apply
+  screens. Saved folder shortcuts are still supported and move automatically to
+  the new `ShortcutStore` (the legacy `AssetSets/download-shortcuts.json` is
+  migrated on first read).
+- Duplicate toolbar chrome, infinite decorative animations and material
+  backgrounds on the Files screens.
+
+### Version
+
+- `3.0.0` (build 30). English and Thai string tables remain at full key parity.
+
 ## [2.1.0] - 2026-11-13 — 27.0.1 compatibility, safe folders and diagnostics
 
 ### What was reported
