@@ -1,0 +1,59 @@
+name: Build 3105 unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [3105-2.0]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build 3105 unsigned IPA on macOS runner
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcodebuild -showsdks | grep iphoneos || true
+
+      - name: Build unsigned IPA
+        run: |
+          set -o pipefail
+          chmod +x scripts/build-unsigned-ipa-3105.sh
+          ./scripts/build-unsigned-ipa-3105.sh 2>&1 | tee build.log
+
+      - name: Verify IPA layout
+        run: |
+          unzip -l 3105-unsigned.ipa | grep 'Payload/3105.app/Info.plist'
+          unzip -p 3105-unsigned.ipa 'Payload/3105.app/Info.plist' > ipa-info.plist
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' ipa-info.plist
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' ipa-info.plist
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' ipa-info.plist
+          /usr/libexec/PlistBuddy -c 'Print :AppReleaseDisplayVersion' ipa-info.plist
+          /usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' ipa-info.plist
+          ! unzip -l 3105-unsigned.ipa | grep -q '_CodeSignature/'
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3105-unsigned-ipa
+          path: 3105-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
