@@ -15,6 +15,8 @@ struct DeviceProxySetupView: View {
     @State private var copied: String?
     @State private var detected: DetectedProxy?
     @State private var didCheck = false
+    @State private var profileURL: URL?
+    @State private var certificateFailed = false
 
     private let client = ActivateClient.shared
 
@@ -33,6 +35,7 @@ struct DeviceProxySetupView: View {
                         hero
                         statusCard
                         valuesCard
+                        certificateCard
                         stepsCard
                         noteCard
                     }
@@ -166,6 +169,67 @@ struct DeviceProxySetupView: View {
                 }
                 .buttonStyle(DekpopPressStyle())
                 .padding(.top, 12)
+            }
+        }
+    }
+
+    private var certificateCard: some View {
+        glassCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(language.text("setup.cert_title"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                Text(language.text("setup.cert_body"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button {
+                    createCertificateProfile()
+                } label: {
+                    Label(language.text("setup.cert_button"), systemImage: "checkmark.shield")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: 42)
+                        .background(
+                            LinearGradient(
+                                colors: [.purple, .pink],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ),
+                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        )
+                }
+                .buttonStyle(DekpopPressStyle())
+
+                if certificateFailed {
+                    Label(language.text("setup.cert_error"), systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                } else if let profileURL {
+                    Text(language.text("setup.cert_ready"))
+                        .font(.caption2)
+                        .foregroundStyle(.green)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    ShareLink(item: profileURL) {
+                        Label(language.text("setup.cert_share"), systemImage: "square.and.arrow.up")
+                            .font(.caption.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 38)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.primary)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(.tertiarySystemFill))
+                    )
+                }
+
+                Text(language.text("setup.cert_trust"))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -313,6 +377,18 @@ struct DeviceProxySetupView: View {
         }
     }
 
+    private func createCertificateProfile() {
+        do {
+            profileURL = try CertificateInstaller.writeProfileToDocuments()
+            certificateFailed = false
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
+        } catch {
+            profileURL = nil
+            certificateFailed = true
+        }
+    }
+
     private func openSettingsApp() {
         for candidate in ["App-Prefs:root=WIFI", UIApplication.openSettingsURLString] {
             guard let url = URL(string: candidate) else { continue }
@@ -327,6 +403,12 @@ struct DeviceProxySetupView: View {
     private func refreshProxy() {
         detected = Self.readSystemProxy()
         didCheck = true
+
+        // Keep the profile in Documents so it is always findable in the Files
+        // app, without the user having to ask for it first.
+        if profileURL == nil {
+            profileURL = try? CertificateInstaller.writeProfileToDocuments()
+        }
     }
 
     private static func readSystemProxy() -> DetectedProxy? {

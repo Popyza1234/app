@@ -770,3 +770,12 @@
 "setup.open_settings" = "เปิดการตั้งค่า";
 "setup.note_title" = "ใช้ได้กับ Wi-Fi เท่านั้น";
 "setup.note_body" = "proxy ในตัวนี้ครอบคลุมเฉพาะ Wi-Fi ถ้าใช้เน็ตมือถือ iOS ไม่มีช่องตั้ง proxy ต้องใช้แอพอย่าง Proxy Pin หรือโปรไฟล์บนเครื่อง supervised";
+
+/* โปรไฟล์ใบรับรองในแอป */
+"setup.cert_title" = "ใบรับรอง";
+"setup.cert_body" = "โปรไฟล์นี้มีใบรับรอง CA ของ proxy ฝังอยู่แล้ว ไม่ต้องไปโหลดจากที่ไหนก่อน";
+"setup.cert_button" = "สร้างโปรไฟล์ใบรับรอง";
+"setup.cert_ready" = "บันทึกไว้ที่ On My iPhone → dekpop แล้ว เปิดแอป Files แตะ dekpop-proxy-ca.mobileconfig แล้วไป Settings → Profile Downloaded → Install";
+"setup.cert_share" = "แชร์/บันทึกไปที่ Files";
+"setup.cert_trust" = "หลังติดตั้งแล้ว ไปที่ Settings → General → About → Certificate Trust Settings แล้วเปิด mitmproxy (iOS บังคับให้ต้องเปิดขั้นนี้)";
+"setup.cert_error" = "สร้างโปรไฟล์ไม่สำเร็จ";

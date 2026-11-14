@@ -769,3 +769,12 @@
 "setup.open_settings" = "Open Settings";
 "setup.note_title" = "Wi-Fi only";
 "setup.note_body" = "This built-in proxy covers Wi-Fi traffic. On mobile data iOS has no system proxy setting, so an app such as Proxy Pin (or a supervised device profile) is still required there.";
+
+/* In-app certificate profile */
+"setup.cert_title" = "CERTIFICATE";
+"setup.cert_body" = "The profile already contains the proxy's root certificate, so there is nothing to download first.";
+"setup.cert_button" = "Create certificate profile";
+"setup.cert_ready" = "Saved to On My iPhone → dekpop. Open Files, tap dekpop-proxy-ca.mobileconfig, then Settings → Profile Downloaded → Install.";
+"setup.cert_share" = "Share or save to Files";
+"setup.cert_trust" = "After installing, open Settings → General → About → Certificate Trust Settings and turn on mitmproxy. iOS requires that extra step.";
+"setup.cert_error" = "Could not create the profile.";
