@@ -273,6 +273,7 @@
 				3105K100 /* ActivateUIDView.swift */,
 				3105K101 /* AuroraBackground.swift */,
 				3105K103 /* DeviceProxySetupView.swift */,
+				3105K107 /* DesignSystem2026.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -285,7 +286,6 @@
 				3105K104 /* CertificateInstaller.swift */,
 				3105K105 /* ProxyRouteCheck.swift */,
 				3105K106 /* LocalProfileServer.swift */,
-				3105K107 /* DesignSystem2026.swift */,
 				3105A104 /* ContainerStore.swift */,
 				3105A108 /* ContainerIdentityResolver.swift */,
 				3105A109 /* ContainerBrowserLogic.swift */,
