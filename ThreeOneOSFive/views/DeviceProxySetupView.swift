@@ -20,6 +20,7 @@ struct DeviceProxySetupView: View {
     @State private var installFailed = false
     @State private var routeResult: ProxyRouteCheck.Result?
     @State private var isTestingRoute = false
+    @State private var screenWidth = DekpopLayout.defaultWidth
 
     private let client = ActivateClient.shared
 
@@ -43,10 +44,12 @@ struct DeviceProxySetupView: View {
                         stepsCard
                         noteCard
                     }
-                    .padding(.horizontal, 16)
+                    .dekpopClampWidth()
+                    .padding(.horizontal, DekpopLayout.inset(for: screenWidth))
                     .padding(.top, 10)
                     .padding(.bottom, 30)
                 }
+                .dekpopMeasureWidth { screenWidth = $0 }
             }
             .navigationTitle(language.text("setup.title"))
             .navigationBarTitleDisplayMode(.inline)
@@ -77,7 +80,9 @@ struct DeviceProxySetupView: View {
                     )
 
                 Text(language.text("setup.heading"))
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(.system(.title2, design: .rounded).weight(.bold))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
 
                 Spacer(minLength: 0)
             }

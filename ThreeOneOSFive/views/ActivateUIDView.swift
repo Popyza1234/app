@@ -20,6 +20,7 @@ struct ActivateUIDView: View {
     @State private var copied: CopiedTarget?
     @State private var pulse = false
     @State private var showingSetup = false
+    @State private var screenWidth = DekpopLayout.defaultWidth
 
     private let client = ActivateClient.shared
 
@@ -58,10 +59,12 @@ struct ActivateUIDView: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 2)
                     }
-                    .padding(.horizontal, 16)
+                    .dekpopClampWidth()
+                    .padding(.horizontal, DekpopLayout.inset(for: screenWidth))
                     .padding(.top, 10)
                     .padding(.bottom, 30)
                 }
+                .dekpopMeasureWidth { screenWidth = $0 }
                 .scrollDismissesKeyboard(.interactively)
             }
             .navigationTitle(language.text("activate.title"))
@@ -101,7 +104,9 @@ struct ActivateUIDView: View {
                     )
 
                 Text(language.text("activate.heading"))
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(.system(.title2, design: .rounded).weight(.bold))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
 
                 Spacer(minLength: 0)
             }
