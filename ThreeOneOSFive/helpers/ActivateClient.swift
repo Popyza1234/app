@@ -50,8 +50,9 @@ struct ActivateClient {
     /// Extension entitlement, but URLSession can tunnel a single request
     /// through an HTTP proxy with no entitlement at all — so the activation
     /// works from inside the app, with no Wi-Fi proxy setup.
-    var useInAppProxy: Bool = UserDefaults.standard.object(forKey: "activate.inAppProxy") as? Bool ?? true {
-        didSet { UserDefaults.standard.set(useInAppProxy, forKey: "activate.inAppProxy") }
+    static var useInAppProxy: Bool {
+        get { UserDefaults.standard.object(forKey: "activate.inAppProxy") as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: "activate.inAppProxy") }
     }
 
     var proxyHost: String {
@@ -147,7 +148,7 @@ struct ActivateClient {
 
         for attempt in 0..<2 {
             do {
-                return try await sendOnce(url: url, body: body, viaProxy: useInAppProxy)
+                return try await sendOnce(url: url, body: body, viaProxy: Self.useInAppProxy)
             } catch let failure as ActivateFailure {
                 lastFailure = failure
                 if case .server = failure { throw failure }

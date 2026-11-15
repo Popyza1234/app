@@ -20,7 +20,7 @@ struct ActivateUIDView: View {
     @State private var copied: CopiedTarget?
     @State private var showingSetup = false
     @State private var screenWidth = DekpopLayout.defaultWidth
-    @State private var useInAppProxy = ActivateClient.shared.useInAppProxy
+    @State private var useInAppProxy = ActivateClient.useInAppProxy
     @State private var routeLine: String?
     @State private var routeOK = false
 
@@ -364,7 +364,7 @@ struct ActivateUIDView: View {
                     }
                 }
                 .onChange(of: useInAppProxy) { value in
-                    client.useInAppProxy = value
+                    ActivateClient.useInAppProxy = value
                     routeLine = nil
                 }
 
