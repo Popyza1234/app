@@ -45,9 +45,6 @@ final class LicenseManager: ObservableObject {
     /// How long a verified licence keeps working without reaching the server.
     private let offlineWindow: TimeInterval = 7 * 24 * 3600
 
-    /// A verified licence is not re-checked more often than this.
-    private let recheckInterval: TimeInterval = 6 * 3600
-
     /// A verified licence is not re-checked more often than this. Repeated
     /// launches on a slow phone cost nothing: no request, no spinner.
     private let recheckInterval: TimeInterval = 6 * 3600
