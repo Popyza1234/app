@@ -855,3 +855,9 @@
 "exploit.retry" = "ลองใหม่";
 "exploit.copy_log" = "คัดลอกข้อมูลวินิจฉัย";
 "exploit.log_copied" = "คัดลอกแล้ว";
+"activate.inapp_proxy" = "ส่งผ่าน proxy ในแอป";
+"activate.inapp_proxy_detail" = "ไม่ต้องตั้ง Wi-Fi ก็ใช้งานได้ แอปจะวิ่งผ่าน proxy ให้เอง";
+"activate.inapp_test" = "ทดสอบเส้นทาง";
+"activate.inapp_ok" = "ผ่าน proxy แล้ว · IP ขาออก %@ · %d ms";
+"activate.inapp_direct" = "ยังออกด้วย IP ตรง (%@) · %d ms ลองเปิดสวิตช์ด้านบน";
+"activate.inapp_fail" = "ทดสอบไม่สำเร็จ: %@";

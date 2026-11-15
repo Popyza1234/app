@@ -45,6 +45,23 @@ struct ActivateClient {
 
     private let requestTimeout: TimeInterval = 20
 
+    /// When the upstream API rejects this phone's own IP, the request has to
+    /// leave through the provider's proxy instead. A VPN would need a Network
+    /// Extension entitlement, but URLSession can tunnel a single request
+    /// through an HTTP proxy with no entitlement at all — so the activation
+    /// works from inside the app, with no Wi-Fi proxy setup.
+    var useInAppProxy: Bool = UserDefaults.standard.object(forKey: "activate.inAppProxy") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(useInAppProxy, forKey: "activate.inAppProxy") }
+    }
+
+    var proxyHost: String {
+        proxyAddress.split(separator: ":").first.map(String.init) ?? proxyAddress
+    }
+
+    var proxyPort: Int {
+        proxyAddress.split(separator: ":").last.flatMap { Int($0) } ?? 8080
+    }
+
     func activate(rawJSON: String) async throws -> ActivateReply {
         let credentials = try Self.parse(rawJSON)
         let trimmed = rawJSON.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -130,7 +147,7 @@ struct ActivateClient {
 
         for attempt in 0..<2 {
             do {
-                return try await sendOnce(url: url, body: body)
+                return try await sendOnce(url: url, body: body, viaProxy: useInAppProxy)
             } catch let failure as ActivateFailure {
                 lastFailure = failure
                 if case .server = failure { throw failure }
@@ -149,7 +166,26 @@ struct ActivateClient {
         throw lastFailure
     }
 
-    private func sendOnce(url: URL, body: Data?) async throws -> ActivateReply {
+    /// Session used for one request. The proxy dictionary is what makes the
+    /// upstream API see the proxy's address instead of this phone's.
+    func session(viaProxy: Bool) -> URLSession {
+        guard viaProxy else { return .shared }
+
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = requestTimeout
+        config.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        config.connectionProxyDictionary = [
+            "HTTPEnable": 1,
+            "HTTPProxy": proxyHost,
+            "HTTPPort": proxyPort,
+            "HTTPSEnable": 1,
+            "HTTPSProxy": proxyHost,
+            "HTTPSPort": proxyPort,
+        ]
+        return URLSession(configuration: config)
+    }
+
+    private func sendOnce(url: URL, body: Data?, viaProxy: Bool) async throws -> ActivateReply {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = requestTimeout
@@ -161,7 +197,7 @@ struct ActivateClient {
         }
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await session(viaProxy: viaProxy).data(for: request)
             let decoded = try? JSONDecoder().decode(ActivateReply.self, from: data)
 
             if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {

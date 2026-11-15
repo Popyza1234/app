@@ -20,7 +20,10 @@ enum ProxyRouteCheck {
         URL(string: "http://ipv4.icanhazip.com")
     ].compactMap { $0 }
 
-    static func run(expectedProxyHost: String) async -> Result {
+    /// - Parameter viaProxy: when set, the check itself goes through that proxy
+    ///   using the same in-app transport the activation uses, so the result
+    ///   proves the in-app route and not the Wi-Fi settings.
+    static func run(expectedProxyHost: String, viaProxy: Bool = false) async -> Result {
         var lastError = "no endpoint"
 
         for url in echoURLs {
@@ -31,7 +34,8 @@ enum ProxyRouteCheck {
 
             let started = Date()
             do {
-                let (data, response) = try await URLSession.shared.data(for: request)
+                let session = ActivateClient.shared.session(viaProxy: viaProxy)
+                let (data, response) = try await session.data(for: request)
                 let milliseconds = Int(Date().timeIntervalSince(started) * 1000)
 
                 guard let http = response as? HTTPURLResponse else {
