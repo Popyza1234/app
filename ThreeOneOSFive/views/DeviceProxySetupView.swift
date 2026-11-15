@@ -21,10 +21,6 @@ struct DeviceProxySetupView: View {
     @State private var routeResult: ProxyRouteCheck.Result?
     @State private var isTestingRoute = false
     @State private var screenWidth = DekpopLayout.defaultWidth
-    @State private var vpnMessage: String?
-    @State private var showingTraffic = false
-
-    @StateObject private var vpn = ProxyVPNManager.shared
 
     private let client = ActivateClient.shared
 
@@ -42,8 +38,6 @@ struct DeviceProxySetupView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         hero
                         statusCard
-                        vpnCard
-                        trafficCard
                         routeCard
                         valuesCard
                         certificateCard
@@ -67,133 +61,6 @@ struct DeviceProxySetupView: View {
         }
         .tint(AppTheme.accent)
         .onAppear(perform: refreshProxy)
-        .task { await vpn.refresh() }
-        .sheet(isPresented: $showingTraffic) {
-            TrafficView()
-        }
-    }
-
-    // MARK: - Traffic
-
-    private var trafficCard: some View {
-        DekpopGlassCard(padding: 16, cornerRadius: DekpopRadius.medium) {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 8) {
-                    Image(systemName: "waveform.path.ecg")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(AppTheme.accent)
-
-                    Text(language.text("traffic.card_title"))
-                        .font(.footnote.weight(.semibold))
-
-                    Spacer(minLength: 0)
-                }
-
-                Text(language.text("traffic.card_detail"))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Button {
-                    showingTraffic = true
-                } label: {
-                    Label(language.text("traffic.open"), systemImage: "list.bullet.rectangle")
-                        .font(.caption.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-            }
-        }
-    }
-
-    // MARK: - In-app VPN
-
-    /// Same idea as ProxyPin: the tunnel extension takes over routing, so no
-    /// Wi-Fi proxy settings are needed. Requires a signing profile that carries
-    /// the Network Extension capability; the failure text says so when it does
-    /// not.
-    private var vpnCard: some View {
-        DekpopGlassCard(padding: 16, cornerRadius: DekpopRadius.medium) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 8) {
-                    Image(systemName: "shield.lefthalf.filled")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(AppTheme.accent)
-
-                    Text(language.text("setup.vpn_title"))
-                        .font(.footnote.weight(.semibold))
-
-                    Spacer(minLength: 0)
-
-                    Text(vpnStatusText)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(vpnStatusColor)
-                }
-
-                Text(language.text("setup.vpn_detail"))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                HStack(spacing: 10) {
-                    Button {
-                        Task { await startVPN() }
-                    } label: {
-                        Label(language.text("setup.vpn_on"), systemImage: "play.fill")
-                            .font(.caption.weight(.semibold))
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(vpn.isBusy || vpn.isOn)
-
-                    Button {
-                        Task { await vpn.stop() }
-                    } label: {
-                        Label(language.text("setup.vpn_off"), systemImage: "stop.fill")
-                            .font(.caption.weight(.semibold))
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(vpn.isBusy || !vpn.isOn)
-                }
-
-                if let vpnMessage {
-                    Text(vpnMessage)
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-    }
-
-    private var vpnStatusText: String {
-        switch vpn.state {
-        case .on: return language.text("setup.vpn_state_on")
-        case .connecting: return language.text("setup.vpn_state_connecting")
-        case .disconnecting: return language.text("setup.vpn_state_connecting")
-        case .off: return language.text("setup.vpn_state_off")
-        case .unsupported: return language.text("setup.vpn_state_blocked")
-        }
-    }
-
-    private var vpnStatusColor: Color {
-        switch vpn.state {
-        case .on: return .green
-        case .connecting, .disconnecting: return .orange
-        case .off: return .secondary
-        case .unsupported: return .red
-        }
-    }
-
-    private func startVPN() async {
-        vpnMessage = nil
-        let host = client.proxyHost
-        let port = client.proxyPort
-        let failure = await vpn.start(host: host, port: port, ipMode: false)
-        if let failure {
-            vpnMessage = failure
-        }
     }
 
     // MARK: - Sections

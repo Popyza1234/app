@@ -20,9 +20,6 @@ struct ActivateUIDView: View {
     @State private var copied: CopiedTarget?
     @State private var showingSetup = false
     @State private var screenWidth = DekpopLayout.defaultWidth
-    @State private var useInAppProxy = ActivateClient.useInAppProxy
-    @State private var routeLine: String?
-    @State private var routeOK = false
 
     private let client = ActivateClient.shared
 
@@ -50,7 +47,6 @@ struct ActivateUIDView: View {
                         actionRow
                         resultCard
                         proxyCard
-                        inAppProxyCard
                         if !ActivationMemory.history.isEmpty {
                             historyCard
                         }
@@ -344,49 +340,6 @@ struct ActivateUIDView: View {
         .padding(.vertical, 10)
     }
 
-    // MARK: - In-app proxy
-
-    /// The switch that makes activation work with no Wi-Fi proxy setup at all:
-    /// the request is tunnelled through the provider's proxy by URLSession.
-    private var inAppProxyCard: some View {
-        glassCard {
-            VStack(alignment: .leading, spacing: 12) {
-                Toggle(isOn: $useInAppProxy) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(language.text("activate.inapp_proxy"))
-                            .font(.footnote.weight(.semibold))
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        Text(language.text("activate.inapp_proxy_detail"))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .onChange(of: useInAppProxy) { value in
-                    ActivateClient.useInAppProxy = value
-                    routeLine = nil
-                }
-
-                Button {
-                    Task { await testInAppRoute() }
-                } label: {
-                    Label(language.text("activate.inapp_test"), systemImage: "arrow.triangle.branch")
-                        .font(.caption.weight(.medium))
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-
-                if let routeLine {
-                    Label(routeLine, systemImage: routeOK ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                        .font(.caption2)
-                        .foregroundStyle(routeOK ? Color.green : Color.orange)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-    }
-
     // MARK: - Proxy
 
     private var proxyCard: some View {
@@ -600,28 +553,6 @@ struct ActivateUIDView: View {
     }
 
     // MARK: - Actions
-
-    private func testInAppRoute() async {
-        routeLine = nil
-        let result = await ProxyRouteCheck.run(
-            expectedProxyHost: client.proxyHost,
-            viaProxy: useInAppProxy
-        )
-
-        await MainActor.run {
-            switch result {
-            case .throughProxy(let ip, let milliseconds):
-                routeOK = true
-                routeLine = language.text("activate.inapp_ok", ip, milliseconds)
-            case .direct(let ip, let milliseconds):
-                routeOK = false
-                routeLine = language.text("activate.inapp_direct", ip, milliseconds)
-            case .failed(let reason):
-                routeOK = false
-                routeLine = language.text("activate.inapp_fail", reason)
-            }
-        }
-    }
 
     private func activate() async {
         let trimmed = jsonText.trimmingCharacters(in: .whitespacesAndNewlines)

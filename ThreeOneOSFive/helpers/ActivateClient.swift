@@ -45,16 +45,6 @@ struct ActivateClient {
 
     private let requestTimeout: TimeInterval = 20
 
-    /// When the upstream API rejects this phone's own IP, the request has to
-    /// leave through the provider's proxy instead. A VPN would need a Network
-    /// Extension entitlement, but URLSession can tunnel a single request
-    /// through an HTTP proxy with no entitlement at all — so the activation
-    /// works from inside the app, with no Wi-Fi proxy setup.
-    static var useInAppProxy: Bool {
-        get { UserDefaults.standard.object(forKey: "activate.inAppProxy") as? Bool ?? true }
-        set { UserDefaults.standard.set(newValue, forKey: "activate.inAppProxy") }
-    }
-
     var proxyHost: String {
         proxyAddress.split(separator: ":").first.map(String.init) ?? proxyAddress
     }
@@ -148,7 +138,7 @@ struct ActivateClient {
 
         for attempt in 0..<2 {
             do {
-                return try await sendOnce(url: url, body: body, viaProxy: Self.useInAppProxy)
+                return try await sendOnce(url: url, body: body)
             } catch let failure as ActivateFailure {
                 lastFailure = failure
                 if case .server = failure { throw failure }
@@ -167,26 +157,7 @@ struct ActivateClient {
         throw lastFailure
     }
 
-    /// Session used for one request. The proxy dictionary is what makes the
-    /// upstream API see the proxy's address instead of this phone's.
-    func session(viaProxy: Bool) -> URLSession {
-        guard viaProxy else { return .shared }
-
-        let config = URLSessionConfiguration.ephemeral
-        config.timeoutIntervalForRequest = requestTimeout
-        config.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-        config.connectionProxyDictionary = [
-            "HTTPEnable": 1,
-            "HTTPProxy": proxyHost,
-            "HTTPPort": proxyPort,
-            "HTTPSEnable": 1,
-            "HTTPSProxy": proxyHost,
-            "HTTPSPort": proxyPort,
-        ]
-        return URLSession(configuration: config)
-    }
-
-    private func sendOnce(url: URL, body: Data?, viaProxy: Bool) async throws -> ActivateReply {
+    private func sendOnce(url: URL, body: Data?) async throws -> ActivateReply {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = requestTimeout
@@ -197,31 +168,9 @@ struct ActivateClient {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
 
-        let startedAt = Date()
         do {
-            let (data, response) = try await session(viaProxy: viaProxy).data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request)
             let decoded = try? JSONDecoder().decode(ActivateReply.self, from: data)
-
-            let statusCode = (response as? HTTPURLResponse)?.statusCode
-            let requestText = body.flatMap { String(data: $0.prefix(4000), encoding: .utf8) }
-            let responseText = String(data: data.prefix(4000), encoding: .utf8)
-            let duration = Date().timeIntervalSince(startedAt) * 1000
-            let headers = request.allHTTPHeaderFields ?? [:]
-            let method = request.httpMethod ?? "POST"
-            let target = url.absoluteString
-
-            Task { @MainActor in
-                TrafficRecorder.shared.record(
-                    method: method,
-                    url: target,
-                    status: statusCode,
-                    started: startedAt,
-                    duration: duration,
-                    requestHeaders: headers,
-                    requestBody: requestText,
-                    responseBody: responseText
-                )
-            }
 
             if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
                 throw ActivateFailure.server(decoded?.message ?? "HTTP \(http.statusCode)")
