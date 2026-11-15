@@ -830,3 +830,29 @@
 "exploit.retry" = "Try again";
 "exploit.copy_log" = "Copy diagnostics";
 "exploit.log_copied" = "Copied";
+
+/* License gate */
+"license.title" = "Activate dekpop";
+"license.subtitle" = "Enter the key you bought. One key works on one device only.";
+"license.key_label" = "YOUR KEY";
+"license.key_placeholder" = "DKP-XXXX-XXXX-XXXX-XXXX";
+"license.activate" = "Activate";
+"license.activating" = "Checking…";
+"license.hint" = "No key yet? Contact the seller to get one.";
+"license.device_label" = "This device";
+"license.status_active" = "Licensed";
+"license.status_active_until" = "Active until %@";
+"license.err_empty" = "Enter a key first.";
+"license.err_network" = "Could not reach the licence server. Check your connection and try again.";
+"license.err_key_not_found" = "That key does not exist.";
+"license.err_device_mismatch" = "This key is already bound to another device. Ask the seller to reset it.";
+"license.err_revoked" = "This key has been revoked.";
+"license.err_expired" = "This key has expired.";
+"license.err_not_activated" = "This key was never activated. Enter it to activate.";
+"license.err_invalid" = "That key format looks wrong.";
+"license.retry" = "Check again";
+"license.steps_title" = "HOW IT WORKS";
+"license.step1" = "Buy a key from the seller.";
+"license.step2" = "Type the key above.";
+"license.step3" = "Tap Activate — the app unlocks right away.";
+"license.paste" = "Paste key";

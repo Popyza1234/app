@@ -12,6 +12,7 @@ struct ContentView: View {
     // Subscribing here refreshes the top-level tint when the palette changes;
     // individual screens observe the same singleton and redraw in place.
     @StateObject private var theme = ThemeManager.shared
+    @StateObject private var license = LicenseManager.shared
 
     var body: some View {
         ZStack {
@@ -20,10 +21,14 @@ struct ContentView: View {
             // a third animated blurred background on the list itself.
             DekpopAuroraBackground()
 
-            AppDataBrowserView(tabSession: $filesTabs)
-                .tint(theme.palette.accent)
-                .imageScale(.small)
-                .background(Color.clear)
+            if license.isLicensed {
+                AppDataBrowserView(tabSession: $filesTabs)
+                    .tint(theme.palette.accent)
+                    .imageScale(.small)
+                    .background(Color.clear)
+            } else {
+                LicenseGateView()
+            }
 
             if !launchGone {
                 DekpopLaunchView()
@@ -44,6 +49,9 @@ struct ContentView: View {
         .sheet(isPresented: $showingThemePicker) {
             DekpopThemePicker()
                 .dekpopSheetCorners()
+        }
+        .task {
+            await license.start()
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
