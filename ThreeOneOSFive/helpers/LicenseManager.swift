@@ -212,9 +212,28 @@ final class LicenseManager: ObservableObject {
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
+        let startedAt = Date()
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse else { return .unreachable }
+
+            let requestText = body.flatMap { String(data: $0.prefix(4000), encoding: .utf8) }
+            let responseText = String(data: data.prefix(4000), encoding: .utf8)
+            let duration = Date().timeIntervalSince(startedAt) * 1000
+            let headers = request.allHTTPHeaderFields ?? [:]
+            let target = request.url?.absoluteString ?? path
+            await MainActor.run {
+                TrafficRecorder.shared.record(
+                    method: "POST",
+                    url: target,
+                    status: http.statusCode,
+                    started: startedAt,
+                    duration: duration,
+                    requestHeaders: headers,
+                    requestBody: requestText,
+                    responseBody: responseText
+                )
+            }
 
             let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
             let ok = (object["ok"] as? Bool) ?? false

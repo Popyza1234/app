@@ -22,6 +22,7 @@ struct DeviceProxySetupView: View {
     @State private var isTestingRoute = false
     @State private var screenWidth = DekpopLayout.defaultWidth
     @State private var vpnMessage: String?
+    @State private var showingTraffic = false
 
     @StateObject private var vpn = ProxyVPNManager.shared
 
@@ -42,6 +43,7 @@ struct DeviceProxySetupView: View {
                         hero
                         statusCard
                         vpnCard
+                        trafficCard
                         routeCard
                         valuesCard
                         certificateCard
@@ -66,6 +68,42 @@ struct DeviceProxySetupView: View {
         .tint(AppTheme.accent)
         .onAppear(perform: refreshProxy)
         .task { await vpn.refresh() }
+        .sheet(isPresented: $showingTraffic) {
+            TrafficView()
+        }
+    }
+
+    // MARK: - Traffic
+
+    private var trafficCard: some View {
+        DekpopGlassCard(padding: 16, cornerRadius: DekpopRadius.medium) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Image(systemName: "waveform.path.ecg")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppTheme.accent)
+
+                    Text(language.text("traffic.card_title"))
+                        .font(.footnote.weight(.semibold))
+
+                    Spacer(minLength: 0)
+                }
+
+                Text(language.text("traffic.card_detail"))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button {
+                    showingTraffic = true
+                } label: {
+                    Label(language.text("traffic.open"), systemImage: "list.bullet.rectangle")
+                        .font(.caption.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
     }
 
     // MARK: - In-app VPN

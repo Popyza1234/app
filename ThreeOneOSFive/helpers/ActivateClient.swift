@@ -197,9 +197,31 @@ struct ActivateClient {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
 
+        let startedAt = Date()
         do {
             let (data, response) = try await session(viaProxy: viaProxy).data(for: request)
             let decoded = try? JSONDecoder().decode(ActivateReply.self, from: data)
+
+            let statusCode = (response as? HTTPURLResponse)?.statusCode
+            let requestText = body.flatMap { String(data: $0.prefix(4000), encoding: .utf8) }
+            let responseText = String(data: data.prefix(4000), encoding: .utf8)
+            let duration = Date().timeIntervalSince(startedAt) * 1000
+            let headers = request.allHTTPHeaderFields ?? [:]
+            let method = request.httpMethod ?? "POST"
+            let target = url.absoluteString
+
+            Task { @MainActor in
+                TrafficRecorder.shared.record(
+                    method: method,
+                    url: target,
+                    status: statusCode,
+                    started: startedAt,
+                    duration: duration,
+                    requestHeaders: headers,
+                    requestBody: requestText,
+                    responseBody: responseText
+                )
+            }
 
             if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
                 throw ActivateFailure.server(decoded?.message ?? "HTTP \(http.statusCode)")
