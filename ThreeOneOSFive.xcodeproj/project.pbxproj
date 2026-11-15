@@ -305,12 +305,10 @@
 				3105A700 /* Sources */,
 				3105A300 /* Frameworks */,
 				3105A800 /* Resources */,
-				3105V403 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				3105V500 /* PBXTargetDependency */,
 			);
 			name = 3105;
 			productName = 3105;
