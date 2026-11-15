@@ -59,7 +59,6 @@
 		3105V205 /* NWProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V105; };
 		3105V206 /* ProxyVpnService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V106; };
 		3105V207 /* QueueFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V107; };
-		3105V208 /* GBPingHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V108; };
 		3105V209 /* ClientPacketWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V109; };
 		3105V210 /* CloseableConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V110; };
 		3105V211 /* SocketIOService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V111; };
@@ -137,7 +136,6 @@
 		3105V105 /* NWProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/NWProtocol.swift"; sourceTree = "<group>"; };
 		3105V106 /* ProxyVpnService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/ProxyVpnService.swift"; sourceTree = "<group>"; };
 		3105V107 /* QueueFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/QueueFactory.swift"; sourceTree = "<group>"; };
-		3105V108 /* GBPingHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/ping/GBPingHelper.swift"; sourceTree = "<group>"; };
 		3105V109 /* ClientPacketWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/socket/ClientPacketWriter.swift"; sourceTree = "<group>"; };
 		3105V110 /* CloseableConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/socket/CloseableConnection.swift"; sourceTree = "<group>"; };
 		3105V111 /* SocketIOService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/socket/SocketIOService.swift"; sourceTree = "<group>"; };
@@ -281,7 +279,6 @@
 				3105V105 /* NWProtocol.swift */,
 				3105V106 /* ProxyVpnService.swift */,
 				3105V107 /* QueueFactory.swift */,
-				3105V108 /* GBPingHelper.swift */,
 				3105V109 /* ClientPacketWriter.swift */,
 				3105V110 /* CloseableConnection.swift */,
 				3105V111 /* SocketIOService.swift */,
@@ -458,7 +455,6 @@
 				3105V205,
 				3105V206,
 				3105V207,
-				3105V208,
 				3105V209,
 				3105V210,
 				3105V211,

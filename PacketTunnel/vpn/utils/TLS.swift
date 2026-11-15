@@ -1,9 +1,13 @@
+import Foundation
+
 //
 //  TLS.swift
 //  Runner
 //
 //  Created by wanghongen on 2025/5/31.
 //
+
+import Foundation
 
 class TLS {
     
