@@ -601,6 +601,7 @@
 "home.category_apps" = "Apps";
 "home.category_shortcuts" = "Shortcuts";
 "home.category_mods" = "Mods";
+"home.category_activate" = "Activate UID";
 
 "shortcuts.title" = "Shortcuts";
 "shortcuts.count" = "%lld shortcuts";

@@ -602,6 +602,7 @@
 "home.category_apps" = "แอป";
 "home.category_shortcuts" = "ทางลัด";
 "home.category_mods" = "มอด";
+"home.category_activate" = "Activate UID";
 
 "shortcuts.title" = "ทางลัด";
 "shortcuts.count" = "ทางลัด %lld รายการ";

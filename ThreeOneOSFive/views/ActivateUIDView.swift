@@ -7,6 +7,10 @@ import UIKit
 /// to the phone's own IP address — no backend of ours is involved. Network,
 /// JSON and persistence work lives in `ActivateClient`.
 struct ActivateUIDView: View {
+    /// `true` when the screen is one of the root tabs instead of a modal sheet:
+    /// the tab version skips its own navigation stack and close button.
+    var embedded: Bool = false
+
     @Environment(\.appLanguage) private var language
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -36,11 +40,37 @@ struct ActivateUIDView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                DekpopAuroraBackground()
+        Group {
+            if embedded {
+                content
+                    .navigationTitle(language.text("activate.title"))
+                    .navigationBarTitleDisplayMode(.inline)
+            } else {
+                NavigationStack {
+                    content
+                        .navigationTitle(language.text("activate.title"))
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button(language.text("common.close")) { dismiss() }
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                        }
+                }
+            }
+        }
+        .tint(AppTheme.accent)
+        .onAppear(perform: restoreLastActivation)
+        .sheet(isPresented: $showingSetup) {
+            DeviceProxySetupView()
+        }
+    }
 
-                ScrollView {
+    private var content: some View {
+        ZStack {
+            DekpopAuroraBackground()
+
+            ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         hero
                         editorCard
@@ -61,23 +91,9 @@ struct ActivateUIDView: View {
                     .dekpopContentWidth(inset: DekpopLayout.inset(for: screenWidth))
                     .padding(.top, 10)
                     .padding(.bottom, 30)
-                }
-                .dekpopMeasureWidth { screenWidth = $0 }
-                .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle(language.text("activate.title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(language.text("common.close")) { dismiss() }
-                        .font(.subheadline.weight(.semibold))
-                }
-            }
-        }
-        .tint(AppTheme.accent)
-        .onAppear(perform: restoreLastActivation)
-        .sheet(isPresented: $showingSetup) {
-            DeviceProxySetupView()
+            .dekpopMeasureWidth { screenWidth = $0 }
+            .scrollDismissesKeyboard(.interactively)
         }
     }
 

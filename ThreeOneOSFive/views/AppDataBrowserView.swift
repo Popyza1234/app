@@ -176,40 +176,31 @@ struct AppDataBrowserView: View {
             if horizontalSizeClass == .regular {
                 FilesTabStrip(session: $tabSession)
             }
-            categoryPicker
-            if selectedCategory != .mods {
-                AppSearchField(
-                    text: $searchText,
-                    prompt: language.text(selectedCategory == .apps ? "browser.search" : "shortcuts.search"),
-                    clearLabel: language.text("common.clear")
-                )
+            if selectedCategory == .activate {
+                // Activation lives inside the tab instead of a modal sheet, so
+                // the root screen keeps a single, predictable navigation model.
+                ActivateUIDView(embedded: true)
+            } else {
+                if selectedCategory == .apps || selectedCategory == .shortcuts {
+                    AppSearchField(
+                        text: $searchText,
+                        prompt: language.text(selectedCategory == .apps ? "browser.search" : "shortcuts.search"),
+                        clearLabel: language.text("common.clear")
+                    )
+                }
+                Divider().opacity(0.5)
+                homeRows
             }
-            Divider().opacity(0.5)
-            homeRows
+            HomeTabBar(selection: $selectedCategory)
+        }
+        .onChange(of: selectedCategory) { _ in
+            if !searchText.isEmpty { searchText = "" }
         }
         // Keeps the browser centred on iPad and prevents a wide list from
         // stretching rows into unreadable lines.
         .frame(maxWidth: 760)
         .frame(maxWidth: .infinity)
         .background(Color.clear)
-    }
-
-    private var categoryPicker: some View {
-        DekpopSegmentedControl(
-            segments: HomeCategory.allCases.map {
-                DekpopSegment(id: $0.rawValue, title: language.text($0.titleKey))
-            },
-            selection: Binding(
-                get: { selectedCategory.rawValue },
-                set: { value in
-                    guard let category = HomeCategory(rawValue: value) else { return }
-                    selectedCategory = category
-                    searchText = ""
-                }
-            )
-        )
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
     }
 
     private var rootMenu: some View {
@@ -224,7 +215,7 @@ struct AppDataBrowserView: View {
             Divider()
 
             Button {
-                activeSheet = .activateUID
+                selectedCategory = .activate
             } label: {
                 Label(language.text("activate.title"), systemImage: "bolt.horizontal.circle")
             }
@@ -944,11 +935,104 @@ private enum HomeCategory: String, CaseIterable, Identifiable {
     case apps
     case shortcuts
     case mods
+    case activate
 
     var id: String { rawValue }
 
     var titleKey: String {
         "home.category_\(rawValue)"
+    }
+
+    var symbolName: String {
+        switch self {
+        case .apps: return "square.grid.2x2.fill"
+        case .shortcuts: return "bookmark.fill"
+        case .mods: return "puzzlepiece.extension.fill"
+        case .activate: return "bolt.horizontal.circle.fill"
+        }
+    }
+}
+
+/// Floating capsule tab bar for the root screen.
+///
+/// Built from a plain `Capsule` fill, one static shadow and SF Symbols — no
+/// blur/material layer, no `GeometryReader`, no repeating animation — so the
+/// bar costs a single cheap draw pass even on older phones. Selection is the
+/// only animated value and it is a 0.16s colour change.
+private struct HomeTabBar: View {
+    @Environment(\.appLanguage) private var language
+    @Environment(\.colorScheme) private var colorScheme
+
+    @Binding var selection: HomeCategory
+
+    private var containerFill: Color {
+        colorScheme == .dark ? Color(white: 0.14) : Color(white: 0.97)
+    }
+
+    private var selectedFill: Color {
+        colorScheme == .dark ? Color(white: 0.05) : Color.white
+    }
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(HomeCategory.allCases) { category in
+                item(category)
+            }
+        }
+        .padding(5)
+        .background(
+            Capsule(style: .continuous)
+                .fill(containerFill)
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.7)
+        )
+        .shadow(
+            color: .black.opacity(colorScheme == .dark ? 0.36 : 0.10),
+            radius: 12,
+            x: 0,
+            y: 6
+        )
+        .frame(maxWidth: 520)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 14)
+        .padding(.top, 6)
+        .padding(.bottom, 2)
+        .accessibilityElement(children: .contain)
+    }
+
+    private func item(_ category: HomeCategory) -> some View {
+        let isSelected = category == selection
+
+        return Button {
+            guard !isSelected else { return }
+            DekpopHaptics.select()
+            withAnimation(.easeOut(duration: 0.16)) {
+                selection = category
+            }
+        } label: {
+            VStack(spacing: 3) {
+                Image(systemName: category.symbolName)
+                    .font(.system(size: 19, weight: .semibold))
+                    .frame(height: 22)
+                Text(language.text(category.titleKey))
+                    .font(.system(size: 10.5, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .foregroundStyle(isSelected ? AppTheme.accent : Color.secondary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(isSelected ? selectedFill : Color.clear)
+            )
+            .contentShape(Capsule(style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(language.text(category.titleKey))
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
