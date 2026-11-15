@@ -71,7 +71,9 @@ final class ProxyVPNManager: ObservableObject {
         isBusy = true
         defer { isBusy = false }
 
-        guard let manager = manager ?? (await loadManagers()).first else {
+        let known = manager
+        let loaded = known == nil ? await loadManagers() : []
+        guard let manager = known ?? loaded.first else {
             state = .off
             return
         }
@@ -96,7 +98,9 @@ final class ProxyVPNManager: ObservableObject {
         ipMode: Bool,
         bypassDomains: [String]
     ) async throws -> NETunnelProviderManager {
-        let manager = manager ?? (await loadManagers()).first ?? NETunnelProviderManager()
+        let known = manager
+        let loaded = known == nil ? await loadManagers() : []
+        let manager = known ?? loaded.first ?? NETunnelProviderManager()
 
         let proto = NETunnelProviderProtocol()
         proto.providerBundleIdentifier = Self.providerBundleId
