@@ -40,6 +40,7 @@
 		3105K208 /* ResponsiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105K108; };
 		3105K209 /* LicenseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105K109; };
 		3105K210 /* LicenseGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105K110; };
+		3105K211 /* ProxyVPNManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105K111; };
 		3105A233 /* ContainerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105A104; };
 		3105A234 /* AppDataBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105A105; };
 		3105A228 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3105A120; };
@@ -50,6 +51,27 @@
 		3105CB0A /* AnnouncementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA0A; };
 		3105CB0B /* LaunchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA0B; };
 		3105CB0C /* ShortcutStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105CA0C; };
+		3105V002 /* PacketTunnel.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3105V010; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3105V201 /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V101; };
+		3105V202 /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V102; };
+		3105V203 /* ConnectionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V103; };
+		3105V204 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V104; };
+		3105V205 /* NWProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V105; };
+		3105V206 /* ProxyVpnService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V106; };
+		3105V207 /* QueueFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V107; };
+		3105V208 /* GBPingHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V108; };
+		3105V209 /* ClientPacketWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V109; };
+		3105V210 /* CloseableConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V110; };
+		3105V211 /* SocketIOService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V111; };
+		3105V212 /* Packet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V112; };
+		3105V213 /* ICMPPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V113; };
+		3105V214 /* IP4Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V114; };
+		3105V215 /* TCPHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V115; };
+		3105V216 /* TCPPacketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V116; };
+		3105V217 /* TransportHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V117; };
+		3105V218 /* UDPHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V118; };
+		3105V219 /* PacketUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V119; };
+		3105V220 /* TLS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105V120; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -96,6 +118,7 @@
 		3105K108 /* ResponsiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponsiveLayout.swift; sourceTree = "<group>"; };
 		3105K109 /* LicenseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseManager.swift; sourceTree = "<group>"; };
 		3105K110 /* LicenseGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseGateView.swift; sourceTree = "<group>"; };
+		3105K111 /* ProxyVPNManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyVPNManager.swift; sourceTree = "<group>"; };
 		3105A121 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3105B124 /* th */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = th; path = th.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3105CA07 /* ModBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModBrowserView.swift; sourceTree = "<group>"; };
@@ -104,10 +127,40 @@
 		3105CA0A /* AnnouncementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementView.swift; sourceTree = "<group>"; };
 		3105CA0B /* LaunchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchView.swift; sourceTree = "<group>"; };
 		3105CA0C /* ShortcutStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutStore.swift; sourceTree = "<group>"; };
+		3105V010 /* PacketTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PacketTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3105V011 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3105V012 /* PacketTunnel.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PacketTunnel.entitlements; sourceTree = "<group>"; };
+		3105V101 /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PacketTunnelProvider.swift"; sourceTree = "<group>"; };
+		3105V102 /* Connection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/Connection.swift"; sourceTree = "<group>"; };
+		3105V103 /* ConnectionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/ConnectionHandler.swift"; sourceTree = "<group>"; };
+		3105V104 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/ConnectionManager.swift"; sourceTree = "<group>"; };
+		3105V105 /* NWProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/NWProtocol.swift"; sourceTree = "<group>"; };
+		3105V106 /* ProxyVpnService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/ProxyVpnService.swift"; sourceTree = "<group>"; };
+		3105V107 /* QueueFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/QueueFactory.swift"; sourceTree = "<group>"; };
+		3105V108 /* GBPingHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/ping/GBPingHelper.swift"; sourceTree = "<group>"; };
+		3105V109 /* ClientPacketWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/socket/ClientPacketWriter.swift"; sourceTree = "<group>"; };
+		3105V110 /* CloseableConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/socket/CloseableConnection.swift"; sourceTree = "<group>"; };
+		3105V111 /* SocketIOService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/socket/SocketIOService.swift"; sourceTree = "<group>"; };
+		3105V112 /* Packet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/transport/Packet.swift"; sourceTree = "<group>"; };
+		3105V113 /* ICMPPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/transport/protocol/ICMPPacket.swift"; sourceTree = "<group>"; };
+		3105V114 /* IP4Header.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/transport/protocol/IP4Header.swift"; sourceTree = "<group>"; };
+		3105V115 /* TCPHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/transport/protocol/TCPHeader.swift"; sourceTree = "<group>"; };
+		3105V116 /* TCPPacketFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/transport/protocol/TCPPacketFactory.swift"; sourceTree = "<group>"; };
+		3105V117 /* TransportHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/transport/protocol/TransportHeader.swift"; sourceTree = "<group>"; };
+		3105V118 /* UDPHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/transport/protocol/UDPHeader.swift"; sourceTree = "<group>"; };
+		3105V119 /* PacketUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/utils/PacketUtil.swift"; sourceTree = "<group>"; };
+		3105V120 /* TLS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vpn/utils/TLS.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		3105A300 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3105V401 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -121,6 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				3105A401 /* ThreeOneOSFive */,
+				3105V300 /* PacketTunnel */,
 				3105A402 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -145,6 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				3105A010 /* 3105.app */,
+				3105V010 /* PacketTunnel.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -194,6 +249,7 @@
 				3105K105 /* ProxyRouteCheck.swift */,
 				3105K106 /* LocalProfileServer.swift */,
 				3105K109 /* LicenseManager.swift */,
+				3105K111 /* ProxyVPNManager.swift */,
 				3105A104 /* ContainerStore.swift */,
 				3105A108 /* ContainerIdentityResolver.swift */,
 				3105A109 /* ContainerBrowserLogic.swift */,
@@ -213,6 +269,35 @@
 			path = helpers;
 			sourceTree = "<group>";
 		};
+		3105V300 /* PacketTunnel */ = {
+			isa = PBXGroup;
+			children = (
+				3105V011 /* Info.plist */,
+				3105V012 /* PacketTunnel.entitlements */,
+				3105V101 /* PacketTunnelProvider.swift */,
+				3105V102 /* Connection.swift */,
+				3105V103 /* ConnectionHandler.swift */,
+				3105V104 /* ConnectionManager.swift */,
+				3105V105 /* NWProtocol.swift */,
+				3105V106 /* ProxyVpnService.swift */,
+				3105V107 /* QueueFactory.swift */,
+				3105V108 /* GBPingHelper.swift */,
+				3105V109 /* ClientPacketWriter.swift */,
+				3105V110 /* CloseableConnection.swift */,
+				3105V111 /* SocketIOService.swift */,
+				3105V112 /* Packet.swift */,
+				3105V113 /* ICMPPacket.swift */,
+				3105V114 /* IP4Header.swift */,
+				3105V115 /* TCPHeader.swift */,
+				3105V116 /* TCPPacketFactory.swift */,
+				3105V117 /* TransportHeader.swift */,
+				3105V118 /* UDPHeader.swift */,
+				3105V119 /* PacketUtil.swift */,
+				3105V120 /* TLS.swift */,
+			);
+			path = PacketTunnel;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -223,17 +308,50 @@
 				3105A700 /* Sources */,
 				3105A300 /* Frameworks */,
 				3105A800 /* Resources */,
+				3105V403 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				3105V500 /* PBXTargetDependency */,
 			);
 			name = 3105;
 			productName = 3105;
 			productReference = 3105A010;
 			productType = "com.apple.product-type.application";
 		};
+		3105V600 /* PacketTunnel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3105V700;
+			buildPhases = (
+				3105V400 /* Sources */,
+				3105V401 /* Frameworks */,
+				3105V402 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PacketTunnel;
+			productName = PacketTunnel;
+			productReference = 3105V010;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3105V403 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3105V002 /* PacketTunnel.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXProject section */
 		3105A900 /* Project object */ = {
@@ -258,6 +376,7 @@
 			projectRoot = "";
 			targets = (
 				3105A500,
+				3105V600,
 			);
 		};
 /* End PBXProject section */
@@ -269,6 +388,13 @@
 			files = (
 				3105A211,
 				3105A228,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3105V402 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,10 +443,56 @@
 				3105K208,
 				3105K209,
 				3105K210,
+				3105K211,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3105V400 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3105V201,
+				3105V202,
+				3105V203,
+				3105V204,
+				3105V205,
+				3105V206,
+				3105V207,
+				3105V208,
+				3105V209,
+				3105V210,
+				3105V211,
+				3105V212,
+				3105V213,
+				3105V214,
+				3105V215,
+				3105V216,
+				3105V217,
+				3105V218,
+				3105V219,
+				3105V220,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		3105V501 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3105A900 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3105V600;
+			remoteInfo = PacketTunnel;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		3105V500 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3105V600 /* PacketTunnel */;
+			targetProxy = 3105V501 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		3105A120 /* Localizable.strings */ = {
@@ -520,6 +692,56 @@
 			};
 			name = Release;
 		};
+		3105V701 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 35;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 4.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.mobile.MobileHouseArrest.tunnel";
+				PRODUCT_NAME = PacketTunnel;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3105V702 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 35;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 4.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.mobile.MobileHouseArrest.tunnel";
+				PRODUCT_NAME = PacketTunnel;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -537,6 +759,15 @@
 			buildConfigurations = (
 				3105AA01 /* Debug */,
 				3105AA02 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3105V700 /* Build configuration list for PBXNativeTarget "PacketTunnel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3105V701 /* Debug */,
+				3105V702 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

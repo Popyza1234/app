@@ -860,3 +860,11 @@
 "activate.inapp_ok" = "Through the proxy · egress IP %@ · %d ms";
 "activate.inapp_direct" = "Still using the direct IP (%@) · %d ms — turn the switch on";
 "activate.inapp_fail" = "Test failed: %@";
+"setup.vpn_title" = "In-app VPN (ProxyPin mode)";
+"setup.vpn_detail" = "Run a tunnel inside the app so all traffic goes through the proxy with no Wi-Fi setup. Requires a signing profile with the Network Extension capability.";
+"setup.vpn_on" = "Turn VPN on";
+"setup.vpn_off" = "Turn VPN off";
+"setup.vpn_state_on" = "Connected";
+"setup.vpn_state_off" = "Off";
+"setup.vpn_state_connecting" = "Connecting…";
+"setup.vpn_state_blocked" = "Unavailable";

@@ -861,3 +861,11 @@
 "activate.inapp_ok" = "ผ่าน proxy แล้ว · IP ขาออก %@ · %d ms";
 "activate.inapp_direct" = "ยังออกด้วย IP ตรง (%@) · %d ms ลองเปิดสวิตช์ด้านบน";
 "activate.inapp_fail" = "ทดสอบไม่สำเร็จ: %@";
+"setup.vpn_title" = "VPN ในแอป (โหมด ProxyPin)";
+"setup.vpn_detail" = "เปิด tunnel ในแอปเพื่อส่งทราฟฟิกทั้งหมดผ่าน proxy ไม่ต้องตั้ง Wi-Fi ต้องเซ็นแอปด้วยโปรไฟล์ที่มีสิทธิ์ Network Extension";
+"setup.vpn_on" = "เปิด VPN";
+"setup.vpn_off" = "ปิด VPN";
+"setup.vpn_state_on" = "เชื่อมต่ออยู่";
+"setup.vpn_state_off" = "ปิด";
+"setup.vpn_state_connecting" = "กำลังเชื่อมต่อ…";
+"setup.vpn_state_blocked" = "ใช้ไม่ได้";
