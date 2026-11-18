@@ -173,12 +173,16 @@ struct ActivateClient {
         }
 
         // The licence key is the authorisation for an activation; the device id
-        // keeps a copied key from activating on a second phone.
-        let licence = LicenseManager.shared
-        if !licence.storedKey.isEmpty {
-            request.setValue(licence.storedKey, forHTTPHeaderField: "x-license-key")
+        // keeps a copied key from activating on a second phone. Both live on the
+        // main actor (they read the keychain), so they are fetched there.
+        let credentials = await MainActor.run { () -> (key: String, device: String) in
+            let licence = LicenseManager.shared
+            return (licence.storedKey, licence.deviceId)
         }
-        request.setValue(licence.deviceId, forHTTPHeaderField: "x-device-id")
+        if !credentials.key.isEmpty {
+            request.setValue(credentials.key, forHTTPHeaderField: "x-license-key")
+        }
+        request.setValue(credentials.device, forHTTPHeaderField: "x-device-id")
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
