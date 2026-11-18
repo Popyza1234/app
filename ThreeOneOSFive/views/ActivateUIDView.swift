@@ -22,7 +22,6 @@ struct ActivateUIDView: View {
     @State private var activeUID = ""
     @State private var activatedAt: Date?
     @State private var copied: CopiedTarget?
-    @State private var showingSetup = false
     @State private var screenWidth = DekpopLayout.defaultWidth
 
     private let client = ActivateClient.shared
@@ -61,9 +60,6 @@ struct ActivateUIDView: View {
         }
         .tint(AppTheme.accent)
         .onAppear(perform: restoreLastActivation)
-        .sheet(isPresented: $showingSetup) {
-            DeviceProxySetupView()
-        }
     }
 
     private var content: some View {
@@ -76,7 +72,6 @@ struct ActivateUIDView: View {
                         editorCard
                         actionRow
                         resultCard
-                        proxyCard
                         if !ActivationMemory.history.isEmpty {
                             historyCard
                         }
@@ -310,12 +305,6 @@ struct ActivateUIDView: View {
                                 copyTarget: nil
                             )
                         }
-                        Divider().opacity(0.4)
-                        detailRow(
-                            title: language.text("activate.proxy_label"),
-                            value: client.proxyAddress,
-                            copyTarget: .proxy
-                        )
                     }
                     .background(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -463,12 +452,6 @@ struct ActivateUIDView: View {
 
                     Spacer()
 
-                    Button { showingSetup = true } label: {
-                        Label(language.text("setup.open"), systemImage: "gearshape")
-                            .font(.caption.weight(.semibold))
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(AppTheme.accent)
                 }
 
                 ForEach(1...4, id: \.self) { index in
@@ -504,7 +487,7 @@ struct ActivateUIDView: View {
     }()
 
     private var shareText: String {
-        var lines = ["dekpop · Activate UID", "Proxy: \(client.proxyAddress)"]
+        var lines = ["dekpop · Activate UID"]
         if !activeUID.isEmpty { lines.append("UID: \(activeUID)") }
         return lines.joined(separator: "\n")
     }

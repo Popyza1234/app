@@ -34,13 +34,17 @@ enum ActivateFailure: Error {
     }
 }
 
-/// Talks to the provider's activation API straight from the device, so the UID
-/// is bound to this phone's own IP address and no backend of ours is involved.
+/// Talks to dekpop's own activation API. The Worker binds the UID to this
+/// phone's device id, its licence key and the request IP, and stamps an expiry
+/// that follows the licence — no third-party box is involved.
 struct ActivateClient {
     static let shared = ActivateClient()
 
-    /// Change these two values when the provider moves the endpoint.
-    let apiRoot = "http://82.26.104.242:6071"
+    /// The licence server doubles as the activation service.
+    let apiRoot = "https://site-9d840023b7f443be923d5bdb73ae9d13.freebuff.page"
+
+    /// Legacy value from the third-party flow. Activation no longer uses an
+    /// HTTP proxy, and nothing in the UI shows this any more.
     let proxyAddress = "82.26.104.242:8080"
 
     private let requestTimeout: TimeInterval = 20
@@ -167,6 +171,14 @@ struct ActivateClient {
             request.httpBody = body
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
+
+        // The licence key is the authorisation for an activation; the device id
+        // keeps a copied key from activating on a second phone.
+        let licence = LicenseManager.shared
+        if !licence.storedKey.isEmpty {
+            request.setValue(licence.storedKey, forHTTPHeaderField: "x-license-key")
+        }
+        request.setValue(licence.deviceId, forHTTPHeaderField: "x-device-id")
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)

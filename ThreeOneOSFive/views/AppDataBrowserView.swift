@@ -252,6 +252,9 @@ struct AppDataBrowserView: View {
                 shortcutsContent
             case .mods:
                 modsContent
+            case .activate:
+                // Rendered outside the list by `appList`.
+                EmptyView()
             }
         }
         .listStyle(.insetGrouped)
