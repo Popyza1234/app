@@ -2,22 +2,26 @@
 
 All notable user-facing changes are documented in this file.
 
-## [2.0.1] - 2026-11-15
+## [2.2 Beta 1] - 2026-11-26
 
 ### Added
 
-- iOS 27.0.1 and later now run with full device-feature support; every build in that range is enabled, including later point releases and future majors.
+- iOS 27.0–27.2.1 support through the `worse_query` route, including iOS 27.0.1 and 27.1.
+- Access-route reporting in Settings and the support views (`kernel`, `bad_query`, `worse_query`, AirLift, unsupported).
+- **Unlock iOS Repo**, an opt-in Settings switch that allows installing repository packages on iOS versions their author did not declare.
+- Previous session logs: Logs keeps the last five sessions and can open and share each one.
 
 ### Changed
 
-- The kernel exploit no longer aborts on iOS 26.1+; newer releases reuse the newest verified offset table and log a warning when no dedicated table exists.
-- Kernel base discovery accepts any MH_FILESET Mach-O header on iOS 26 and later instead of pinning the iOS 26.0 subtype word.
-- Support details in Settings, onboarding, and the README now list the iOS 27.0.1+ range.
+- Support ranges now match 2.2: iOS 17.0–17.7.x, iOS 18.0–18.7.1, iOS 26.0–26.7.2 and iOS 27.0–27.2.1.
+- The kernel exploit only runs on iOS 17–18.0–18.7.1; `bad_query` and `worse_query` builds no longer attempt it at launch.
+- App metadata is now 2.2 Beta 1 (build 15).
 
 ### Compatibility
 
-- Verified ranges unchanged for iOS 17–26.
-- iOS 27.0.1+ is enabled on any build. Unlisted iOS 27.0 builds remain unsupported.
+- Verified ranges: iOS 17.0–17.7.x, iOS 18.0–18.7.1, iOS 26.0–26.7.2, iOS 27.0–27.2.1.
+- iOS 18.7.2–18.7.10 requires AirLift and is reported as unsupported by this build.
+- AirLift pairing, Apple Wallet backgrounds, keypad themes, system-feature installers and license activation from the 2.2 IPA are not included in this source build.
 
 ## [1.0.1] - 2026-08-15
 

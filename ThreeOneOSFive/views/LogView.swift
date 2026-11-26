@@ -6,6 +6,7 @@ struct LogView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.appLanguage) private var language
     @State private var copied = false
+    @State private var showPreviousSessions = false
 
     private var shareText: String {
         var lines: [String] = []
@@ -75,8 +76,18 @@ struct LogView: View {
             .background(AppTheme.consoleBackground.ignoresSafeArea())
             .navigationTitle(language.text("logs.title"))
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showPreviousSessions) {
+                PreviousSessionLogView()
+            }
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItemGroup(placement: .navigationBarLeading) {
+                    Button {
+                        showPreviousSessions = true
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                    }
+                    .accessibilityLabel(language.text("logs.previous_sessions"))
+
                     Button(language.text("logs.clear"), role: .destructive) { appLog.entries.removeAll() }
                         .disabled(appLog.entries.isEmpty)
                 }
@@ -100,6 +111,84 @@ struct LogView: View {
                     Button(language.text("common.done")) { dismiss() }
                         .fontWeight(.semibold)
                 }
+            }
+        }
+    }
+}
+
+struct PreviousSessionLogView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.appLanguage) private var language
+    @State private var sessions: [SessionLogFile] = []
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if sessions.isEmpty {
+                    Section {
+                        Text(language.text("logs.previous_empty"))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Section {
+                        ForEach(sessions) { session in
+                            NavigationLink {
+                                PreviousSessionLogDetailView(session: session)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(session.startedAt, style: .date)
+                                    Text(session.startedAt, style: .time)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle(language.text("logs.previous_title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(language.text("common.done")) { dismiss() }
+                        .fontWeight(.semibold)
+                }
+            }
+            .onAppear {
+                sessions = SessionLogStore.previousSessions()
+            }
+        }
+    }
+}
+
+private struct PreviousSessionLogDetailView: View {
+    @Environment(\.appLanguage) private var language
+    let session: SessionLogFile
+
+    private var text: String {
+        let contents = SessionLogStore.contents(of: session)
+        return contents.isEmpty ? language.text("logs.previous_empty") : contents
+    }
+
+    var body: some View {
+        ScrollView {
+            Text(text)
+                .font(.system(.caption, design: .monospaced))
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(AppTheme.pageInset)
+                .background(AppTheme.consoleBackground)
+        }
+        .background(AppTheme.consoleBackground.ignoresSafeArea())
+        .navigationTitle(language.text("logs.previous_title"))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                ShareLink(item: text) {
+                    Image(systemName: "square.and.arrow.up")
+                }
+                .accessibilityLabel(language.text("logs.share"))
             }
         }
     }

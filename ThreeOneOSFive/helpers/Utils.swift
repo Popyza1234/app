@@ -7,8 +7,105 @@ import Combine
 class AppLog: ObservableObject {
     static let shared = AppLog()
     @Published var entries: [String] = []
+
+    private let ioQueue = DispatchQueue(label: "com.yangjiii.3105.session-log")
+
+    init() {
+        // Keep the previous session readable from Logs, then start a fresh file.
+        SessionLogStore.rotateCurrentSession()
+    }
+
     func append(_ msg: String) {
         DispatchQueue.main.async { self.entries.append(msg) }
+        ioQueue.async {
+            SessionLogStore.append(msg)
+        }
+    }
+}
+
+struct SessionLogFile: Identifiable, Hashable {
+    let id: String
+    let url: URL
+    let startedAt: Date
+}
+
+/// Persists the running log so the previous session survives a relaunch,
+/// matching the "Previous sessions" view in 3105 2.2.
+enum SessionLogStore {
+    static let maximumPreviousSessions = 5
+
+    private static var directoryURL: URL {
+        let base = FileManager.default.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        let directory = base.appendingPathComponent("SessionLogs", isDirectory: true)
+        try? FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+        return directory
+    }
+
+    private static var currentURL: URL {
+        directoryURL.appendingPathComponent("current.log")
+    }
+
+    static func rotateCurrentSession() {
+        let manager = FileManager.default
+        guard manager.fileExists(atPath: currentURL.path) else { return }
+
+        let stamp = ISO8601DateFormatter().string(from: Date())
+            .replacingOccurrences(of: ":", with: "-")
+        let destination = directoryURL.appendingPathComponent("session-\(stamp).log")
+        try? manager.moveItem(at: currentURL, to: destination)
+        trimPreviousSessions()
+    }
+
+    static func append(_ line: String) {
+        guard let data = (line + "\n").data(using: .utf8) else { return }
+        if let handle = try? FileHandle(forWritingTo: currentURL) {
+            defer { try? handle.close() }
+            handle.seekToEndOfFile()
+            handle.write(data)
+        } else {
+            try? data.write(to: currentURL, options: .atomic)
+        }
+    }
+
+    static func previousSessions() -> [SessionLogFile] {
+        let manager = FileManager.default
+        guard let files = try? manager.contentsOfDirectory(
+            at: directoryURL,
+            includingPropertiesForKeys: [.creationDateKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return []
+        }
+        return files
+            .filter { $0.lastPathComponent.hasPrefix("session-") }
+            .compactMap { url -> SessionLogFile? in
+                let date = (try? url.resourceValues(forKeys: [.creationDateKey]))?
+                    .creationDate ?? Date.distantPast
+                return SessionLogFile(
+                    id: url.lastPathComponent,
+                    url: url,
+                    startedAt: date
+                )
+            }
+            .sorted { $0.startedAt > $1.startedAt }
+    }
+
+    static func contents(of file: SessionLogFile) -> String {
+        (try? String(contentsOf: file.url, encoding: .utf8)) ?? ""
+    }
+
+    private static func trimPreviousSessions() {
+        let sessions = previousSessions()
+        guard sessions.count > maximumPreviousSessions else { return }
+        for session in sessions.dropFirst(maximumPreviousSessions) {
+            try? FileManager.default.removeItem(at: session.url)
+        }
     }
 }
 func log(_ msg: String) { AppLog.shared.append("[3105] \(msg)") }

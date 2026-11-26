@@ -101,14 +101,16 @@ class AppState: ObservableObject {
     @Published var exploitStatus: ExploitStatus = .notStarted
     @Published var unsupportedMessage: String?
     @Published var kernelExploitRunning = false
+    @Published var accessRoute: DeviceAccessRoute = .unsupported
 
     private var autoRunAttempted = false
 
     var kernelExploitApplicable: Bool {
-        KernelExploit.isApplicable(
-            major: AppInfo.versionTuple.major,
-            minor: AppInfo.versionTuple.minor,
-            patch: AppInfo.versionTuple.patch,
+        let v = AppInfo.versionTuple
+        return ExploitSupportPolicy.usesKernelChain(
+            major: v.major,
+            minor: v.minor,
+            patch: v.patch,
             build: AppInfo.osBuild
         )
     }
@@ -117,6 +119,12 @@ class AppState: ObservableObject {
 
     func detectSupport() {
         let v = AppInfo.versionTuple
+        accessRoute = ExploitSupportPolicy.accessRoute(
+            major: v.major,
+            minor: v.minor,
+            patch: v.patch,
+            build: AppInfo.osBuild
+        )
         let supported = ExploitSupportPolicy.isSupported(
             major: v.major,
             minor: v.minor,
@@ -135,13 +143,9 @@ class AppState: ObservableObject {
             return
         }
 
-        let applicable = KernelExploit.isApplicable(
-            major: v.major,
-            minor: v.minor,
-            patch: v.patch,
-            build: AppInfo.osBuild
-        )
-        guard applicable else { return }
+        // worse_query builds are served by container queries and never need
+        // the kernel chain. Kernel and bad_query builds keep it.
+        guard kernelExploitApplicable else { return }
 
         refreshKernelExploitStatus()
         maybeAutoRunKernelExploit()

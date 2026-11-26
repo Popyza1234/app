@@ -338,6 +338,8 @@ struct RepositoryPackageDetailView: View {
     @EnvironmentObject private var repositoryStore: PackageRepositoryStore
     @EnvironmentObject private var patchStore: PatchProjectStore
     @State private var isSupportedOSExpanded = false
+    @AppStorage(RepositoryInstallPolicy.iosUnlockStorageKey)
+    private var iosRepoUnlock = false
 
     let record: RepositoryPackageRecord
     private static let informationSectionID = "repository-package-information"
@@ -456,6 +458,16 @@ struct RepositoryPackageDetailView: View {
             }
 
             installButton
+
+            if compatibility == .incompatible && iosRepoUnlock {
+                Label(
+                    language.text("repository.ios_unlocked_warning"),
+                    systemImage: "exclamationmark.triangle.fill"
+                )
+                .font(.caption)
+                .foregroundStyle(.orange)
+                .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(18)
         .background(
@@ -720,7 +732,8 @@ struct RepositoryPackageDetailView: View {
         .buttonStyle(.borderedProminent)
         .controlSize(.regular)
         .disabled(
-            compatibility != .compatible
+            !(compatibility == .compatible
+                || (compatibility == .incompatible && iosRepoUnlock))
                 || repositoryStore.isDownloading(record)
                 || patchStore.isBusy
         )

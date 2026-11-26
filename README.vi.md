@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <img alt="Phiên bản" src="https://img.shields.io/badge/phiên%20bản-2.0-E6753A?style=flat-square">
-  <img alt="iOS" src="https://img.shields.io/badge/iOS-17.0–18.7.1%20%7C%2026.0–26.6.1%20%7C%2027.0.1%2B-222222?style=flat-square">
+  <img alt="Phiên bản" src="https://img.shields.io/badge/phiên%20bản-2.2%20Beta%201-E6753A?style=flat-square">
+  <img alt="iOS" src="https://img.shields.io/badge/iOS-17.0–18.7.1%20%7C%2026.0–26.7.2%20%7C%2027.0–27.2.1-222222?style=flat-square">
   <img alt="Ngôn ngữ" src="https://img.shields.io/badge/ngôn%20ngữ-English%20%7C%20Tiếng%20Việt%20%7C%20简体中文-E6753A?style=flat-square">
 </p>
 
@@ -28,6 +28,16 @@
   &nbsp;
   <img src="docs/images/cleaner.png" width="245" alt="Dọn dẹp 3105">
 </p>
+
+## Có gì mới trong 2.2
+
+- **Hỗ trợ iOS 27.2.1** — iOS 27.0 đến 27.2.1 (gồm 27.0.1 và 27.1) hoạt động qua tuyến `worse_query`.
+- **Phạm vi rộng hơn** — iOS 26.0–26.7.2 được hỗ trợ (`bad_query` đến 26.6.1, `worse_query` từ 26.6.2).
+- **Hiển thị tuyến truy cập** — Cài đặt cho biết thiết bị đang dùng kernel, `bad_query`, `worse_query` hay tuyến AirLift chưa hỗ trợ.
+- **Mở khóa repo iOS** — tùy chọn cho phép cài gói từ repo trên phiên bản iOS mà tác giả chưa khai báo.
+- **Nhật ký phiên trước** — Nhật ký giữ lại 5 phiên gần nhất để không mất dấu vết khi ứng dụng khởi động lại.
+
+AirLift, hình nền Apple Wallet, giao diện bàn phím (Dialer), trình cài tính năng hệ thống và kích hoạt bản quyền từ IPA 2.2 chưa có trong bản mã nguồn này.
 
 ## Có gì mới trong 2.0
 
@@ -62,14 +72,10 @@ So với 1.1.1, bản 2.0 chuyển 3105 từ một bộ công cụ riêng lẻ t
 | --- | --- |
 | iOS 17 | 17.0 đến 17.7.x |
 | iOS 18 | 18.0 đến 18.7.1 |
-| iOS 26 | 26.0 đến 26.6.1 |
-| iOS 27.0.1 trở lên | Mọi bản dựng (bản mới hơn dùng offset đã xác minh gần nhất) |
-| iOS 27 Developer Beta 1 | `24A5355q` |
-| iOS 27 Developer Beta 2 | `24A5370h` |
-| iOS 27 Developer Beta 3 / Public Beta 1 | `24A5380h` |
-| iOS 27 Developer Beta 4 / Public Beta 2 | `24A5390f` |
+| iOS 26 | 26.0 đến 26.6.1 (`bad_query`), 26.6.2 đến 26.7.2 (`worse_query`) |
+| iOS 27 | 27.0 đến 27.2.1, gồm 27.0.1 và 27.1 (`worse_query`) |
 
-iOS 27.0.1 trở lên được bật với mọi bản dựng, kể cả các bản point release và major trong tương lai; khi chưa có bảng offset riêng, kernel exploit dùng lại offset đã xác minh gần nhất và ghi cảnh báo. Các bản iOS 27.0 khác không có trong bảng sẽ được đánh dấu là không hỗ trợ.
+Những build không có trong bảng sẽ được đánh dấu là không hỗ trợ. iOS 18.7.2–18.7.10 cần AirLift nên bản này báo không hỗ trợ.
 
 ## Lưu ý cài đặt
 

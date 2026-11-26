@@ -8,6 +8,9 @@ struct SettingsView: View {
     @AppStorage(FeatureVisibility.cleanerStorageKey) private var cleanerEnabled = true
     @AppStorage(FeatureVisibility.developerModeStorageKey)
     private var developerModeEnabled = false
+    @AppStorage(RepositoryInstallPolicy.iosUnlockStorageKey)
+    private var iosRepoUnlock = false
+    @State private var showIOSUnlockConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -34,6 +37,30 @@ struct SettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
+                }
+
+                Section {
+                    Toggle(isOn: iosRepoUnlockBinding) {
+                        Label(
+                            language.text("settings.repo_unlock"),
+                            systemImage: "lock.open.fill"
+                        )
+                    }
+                } header: {
+                    Text(language.text("settings.advanced"))
+                } footer: {
+                    Text(language.text("settings.repo_unlock_footer"))
+                }
+                .alert(
+                    Text(language.text("settings.repo_unlock_confirm_title")),
+                    isPresented: $showIOSUnlockConfirmation
+                ) {
+                    Button(language.text("common.cancel"), role: .cancel) {}
+                    Button(language.text("settings.repo_unlock_action")) {
+                        iosRepoUnlock = true
+                    }
+                } message: {
+                    Text(language.text("settings.repo_unlock_confirm_message"))
                 }
 
                 Section {
@@ -83,20 +110,14 @@ struct SettingsView: View {
                         Text(language.text(appState.isSupported ? "settings.supported" : "settings.unsupported"))
                         .foregroundStyle(appState.isSupported ? Color.green : Color.red)
                     }
+                    LabeledContent(
+                        language.text("settings.access_route"),
+                        value: language.text(appState.accessRoute.titleKey)
+                    )
                     LabeledContent("iOS 17", value: ExploitSupportPolicy.verifiedIOS17Range)
                     LabeledContent("iOS 18", value: ExploitSupportPolicy.verifiedIOS18Range)
-                    LabeledContent("iOS 26", value: ExploitSupportPolicy.verifiedIOS26Range)
+                    LabeledContent("iOS 26", value: ExploitSupportPolicy.verifiedIOS26AllRange)
                     LabeledContent("iOS 27", value: ExploitSupportPolicy.verifiedIOS27Range)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("iOS 27.0 Beta")
-                            .font(.body)
-                        ForEach(ExploitSupportPolicy.verifiedIOS27Builds, id: \.build) { version in
-                            Text(versionLabel(version))
-                            .font(.caption.monospaced())
-                            .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.vertical, 2)
                 } header: {
                     Text(language.text("settings.verified_versions"))
                 } footer: {
@@ -162,21 +183,16 @@ struct SettingsView: View {
             ?? "1.0"
     }
 
-    private func versionLabel(
-        _ version: (beta: Int, publicBeta: Int?, build: String)
-    ) -> String {
-        if let publicBeta = version.publicBeta {
-            return language.text(
-                "settings.developer_public_beta_build",
-                Int64(version.beta),
-                Int64(publicBeta),
-                version.build
-            )
-        }
-        return language.text(
-            "settings.developer_beta_build",
-            Int64(version.beta),
-            version.build
+    private var iosRepoUnlockBinding: Binding<Bool> {
+        Binding(
+            get: { iosRepoUnlock },
+            set: { newValue in
+                if newValue {
+                    showIOSUnlockConfirmation = true
+                } else {
+                    iosRepoUnlock = false
+                }
+            }
         )
     }
 

@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-2.0-E6753A?style=flat-square">
-  <img alt="iOS" src="https://img.shields.io/badge/iOS-17.0–18.7.1%20%7C%2026.0–26.6.1%20%7C%2027.0.1%2B-222222?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.2%20Beta%201-E6753A?style=flat-square">
+  <img alt="iOS" src="https://img.shields.io/badge/iOS-17.0–18.7.1%20%7C%2026.0–26.7.2%20%7C%2027.0–27.2.1-222222?style=flat-square">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="Languages" src="https://img.shields.io/badge/languages-English%20%7C%20Tiếng%20Việt%20%7C%20简体中文-E6753A?style=flat-square">
 </p>
@@ -34,6 +34,16 @@
   &nbsp;
   <img src="docs/images/cleaner.png" width="245" alt="3105 Cleaner">
 </p>
+
+## What's new in 2.2
+
+- **iOS 27.2.1 support** — iOS 27.0 through 27.2.1 (including 27.0.1 and 27.1) is enabled through the `worse_query` route.
+- **Wider verified ranges** — iOS 26.0–26.7.2 is supported (`bad_query` through 26.6.1, `worse_query` from 26.6.2).
+- **Access-route reporting** — Settings shows whether the current device uses the kernel exploit, `bad_query`, `worse_query`, or the unsupported AirLift route.
+- **Unlock iOS Repo** — an opt-in Settings switch that lets repository packages install on iOS versions their author did not declare.
+- **Previous session logs** — Logs keeps the last five sessions so a crash or relaunch does not erase the evidence.
+
+AirLift pairing, Apple Wallet backgrounds, keypad (Dialer) themes, system-feature installers, and license activation from the 2.2 IPA are not part of this source build.
 
 ## What's new in 2.0
 
@@ -69,14 +79,10 @@ Compared with 1.1.1, version 2.0 turns 3105 from a collection of separate tools 
 | --- | --- |
 | iOS 17 | 17.0 through 17.7 (kernel exploit) |
 | iOS 18 | 18.0 through 18.7.1 (kernel exploit) |
-| iOS 26 | 26.0 through 26.6.1 |
-| iOS 27.0.1 and later | Any build (later releases use the newest verified offsets) |
-| iOS 27 Developer Beta 1 | `24A5355q` |
-| iOS 27 Developer Beta 2 | `24A5370h` |
-| iOS 27 Developer Beta 3 / Public Beta 1 | `24A5380h` |
-| iOS 27 Developer Beta 4 / Public Beta 2 | `24A5390f` |
+| iOS 26 | 26.0 through 26.6.1 (`bad_query`), 26.6.2 through 26.7.2 (`worse_query`) |
+| iOS 27 | 27.0 through 27.2.1, including 27.0.1 and 27.1 (`worse_query`) |
 
-iOS 27.0.1 and later are enabled on every build, including future point releases and majors; when no dedicated offset table exists, the kernel exploit reuses the newest verified offsets and logs a warning. Other iOS 27.0 builds are marked unsupported rather than assumed compatible. The iOS 17–18 kernel exploit is opt-in (manual button) because a failed exploit attempt may restart the app.
+Unlisted builds are marked unsupported rather than assumed compatible. The iOS 17–18 kernel exploit is opt-in (manual button) because a failed exploit attempt may restart the app. iOS 18.7.2–18.7.10 needs AirLift and is reported as unsupported by this build.
 
 ## Installation notes
 

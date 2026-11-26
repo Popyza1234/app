@@ -220,6 +220,22 @@ enum PackageCompatibility: Equatable {
     case unknown
 }
 
+/// 2.2 lets the reader install repository packages on iOS versions their
+/// author did not declare. The preference is opt-in and only bypasses the
+/// `.incompatible` result; packages with no declared ranges stay blocked.
+enum RepositoryInstallPolicy {
+    static let iosUnlockStorageKey = "repository.ios_unlock"
+
+    static var iosUnlockEnabled: Bool {
+        UserDefaults.standard.bool(forKey: iosUnlockStorageKey)
+    }
+
+    static func allowsInstall(_ compatibility: PackageCompatibility) -> Bool {
+        compatibility == .compatible
+            || (compatibility == .incompatible && iosUnlockEnabled)
+    }
+}
+
 enum PackageRepositoryLimits {
     static let maximumManifestBytes = 5 * 1_024 * 1_024
     static let maximumCatalogBytes = 256 * 1_024

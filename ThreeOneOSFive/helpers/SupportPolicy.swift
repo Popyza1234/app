@@ -1,26 +1,35 @@
 import Foundation
 
+/// The mechanism 3105 uses to reach app and system data on the current build.
+enum DeviceAccessRoute: String {
+    case kernel
+    case badQuery
+    case worseQuery
+    case airLift
+    case unsupported
+
+    var titleKey: String {
+        switch self {
+        case .kernel: return "route.kernel"
+        case .badQuery: return "route.bad_query"
+        case .worseQuery: return "route.worse_query"
+        case .airLift: return "route.air_lift"
+        case .unsupported: return "route.unsupported"
+        }
+    }
+}
+
 enum ExploitSupportPolicy {
     static let verifiedIOS17Range = "17.0–17.7.x"
     static let verifiedIOS18Range = "18.0–18.7.1"
+    static let verifiedIOS18AirLiftRange = "18.7.2–18.7.10"
     static let verifiedIOS26Range = "26.0–26.6.1"
-    static let verifiedIOS27Range = "27.0.1+"
+    static let verifiedIOS26WorseQueryRange = "26.6.2–26.7.2"
+    static let verifiedIOS27Range = "27.0–27.2.1"
 
-    static let verifiedIOS27Builds: [(beta: Int, publicBeta: Int?, build: String)] = [
-        (1, nil, "24A5355q"),
-        (2, nil, "24A5370h"),
-        (3, 1, "24A5380h"),
-        (4, 2, "24A5390f")
-    ]
+    static let verifiedIOS26AllRange = "26.0–26.7.2"
 
-    static func iOS27BetaNumber(for build: String) -> Int? {
-        verifiedIOS27Builds.first { $0.build == build }?.beta
-    }
-
-    static func iOS27PublicBetaNumber(for build: String) -> Int? {
-        verifiedIOS27Builds.first { $0.build == build }?.publicBeta
-    }
-
+    /// Kernel exploit builds. iOS 18.7.2 and later need AirLift instead.
     static func supportsKernelExploit(major: Int, minor: Int, patch: Int) -> Bool {
         guard minor >= 0, patch >= 0 else { return false }
 
@@ -35,26 +44,95 @@ enum ExploitSupportPolicy {
         return false
     }
 
-    static func isSupported(major: Int, minor: Int, patch: Int, build: String) -> Bool {
+    static func accessRoute(
+        major: Int,
+        minor: Int,
+        patch: Int,
+        build: String
+    ) -> DeviceAccessRoute {
+        guard minor >= 0, patch >= 0 else { return .unsupported }
+
         if supportsKernelExploit(major: major, minor: minor, patch: patch) {
-            return true
+            return .kernel
+        }
+
+        if major == 18 {
+            return (minor == 7 && (2...10).contains(patch)) ? .airLift : .unsupported
         }
 
         if major == 26 {
-            guard minor >= 0, patch >= 0 else { return false }
-            return minor < 6 || (minor == 6 && patch <= 1)
+            if minor < 6 || (minor == 6 && patch <= 1) {
+                return .badQuery
+            }
+            if minor == 6 || (minor == 7 && patch <= 2) {
+                return .worseQuery
+            }
+            return .unsupported
         }
 
-        guard minor >= 0, patch >= 0 else { return false }
+        // iOS 27.0 through 27.2.1 (including RC and 27.0.1 / 27.1) use
+        // worse_query. Unlisted later builds stay unsupported.
+        if major == 27, minor < 3 {
+            return .worseQuery
+        }
 
-        // iOS 27.0.1 and later: every build is enabled, including later point
-        // releases and future majors. Those releases reuse the newest verified
-        // offset table at runtime. Unlisted 27.0 builds stay build-gated.
-        if major > 27 { return true }
-        guard major == 27 else { return false }
-        if minor > 0 || patch >= 1 { return true }
+        return .unsupported
+    }
 
-        guard minor == 0, patch == 0 else { return false }
-        return iOS27BetaNumber(for: build) != nil
+    /// Kernel and bad_query builds use the kernel chain, and worse_query builds
+    /// still try it first: the 2.0.1 offsets fall back to the newest verified
+    /// table on 26.1+ and 27.x instead of failing the launch.
+    static func usesKernelChain(
+        major: Int,
+        minor: Int,
+        patch: Int,
+        build: String
+    ) -> Bool {
+        switch accessRoute(
+            major: major,
+            minor: minor,
+            patch: patch,
+            build: build
+        ) {
+        case .kernel, .badQuery, .worseQuery:
+            return true
+        case .airLift, .unsupported:
+            return false
+        }
+    }
+
+    /// AirLift builds are recognised but cannot be served by this build's
+    /// container and file services, so they are reported as unsupported.
+    static func isSupported(
+        major: Int,
+        minor: Int,
+        patch: Int,
+        build: String
+    ) -> Bool {
+        switch accessRoute(
+            major: major,
+            minor: minor,
+            patch: patch,
+            build: build
+        ) {
+        case .kernel, .badQuery, .worseQuery:
+            return true
+        case .airLift, .unsupported:
+            return false
+        }
+    }
+
+    static func requiresAirLift(
+        major: Int,
+        minor: Int,
+        patch: Int,
+        build: String
+    ) -> Bool {
+        accessRoute(
+            major: major,
+            minor: minor,
+            patch: patch,
+            build: build
+        ) == .airLift
     }
 }
